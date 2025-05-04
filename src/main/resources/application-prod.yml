@@ -1,0 +1,6 @@
+assistant:
+  dryRun: true
+  rootPath: ./src/test/resources/
+  groupPhoto:
+    ecartEnMinutes: 20
+    photoMin: 5

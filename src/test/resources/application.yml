@@ -1,0 +1,139 @@
+spring:
+  application:
+    name: AssistantPhoto
+
+application:
+  version: "@project.version@"
+my:
+  app:
+    name: TestApp
+    version: "1.0"
+assistant:
+  dryRun: true
+  name: assistant
+  rootPath: ./src/test/resources/
+  fileExtensionsToWorkWith:
+    - jpg
+    - tif
+    - tiff
+    - dng
+    - jpeg
+    - arw
+    - mp4
+    - png
+    - mts
+    - mov
+    - avi
+    - m2ts
+    - 3gp
+    - m4v
+    - mpg
+    - psd
+    - bmp
+    - gif
+    - tiff_original
+  groupPhoto:
+    ecartEnMinutes: 20
+    photoMin: 5
+  seanceType:
+    - nom: all_in
+    - nom: Assistant_Work
+    - nom: Rejet
+    - nom: Sauvegarde
+    - nom: Events
+      uniteDeJour: 1
+      nbMaxParUniteDeJour: 15
+      ratioStarMax:
+        - 25
+        - 12
+        - 5
+        - 2
+        - 1
+      zoneValeurAdmise:
+        - £DATE£
+        - "@00_EVENT@"
+        - "@00_WHERE@"
+        - "@00_WHAT@|@00_WHO@"
+      rapprochementNewOk: true
+    - nom: Holidays
+      uniteDeJour: 7
+      nbMaxParUniteDeJour: 30
+      ratioStarMax:
+        - 25
+        - 12
+        - 5
+        - 2
+        - 1
+      zoneValeurAdmise:
+        - £DATE£
+        - "@00_EVENT@"
+        - "@00_WHERE@"
+        - "@00_WHAT@|@00_WHO@"
+      rapprochementNewOk: true
+    - nom: Shooting
+      uniteDeJour: 1
+      nbMaxParUniteDeJour: 5
+      ratioStarMax:
+        - 25
+        - 12
+        - 5
+        - 2
+        - 1
+      zoneValeurAdmise:
+        - £DATE£
+        - "@00_PHOTOGRAPHY@"
+        - "@00_WHERE@"
+        - "@00_WHAT@|@00_WHO@"
+      rapprochementNewOk: true
+  repertoireOfType:
+    - seanceType: all_in
+      repertoire:
+        - path: "00-CheckIn"
+          description: "Main check-in folder"
+        - path: "00-CheckIn-2"
+          description: "Backup check-in folder"
+    - seanceType: assistant_work
+      repertoire:
+        - path: "10-Assistant_work"
+          description: "Work folder for the Assistant"
+    - seanceType: Events
+      repertoire:
+        - path: "50-Phototheque\\##Events 10-15 j"
+          description: "Events photographs"
+    - seanceType: Holidays
+      repertoire:
+        - path: "50-Phototheque\\##Holidays 20-30 sem"
+          description: "Holiday photographs"
+    - seanceType: Shooting
+      repertoire:
+        - path: "50-Phototheque\\##Shooting 03-05 j"
+          description: "Shooting session photographs"
+    - seanceType: Rejet
+      repertoire:
+        - path: "99-Rejet"
+          description: "Rejected items"
+    - seanceType: Sauvegarde
+      repertoire:
+        - path: "50-Phototheque\\#Sauvegarde 999 j"
+          description: "Backup photographs"
+info:
+  application:
+    name: ${spring.application.name}
+    version: ${application.version}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  info:
+    build:
+      enabled: true
+    env:
+      enabled: true
+    git:
+      enabled: true
+      mode: full
+    java:
+      enabled: true
+    os:
+      enabled: true

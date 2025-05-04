@@ -1,0 +1,50 @@
+[ {
+  "id" : "ALL_IN",
+  "name" : "ALL_IN",
+  "uniteDeJour" : 0,
+  "nbMaxParUniteDeJour" : 0,
+  "ratioStarMax" : null,
+  "zoneValeurAdmise" : null
+}, {
+  "id" : "ASSISTANT_WORK",
+  "name" : "ASSISTANT_WORK",
+  "uniteDeJour" : 0,
+  "nbMaxParUniteDeJour" : 0,
+  "ratioStarMax" : null,
+  "zoneValeurAdmise" : null
+}, {
+  "id" : "REJET",
+  "name" : "REJET",
+  "uniteDeJour" : 0,
+  "nbMaxParUniteDeJour" : 0,
+  "ratioStarMax" : null,
+  "zoneValeurAdmise" : null
+}, {
+  "id" : "SAUVEGARDE",
+  "name" : "SAUVEGARDE",
+  "uniteDeJour" : 0,
+  "nbMaxParUniteDeJour" : 0,
+  "ratioStarMax" : null,
+  "zoneValeurAdmise" : null
+}, {
+  "id" : "EVENTS",
+  "name" : "EVENTS",
+  "uniteDeJour" : 1,
+  "nbMaxParUniteDeJour" : 15,
+  "ratioStarMax" : [ 25, 12, 5, 2, 1 ],
+  "zoneValeurAdmise" : [ "Â£DATEÂ£", "@00_EVENT@", "@00_WHERE@", "@00_WHAT@|@00_WHO@" ]
+}, {
+  "id" : "HOLIDAYS",
+  "name" : "HOLIDAYS",
+  "uniteDeJour" : 7,
+  "nbMaxParUniteDeJour" : 30,
+  "ratioStarMax" : [ 25, 12, 5, 2, 1 ],
+  "zoneValeurAdmise" : [ "Â£DATEÂ£", "@00_EVENT@", "@00_WHERE@", "@00_WHAT@|@00_WHO@" ]
+}, {
+  "id" : "SHOOTING",
+  "name" : "SHOOTING",
+  "uniteDeJour" : 1,
+  "nbMaxParUniteDeJour" : 5,
+  "ratioStarMax" : [ 25, 12, 5, 2, 1 ],
+  "zoneValeurAdmise" : [ "Â£DATEÂ£", "@00_PHOTOGRAPHY@", "@00_WHERE@", "@00_WHAT@|@00_WHO@" ]
+} ]

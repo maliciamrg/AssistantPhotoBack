@@ -1,0 +1,9 @@
+[ {
+  "id" : "subOne",
+  "path" : ".\\src\\test\\resources\\00-CheckIn\\subOne",
+  "description" : null
+}, {
+  "id" : "subOneTwo",
+  "path" : ".\\src\\test\\resources\\00-CheckIn-2\\subOneTwo",
+  "description" : null
+} ]

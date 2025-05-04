@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  backend:
+    container_name: assistant_photo_backend_service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8999:8099"
+    volumes:
+      - '/Photo/lrcat:/Lrcat'
+      - '/Photo/50-Phototheque:/Phototheque'
+    depends_on:
+      - db
+    networks:
+      - assistant-photo
+
+
+  db:
+    container_name: assistant_photo_pg_db
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydb
+    ports:
+      - "5932:5432"
+    networks:
+      - assistant-photo
+
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    ports:
+      - "6379:6379"  # Expose Redis port 6379 to the host
+    volumes:
+      - redis_data:/data  # Persist Redis data on the host machine
+    restart: always
+    networks:
+      - assistant-photo
+
+networks:
+  assistant-photo:
+
+volumes:
+  redis_data:
+    driver: local
