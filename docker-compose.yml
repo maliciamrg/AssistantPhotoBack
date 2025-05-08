@@ -11,20 +11,7 @@ services:
       - '/Photo/lrcat:/Lrcat'
       - '/Photo/50-Phototheque:/Phototheque'
     depends_on:
-      - db
-    networks:
-      - assistant-photo
-
-
-  db:
-    container_name: assistant_photo_pg_db
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: mydb
-    ports:
-      - "5932:5432"
+      - redis
     networks:
       - assistant-photo
 

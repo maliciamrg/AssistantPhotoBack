@@ -1,22 +1,6 @@
 spring:
   application:
     name: AssistantPhoto
-  datasource:
-    url: jdbc:postgresql://localhost:5932/postgres
-    username: user
-    password: password
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: update  # Can be "update", "create", or "validate" for development
-    show-sql: true      # Enable showing SQL in logs
-    properties:
-      hibernate:
-        format_sql: true  # Format SQL queries for readability
-  sql:
-    init:
-      mode: always       # Initialize schema on startup (optional)
   data:
     redis:
       database: 0

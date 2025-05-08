@@ -2,36 +2,24 @@ package com.malicia.mrg.assistant.photo.repertoire.file;
 
 import com.malicia.mrg.assistant.photo.file.WorkWithFile;
 import com.malicia.mrg.assistant.photo.repertoire.Photo;
-import com.malicia.mrg.assistant.photo.repository.PhotoRepository;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class WorkWithFileTest {
 
     @MockBean
-    private EntityManagerFactory entityManagerFactory;
-    @MockBean
-    private EntityManager entityManager;
-    @MockBean
     private PhotoService photoService;
-    @MockBean
-    private DataSource dataSource;
-    @MockBean
-    private PhotoRepository photoRepository;
 
     @Test
     void getRightDateFromPhoto() {

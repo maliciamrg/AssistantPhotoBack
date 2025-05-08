@@ -3,13 +3,10 @@ package com.malicia.mrg.assistant.photo.repertoire;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
-import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
 import com.malicia.mrg.assistant.photo.file.WorkWithFile;
-import com.malicia.mrg.assistant.photo.repository.PhotoRepository;
+import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -17,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -36,15 +32,7 @@ class RootRepertoireTest {
     private RootRepertoire rootRepertoire; // Injecting the mock into the RootRepertoire constructor
 
     @MockBean
-    private EntityManagerFactory entityManagerFactory;
-    @MockBean
-    private EntityManager entityManager;
-    @MockBean
     private PhotoService photoService;
-    @MockBean
-    private DataSource dataSource;
-    @MockBean
-    private PhotoRepository photoRepository;
 
     @BeforeEach
     void setUp() {

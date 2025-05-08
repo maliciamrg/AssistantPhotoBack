@@ -6,6 +6,7 @@ import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
 import com.malicia.mrg.assistant.photo.repertoire.Photo;
 import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
+import com.malicia.mrg.assistant.photo.service.PhotoSessionService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
 import org.slf4j.Logger;
@@ -25,15 +26,12 @@ public class PhotoSessionController {
 
     private static final Logger logger = LoggerFactory.getLogger(PhotoSessionController.class);
 
-    private Duration ttl = Duration.ofMinutes(1);
-
-    private final RedisTemplate<String, Object> redisTemplate;
     private final MyConfig config;
-    private final RootRepertoire rootRep;
-    public PhotoSessionController(MyConfig config, RootRepertoire rootRep, RedisTemplate<String, Object> redisTemplate) {
+    private final PhotoSessionService photoSessionService;
+
+    public PhotoSessionController(MyConfig config, PhotoSessionService photoSessionService) {
         this.config = config;
-        this.rootRep = rootRep;
-        this.redisTemplate = redisTemplate;
+        this.photoSessionService = photoSessionService;
     }
 
     // 1. Liste des types de séance
@@ -59,7 +57,7 @@ public class PhotoSessionController {
     // 2. Liste des séances par type de séance
     @GetMapping("/{typeName}")
     public List<SeanceRepertoire> getSeancesParType(@PathVariable String typeName) {
-        List<SeanceRepertoire> seanceRepertoire = getSeanceRepertoireList(typeName);
+        List<SeanceRepertoire> seanceRepertoire = photoSessionService.getSeanceRepertoireList(typeName);
         return seanceRepertoire;
     }
 
@@ -67,46 +65,13 @@ public class PhotoSessionController {
     @GetMapping("/{typeName}/{seanceId}")
     public ResponseEntity<List<Photo>> getPhotosDeSeance(@PathVariable String typeName, @PathVariable String seanceId) {
         try {
-            List<SeanceRepertoire> seanceList = getSeanceRepertoireList(typeName);
+            List<SeanceRepertoire> seanceList = photoSessionService.getSeanceRepertoireList(typeName);
 
-            List<Photo> allPhotoFromPhotoRepertoire = getAllPhotoFromPhotoRepertoire(seanceId, seanceList);
+            List<Photo> allPhotoFromPhotoRepertoire = photoSessionService.getAllPhotoFromPhotoRepertoire(seanceId, seanceList);
             return ResponseEntity.ok(allPhotoFromPhotoRepertoire);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(null);
         }
-    }
-
-    private List<Photo> getAllPhotoFromPhotoRepertoire(String seanceId, List<SeanceRepertoire> seanceList) {
-        List<Photo> cachedPhotos = (List<Photo>) redisTemplate.opsForValue().get(seanceId);
-        if (cachedPhotos != null) {
-            Long ttl = redisTemplate.getExpire(seanceId);
-            logger.info("TTL for key '{}' is: {} seconds", seanceId, ttl);
-            return cachedPhotos;
-        }
-        Optional<SeanceRepertoire> pathToScan = seanceList.stream()
-                .filter(seance -> seance.getId().equals(seanceId)) // Filter by id
-                .findFirst(); // Return the first match (Optional)
-        List<Photo> allPhotoFromPhotoRepertoire = rootRep.getAllPhotoFromPhotoRepertoire(pathToScan.get());
-        redisTemplate.opsForValue().set(seanceId, allPhotoFromPhotoRepertoire,ttl);
-        logger.info("redisTemplate.opsForValue().set :" + seanceId);
-        return allPhotoFromPhotoRepertoire;
-    }
-
-    private List<SeanceRepertoire> getSeanceRepertoireList(String typeName) {
-        List<SeanceRepertoire> cachedSeances = (List<SeanceRepertoire>) redisTemplate.opsForValue().get(typeName);
-        if (cachedSeances != null) {
-            Long ttl = redisTemplate.getExpire(typeName);
-            logger.info("TTL for key '{}' is: {} seconds", typeName, ttl);
-            return cachedSeances;
-        }
-        Optional<SeanceTypeEnum> type = config.getSeanceType().stream()
-                .map(seanceType -> seanceType.getNom())
-                .filter(seanceTypeEnum -> seanceTypeEnum.toString().equals(typeName))
-                .findFirst();
-        List<SeanceRepertoire> seanceList = rootRep.getAllSeanceRepertoire(type.get());
-        redisTemplate.opsForValue().set(typeName, seanceList,ttl);
-        logger.info("redisTemplate.opsForValue().set :" + typeName);
-        return seanceList;
     }
 
 //    // 4. Téléchargement d'une photo spécifique

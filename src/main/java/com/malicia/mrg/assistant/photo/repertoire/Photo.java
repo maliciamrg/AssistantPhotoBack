@@ -1,21 +1,14 @@
 package com.malicia.mrg.assistant.photo.repertoire;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-@Entity
 public class Photo implements Serializable {
     private static final long serialVersionUID = 1L;
     public static final String T_09_15_00_Z = "2024-03-12T09:15:00Z";
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String path;

@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="startBackEnd" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="local" />
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
     <module name="assistant_photo_backend" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.malicia.mrg.assistant.photo.AssistantPhotoApplication" />

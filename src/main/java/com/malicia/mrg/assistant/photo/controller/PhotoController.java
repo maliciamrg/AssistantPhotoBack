@@ -24,31 +24,6 @@ public class PhotoController {
         this.xmpService = xmpService;
     }
 
-    @PostMapping("/api/photos")
-    public ResponseEntity<List<Photo>> index(@RequestBody SeanceRepertoire SeanceRepertoire) {
-        try {
-            String pathToScan = SeanceRepertoire.getPath();
-            List<Photo> allPhotoFromPhotoRepertoire = photoService.getAllPhotosWithPathStartingWith(pathToScan);
-            return ResponseEntity.ok(allPhotoFromPhotoRepertoire);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null); // Handle invalid SeanceTypeEnum
-        }
-    }
-
-    @GetMapping("/api/photos/by-seance-type")
-    public ResponseEntity<List<Photo>> index(@RequestParam SeanceTypeEnum seanceType) {
-        try {
-            List<SeanceRepertoire> assistantRepertoire = rootRep.getAllSeanceRepertoire(seanceType);
-            List<String> allPathFromSeanceRepertoire = rootRep.getAllPathFromSeanceRepertoire(assistantRepertoire);
-            List<Photo> allPhotoFromSeanceRepertoire = new ArrayList<>();
-            for (String pathToScan : allPathFromSeanceRepertoire) {
-                allPhotoFromSeanceRepertoire.addAll(photoService.getAllPhotosWithPathStartingWith(pathToScan));
-            }
-            return ResponseEntity.ok(allPhotoFromSeanceRepertoire);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null); // Handle invalid SeanceTypeEnum
-        }
-    }
 
     @PostMapping("/api/photos/batch-update")
     public ResponseEntity<Map<String, String>> index(@RequestBody List<Photo> photos) {
@@ -65,27 +40,4 @@ public class PhotoController {
         }
     }
 
-    @GetMapping("/api/photo/{id}")
-    public ResponseEntity<Photo> index(@PathVariable UUID id) {
-        try {
-            Photo photFromId = photoService.getPhotoById(id);
-            return ResponseEntity.ok(photFromId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null); // Handle invalid SeanceTypeEnum
-        }
-    }
-
-    @PatchMapping("/api/photo/{id}")
-    public ResponseEntity<Photo> index(@PathVariable UUID id, @RequestBody Photo photo) {
-        try {
-            Photo photFromId = photoService.getPhotoById(id);
-            List<Photo> photFromIdMod = new ArrayList<>();
-            photFromId.mergeFrom(photo);
-            photFromIdMod.add(photFromId);
-            photoService.saveAllPhotos(photFromIdMod, false);
-            return ResponseEntity.ok(photFromId);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null); // Handle invalid SeanceTypeEnum
-        }
-    }
 }
