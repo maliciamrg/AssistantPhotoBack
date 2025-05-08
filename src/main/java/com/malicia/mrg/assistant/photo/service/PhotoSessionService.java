@@ -40,6 +40,11 @@ public class PhotoSessionService {
         Optional<SeanceRepertoire> pathToScan = seanceList.stream()
                 .filter(seance -> seance.getId().equals(seanceId)) // Filter by id
                 .findFirst(); // Return the first match (Optional)
+
+        if (pathToScan.isEmpty()) {
+            throw new IllegalArgumentException("Seance ID '" + seanceId + "' not found in provided seance list.");
+        }
+
         List<Photo> allPhotoFromPhotoRepertoire = rootRep.getAllPhotoFromPhotoRepertoire(pathToScan.get());
         redisTemplate.opsForValue().set(seanceId, allPhotoFromPhotoRepertoire,ttl);
         logger.info("redisTemplate.opsForValue().set :" + seanceId);

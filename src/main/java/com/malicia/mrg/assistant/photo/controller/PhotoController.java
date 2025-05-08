@@ -1,8 +1,6 @@
 package com.malicia.mrg.assistant.photo.controller;
 
-import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
 import com.malicia.mrg.assistant.photo.repertoire.Photo;
-import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
 import com.malicia.mrg.assistant.photo.service.XMPService;
@@ -26,7 +24,7 @@ public class PhotoController {
 
 
     @PostMapping("/api/photos/batch-update")
-    public ResponseEntity<Map<String, String>> index(@RequestBody List<Photo> photos) {
+    public ResponseEntity<Map<String, String>> batchUpdate(@RequestBody List<Photo> photos) {
         try {
             photoService.saveAllPhotos(photos,true);
 
