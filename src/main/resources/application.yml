@@ -12,6 +12,9 @@ spring:
 application:
   version: "@project.version@"
   ipWan: '192.212.5.200'
+  build_date: "@git.build.time@"
+  commit_id: "@git.commit.id.abbrev@"
+
 server:
   port: 8099
 logging:

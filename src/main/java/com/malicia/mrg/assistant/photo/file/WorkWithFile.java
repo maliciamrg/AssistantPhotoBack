@@ -87,6 +87,7 @@ public class WorkWithFile {
             } catch (XMPException e) {
                 throw new RuntimeException(e);
             }
+
             Integer rating = xmpPhoto.getRating();
             if (rating != null){
                 if ( rating > 0) {
@@ -99,6 +100,20 @@ public class WorkWithFile {
 
             // Get file creation date (from filesystem)
             photo.setCreatedDate(getFileCreatedDate(path));
+            if (xmpPhoto.getCreateDate() != null){
+                if (xmpPhoto.getCreateDate().compareTo("null") != 0){
+                    photo.setCreatedDate(xmpPhoto.getCreateDate());
+                }
+            }
+
+            // set file tags
+            photo.setTags(new ArrayList<>());
+            if (xmpPhoto.getSubject() != null){
+                if (xmpPhoto.getSubject().compareTo("null") != 0){
+                    photo.setTags(List.of(xmpPhoto.getSubject().split(",")));
+                }
+            }
+
 
             // Try to extract EXIF date (only if the file is an image)
             if (extension.equalsIgnoreCase("ARW") || extension.equalsIgnoreCase("jpg") || extension.equalsIgnoreCase("jpeg") || extension.equalsIgnoreCase("png")) {

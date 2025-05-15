@@ -1,6 +1,12 @@
 assistant:
   dryRun: true
-  rootPath: ./src/test/resources/
+  rootPath: /Photo/
   groupPhoto:
     ecartEnMinutes: 20
     photoMin: 5
+
+spring:
+  data:
+    redis:
+      host: redis
+      port: 6379

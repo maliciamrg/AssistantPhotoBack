@@ -22,6 +22,8 @@ public class PhotoService {
                 try {
                     XMPPhotoDto xmpPhotoDto = new XMPPhotoDto();
                     xmpPhotoDto.setRating(photo.getFlagType().equals("reject")?-1:photo.getStarred());
+                    xmpPhotoDto.setCreateDate(photo.getCreatedDate());
+                    xmpPhotoDto.setSubject(String.join(",",photo.getTags()));
                     XMPService.storeMetadata(xmpPhotoDto,photo.getPath()+".xmp");
                 } catch (IOException e) {
                     throw new RuntimeException(e);

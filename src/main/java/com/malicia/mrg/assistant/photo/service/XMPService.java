@@ -41,6 +41,8 @@ public class XMPService {
 
         // Extract values from the XMP metadata
         xmpPhotoDto.setRating(Integer.parseInt(xmpMeta.getPropertyString(XMPConst.NS_XMP, "Rating")));
+        xmpPhotoDto.setCreateDate(String.valueOf(xmpMeta.getPropertyString(XMPConst.NS_XMP, "CreateDate")));
+        xmpPhotoDto.setSubject(String.valueOf(xmpMeta.getArrayItem(XMPConst.NS_DC, "subject",1)));
 
         return xmpPhotoDto;
     }

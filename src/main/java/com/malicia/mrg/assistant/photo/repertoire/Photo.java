@@ -3,6 +3,7 @@ package com.malicia.mrg.assistant.photo.repertoire;
 
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 
 public class Photo implements Serializable {
@@ -22,6 +23,7 @@ public class Photo implements Serializable {
     private Boolean flagged;
     private String flagType;
     private Integer starred;
+    private List<String> tags;
 
     public Photo() {
  //       this.date_taken = T_09_15_00_Z;
@@ -167,5 +169,13 @@ public class Photo implements Serializable {
         if (other.starred != null) {
             this.starred = other.starred;
         }
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 }

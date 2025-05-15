@@ -10,7 +10,8 @@
   "date_taken" : "Unknown",
   "flagged" : true,
   "flagType" : "pick",
-  "starred" : 0
+  "starred" : 0,
+  "tags" : [ ]
 }, {
   "id" : null,
   "path" : ".\\src\\test\\resources\\00-CheckIn\\subOne\\20240730-_DSC5227.ARW",
@@ -23,7 +24,8 @@
   "date_taken" : "2024-07-30 20:41:17",
   "flagged" : true,
   "flagType" : "pick",
-  "starred" : 0
+  "starred" : 0,
+  "tags" : [ ]
 }, {
   "id" : null,
   "path" : ".\\src\\test\\resources\\00-CheckIn\\subOne\\Canon_40D.jpg",
@@ -36,7 +38,8 @@
   "date_taken" : "2008-07-31 10:38:11",
   "flagged" : true,
   "flagType" : "pick",
-  "starred" : 0
+  "starred" : 0,
+  "tags" : [ ]
 }, {
   "id" : null,
   "path" : ".\\src\\test\\resources\\00-CheckIn\\subOne\\subTwo\\2023-04-01_09-49-32_IMG_20230401_094932.jpg",
@@ -49,7 +52,8 @@
   "date_taken" : "2023-04-01 09:49:32",
   "flagged" : true,
   "flagType" : "pick",
-  "starred" : 0
+  "starred" : 0,
+  "tags" : [ ]
 }, {
   "id" : null,
   "path" : ".\\src\\test\\resources\\00-CheckIn\\subOne\\subTwo\\4.020.080.060.059.077.00.067.091.0_dsc1637.jpg",
@@ -62,7 +66,8 @@
   "date_taken" : "2021-08-13 11:14:03",
   "flagged" : true,
   "flagType" : "pick",
-  "starred" : 0
+  "starred" : 0,
+  "tags" : [ ]
 }, {
   "id" : null,
   "path" : ".\\src\\test\\resources\\00-CheckIn\\subOne\\subTwo\\file_example_MP4_480_1_5MG.mp4",
@@ -75,7 +80,8 @@
   "date_taken" : "2024-11-24 22:01:54",
   "flagged" : true,
   "flagType" : "pick",
-  "starred" : 0
+  "starred" : 0,
+  "tags" : [ ]
 }, {
   "id" : null,
   "path" : ".\\src\\test\\resources\\00-CheckIn\\subOne\\subTwo\\subThree\\Screenshot 2025-01-127454380411043049813.png",
@@ -88,5 +94,6 @@
   "date_taken" : "Unknown",
   "flagged" : true,
   "flagType" : "pick",
-  "starred" : 0
+  "starred" : 0,
+  "tags" : [ ]
 } ]

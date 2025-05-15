@@ -5,11 +5,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - SPRING_DATA_REDIS_HOST=redis
+      - ASSISTANT_ROOTPATH=/Photo/
     ports:
       - "8999:8099"
     volumes:
-      - '/Photo/lrcat:/Lrcat'
-      - '/Photo/50-Phototheque:/Phototheque'
+      - '/Photo/70_Catalog_Phototheque:/Lrcat'
+      - '/Photo:/Photo'
     depends_on:
       - redis
     networks:
