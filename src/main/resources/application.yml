@@ -105,6 +105,32 @@ assistant:
         - "@00_WHERE@"
         - "@00_WHAT@|@00_WHO@"
       rapprochementNewOk: true
+  tags:
+    - nom: "@00_PHOTOGRAPHY@"
+      tag:
+        - a
+        - e
+        - r
+    - nom: "@00_EVENT@"
+      tag:
+        - a
+        - e
+        - r
+    - nom: "@00_WHERE@"
+      tag:
+        - a
+        - e
+        - r
+    - nom: "@00_WHAT@"
+      tag:
+        - a
+        - e
+        - r
+    - nom: "@00_WHO@"
+      tag:
+        - a
+        - e
+        - r
   repertoireOfType:
     - seanceType: all_in
       repertoire:
