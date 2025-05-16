@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   backend:
     container_name: assistant_photo_backend_service
@@ -13,25 +12,25 @@ services:
     volumes:
       - '/Photo/70_Catalog_Phototheque:/Lrcat'
       - '/Photo:/Photo'
-#    depends_on:
-#      - redis
+    depends_on:
+      - redis
     networks:
       - assistant-photo
 
-#  redis:
-#    image: redis:latest
-#    container_name: redis_container
-#    ports:
-#      - "6379:6379"  # Expose Redis port 6379 to the host
-#    volumes:
-#      - redis_data:/data  # Persist Redis data on the host machine
-#    restart: always
-#    networks:
-#      - assistant-photo
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    ports:
+      - "6379:6379"  # Expose Redis port 6379 to the host
+    volumes:
+      - redis_data:/data  # Persist Redis data on the host machine
+    restart: always
+    networks:
+      - assistant-photo
 
 networks:
   assistant-photo:
 
-#volumes:
-#  redis_data:
-#    driver: local
+volumes:
+  redis_data:
+    driver: local

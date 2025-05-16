@@ -47,8 +47,8 @@ pipeline {
         stage("assistantPhoto : Deploy to Docker Server") {
             steps {
                 script {
-                    sh "docker compose down"
-                    sh "docker compose up -d --force-recreate"
+                    sh "docker compose -p backend down "
+                    sh "docker compose -p backend up -d --force-recreate"
                 }
             }
         }
