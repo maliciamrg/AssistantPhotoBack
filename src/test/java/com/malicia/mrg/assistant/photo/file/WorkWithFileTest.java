@@ -19,7 +19,7 @@ class WorkWithFileTest {
         List<Photo> result = WorkWithFile.convertPathsToPhotos(pathToScan, List.of(Path.of(pathToScan+"/"+photo1)));
         Assertions.assertEquals(1, result.size());
         Assertions.assertEquals(true, result.get(0).getFlagged());
-        Assertions.assertEquals("reject", result.get(0).getFlagType());
+        Assertions.assertEquals("reject", result.get(0).getFlag());
         Assertions.assertEquals(0, result.get(0).getStarred());
         Assertions.assertEquals("1992-12-01T00:00:00", result.get(0).getCreatedDate());
         Assertions.assertEquals(5, result.get(0).getTags().size());
@@ -34,7 +34,7 @@ class WorkWithFileTest {
         List<Photo> result = WorkWithFile.convertPathsToPhotos(pathToScan, List.of(Path.of(pathToScan+"/"+photo1)));
         Assertions.assertEquals(1, result.size());
         Assertions.assertEquals(true, result.get(0).getFlagged());
-        Assertions.assertEquals("pick", result.get(0).getFlagType());
+        Assertions.assertEquals("pick", result.get(0).getFlag());
         Assertions.assertEquals(3, result.get(0).getStarred());
         Assertions.assertEquals("2025-01-31 22:08:37", result.get(0).getCreatedDate());
         Assertions.assertEquals(6, result.get(0).getTags().size());
@@ -54,7 +54,7 @@ class WorkWithFileTest {
         List<Photo> result = WorkWithFile.convertPathsToPhotos(pathToScan, List.of(Path.of(pathToScan+"/"+photo1)));
         Assertions.assertEquals(1, result.size());
         Assertions.assertEquals(true, result.get(0).getFlagged());
-        Assertions.assertEquals("pick", result.get(0).getFlagType());
+        Assertions.assertEquals("pick", result.get(0).getFlag());
         Assertions.assertEquals(0, result.get(0).getStarred());
         Assertions.assertEquals("2024-11-24 22:01:54", result.get(0).getCreatedDate());
         Assertions.assertEquals(0, result.get(0).getTags().size());

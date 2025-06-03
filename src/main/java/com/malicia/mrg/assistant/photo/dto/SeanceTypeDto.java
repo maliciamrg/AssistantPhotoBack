@@ -1,4 +1,4 @@
-package com.malicia.mrg.assistant.photo.DTO;
+package com.malicia.mrg.assistant.photo.dto;
 
 import java.util.List;
 

@@ -1,15 +1,12 @@
 package com.malicia.mrg.assistant.photo.repertoire;
 
 
-
 import java.io.Serializable;
-import java.util.List;
 import java.util.UUID;
 
 public class Photo implements Serializable {
-    private static final long serialVersionUID = 1L;
     public static final String T_09_15_00_Z = "2024-03-12T09:15:00Z";
-
+    private static final long serialVersionUID = 1L;
     private UUID id;
 
     private String path;
@@ -19,46 +16,54 @@ public class Photo implements Serializable {
     private String extension;
     private String createdDate;
     private String exifDate;
-    private String date_taken;
-    private Boolean flagged;
-    private String flagType;
-    private Integer starred;
-    private List<String> tags;
+    private String dateTaken;
+    private int rating;
+    private String label;
+    private String[] keywords;
+    private int pick;
 
     public Photo() {
- //       this.date_taken = T_09_15_00_Z;
+        //       this.date_taken = T_09_15_00_Z;
     }
 
-    public Integer getStarred() {
-        return starred;
+    public int getRating() {
+        return rating;
     }
 
-    public void setStarred(Integer starred) {
-        this.starred = starred;
+    public void setRating(int rating) {
+        this.rating = rating;
     }
 
-    public String getFlagType() {
-        return flagType;
+    public String getLabel() {
+        return label;
     }
 
-    public void setFlagType(String flagType) {
-        this.flagType = flagType;
+    public void setLabel(String label) {
+        this.label = label;
     }
 
-    public Boolean getFlagged() {
-        return flagged;
+    public String[] getKeywords() {
+        return keywords;
     }
 
-    public void setFlagged(Boolean flagged) {
-        this.flagged = flagged;
+    public void setKeywords(String[] keywords) {
+        this.keywords = keywords;
     }
 
-    public String getDate_taken() {
-        return date_taken;
+    public int getPick() {
+        return pick;
     }
 
-    public void setDate_taken(String date_taken) {
-        this.date_taken = date_taken;
+    public void setPick(int pick) {
+        this.pick = pick;
+    }
+
+    public String getDateTaken() {
+        return dateTaken;
+    }
+
+    public void setDateTaken(String dateTaken) {
+        this.dateTaken = dateTaken;
     }
 
     public byte[] getThumbnail() {
@@ -100,8 +105,8 @@ public class Photo implements Serializable {
 
     public void setCreatedDate(String createdDate) {
         this.createdDate = createdDate;
-        if (date_taken == null || date_taken.compareTo(T_09_15_00_Z) == 0) {
-            this.date_taken = createdDate;
+        if (dateTaken == null || dateTaken.compareTo(T_09_15_00_Z) == 0) {
+            this.dateTaken = createdDate;
         }
     }
 
@@ -111,7 +116,7 @@ public class Photo implements Serializable {
 
     public void setExifDate(String exifDate) {
         this.exifDate = exifDate;
-        this.date_taken = exifDate;
+        this.dateTaken = exifDate;
     }
 
     @Override
@@ -157,25 +162,20 @@ public class Photo implements Serializable {
         if (other.exifDate != null) {
             this.exifDate = other.exifDate;
         }
-        if (other.date_taken != null) {
-            this.date_taken = other.date_taken;
+        if (other.dateTaken != null) {
+            this.dateTaken = other.dateTaken;
         }
-        if (other.flagged != null) {
-            this.flagged = other.flagged;
+        //     if (other.rating != null) {
+        this.rating = other.rating;
+        //     }
+        if (other.label != null) {
+            this.label = other.label;
         }
-        if (other.flagType != null) {
-            this.flagType = other.flagType;
+        if (other.keywords != null) {
+            this.keywords = other.keywords;
         }
-        if (other.starred != null) {
-            this.starred = other.starred;
-        }
-    }
-
-    public List<String> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<String> tags) {
-        this.tags = tags;
+        //    if (other.pick != null) {
+        this.pick = other.pick;
+        //    }
     }
 }

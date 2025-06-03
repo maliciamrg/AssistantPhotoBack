@@ -6,7 +6,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.malicia.mrg.assistant.photo.DTO.XMPPhotoDto;
+import com.malicia.mrg.assistant.photo.dto.XMPPhotoDto;
 import com.malicia.mrg.assistant.photo.repertoire.Photo;
 import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
 import com.malicia.mrg.assistant.photo.service.XMPService;
@@ -78,25 +78,18 @@ public class WorkWithFile {
             photo.setExtension(extension);
 
             // Reach xmp if exist
-            photo.setFlagged(true);
-            photo.setStarred(0);
-            photo.setFlagType("pick");
+            photo.setRating(0);
+            photo.setPick(1);
             XMPPhotoDto xmpPhoto = new XMPPhotoDto();
             try {
                 xmpPhoto = XMPService.readMetadata(path.toString()+".xmp");
             } catch (XMPException e) {
                 throw new RuntimeException(e);
             }
-
-            Integer rating = xmpPhoto.getRating();
-            if (rating != null){
-                if ( rating > 0) {
-                    photo.setStarred(rating);
-                }
-                if (rating == -1) {
-                    photo.setFlagType("reject");
-                }
-            }
+            photo.setRating(xmpPhoto.getRating());
+            photo.setPick(xmpPhoto.getPick());
+            photo.setKeywords(xmpPhoto.getKeywords());
+            photo.setLabel(xmpPhoto.getLabel());
 
             // Get file creation date (from filesystem)
             photo.setCreatedDate(getFileCreatedDate(path));
@@ -107,10 +100,10 @@ public class WorkWithFile {
             }
 
             // set file tags
-            photo.setTags(new ArrayList<>());
-            if (xmpPhoto.getSubject() != null){
-                if (xmpPhoto.getSubject().compareTo("null") != 0){
-                    photo.setTags(List.of(xmpPhoto.getSubject().split(",")));
+            photo.setKeywords(new String[0]);
+            if (xmpPhoto.getKeywords() != null){
+                if (xmpPhoto.getKeywords().length > 0){
+                    photo.setKeywords(xmpPhoto.getKeywords());
                 }
             }
 

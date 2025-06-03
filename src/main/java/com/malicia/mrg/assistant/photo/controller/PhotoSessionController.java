@@ -1,23 +1,17 @@
 package com.malicia.mrg.assistant.photo.controller;
 
-import com.malicia.mrg.assistant.photo.AssistantPhotoApplication;
-import com.malicia.mrg.assistant.photo.DTO.SeanceTypeDto;
+import com.malicia.mrg.assistant.photo.dto.SeanceTypeDto;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
 import com.malicia.mrg.assistant.photo.repertoire.Photo;
 import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
 import com.malicia.mrg.assistant.photo.service.PhotoSessionService;
-import com.malicia.mrg.assistant.photo.service.RootRepertoire;
-import com.malicia.mrg.assistant.photo.service.PhotoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
