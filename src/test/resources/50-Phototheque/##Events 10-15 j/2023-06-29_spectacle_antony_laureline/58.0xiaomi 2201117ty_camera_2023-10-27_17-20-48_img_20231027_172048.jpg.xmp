@@ -4,7 +4,17 @@
     <rdf:Description rdf:about=""
         xmlns:xmp="http://ns.adobe.com/xap/1.0/"
         xmlns:dc="http://purl.org/dc/elements/1.1/"
-      xmp:Rating="3"
-      dc:subject="zone2,Salon,Duplicate,Bateau à voile,ImportArgentique,tresor"/>
+      xmp:Rating="3">
+      <dc:subject>
+        <rdf:Bag>
+          <rdf:li>zone2</rdf:li>
+          <rdf:li>Salon</rdf:li>
+          <rdf:li>Duplicate</rdf:li>
+          <rdf:li>Bateau à voile</rdf:li>
+          <rdf:li>ImportArgentique</rdf:li>
+          <rdf:li>tresor</rdf:li>
+        </rdf:Bag>
+      </dc:subject>
+    </rdf:Description>
   </rdf:RDF>
 </x:xmpmeta>

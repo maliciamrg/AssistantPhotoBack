@@ -79,30 +79,49 @@ public class WorkWithFile {
 
             // Reach xmp if exist
             photo.setRating(0);
-            photo.setPick(1);
+            photo.setPick(0);
+            photo.setLabel("");
+            photo.setKeywords(new String[0]);
             XMPPhotoDto xmpPhoto = new XMPPhotoDto();
             try {
-                xmpPhoto = XMPService.readMetadata(path.toString()+".xmp");
+                xmpPhoto = XMPService.readMetadata(path + ".xmp");
+
+                Integer rating = xmpPhoto.getRating();
+                if (rating != null) {
+                    photo.setRating(rating);
+                }
+
+                Integer pick = xmpPhoto.getPick();
+                if (pick != null) {
+                    photo.setPick(pick);
+                }
+
+                String[] keywords = xmpPhoto.getKeywords();
+                if (keywords != null) {
+                    photo.setKeywords(keywords);
+                }
+
+                String label = xmpPhoto.getLabel();
+                if (label != null) {
+                    photo.setLabel(label);
+                }
             } catch (XMPException e) {
                 throw new RuntimeException(e);
             }
-            photo.setRating(xmpPhoto.getRating());
-            photo.setPick(xmpPhoto.getPick());
-            photo.setKeywords(xmpPhoto.getKeywords());
-            photo.setLabel(xmpPhoto.getLabel());
+
 
             // Get file creation date (from filesystem)
             photo.setCreatedDate(getFileCreatedDate(path));
-            if (xmpPhoto.getCreateDate() != null){
-                if (xmpPhoto.getCreateDate().compareTo("null") != 0){
+            if (xmpPhoto.getCreateDate() != null) {
+                if (xmpPhoto.getCreateDate().compareTo("null") != 0) {
                     photo.setCreatedDate(xmpPhoto.getCreateDate());
                 }
             }
 
             // set file tags
             photo.setKeywords(new String[0]);
-            if (xmpPhoto.getKeywords() != null){
-                if (xmpPhoto.getKeywords().length > 0){
+            if (xmpPhoto.getKeywords() != null) {
+                if (xmpPhoto.getKeywords().length > 0) {
                     photo.setKeywords(xmpPhoto.getKeywords());
                 }
             }
@@ -129,8 +148,8 @@ public class WorkWithFile {
 
             if (originalImage != null) {
                 // Set the dimensions for the thumbnail
-                int thumbnailWidth = originalImage.getWidth()/5; // Set desired thumbnail width
-                int thumbnailHeight = originalImage.getHeight()/5; // Set desired thumbnail height
+                int thumbnailWidth = originalImage.getWidth() / 5; // Set desired thumbnail width
+                int thumbnailHeight = originalImage.getHeight() / 5; // Set desired thumbnail height
 
                 // Create a scaled instance (thumbnail)
                 Image thumbnail = originalImage.getScaledInstance(thumbnailWidth, thumbnailHeight, Image.SCALE_SMOOTH);
@@ -287,7 +306,7 @@ public class WorkWithFile {
         List<Path> subdirectories = new ArrayList<>();
 
         // Walk through the directory tree
-        Files.walk(rootPath,1)
+        Files.walk(rootPath, 1)
                 .filter(Files::isDirectory)  // Only directories
                 .filter(p -> !p.equals(rootPath))  // Exclude the root path
                 .forEach(subdirectories::add);
@@ -301,7 +320,7 @@ public class WorkWithFile {
         for (Path path : listPath) {
             // Create a new Photo object
             SeanceRepertoire SeanceRepertoire = new SeanceRepertoire();
-            SeanceRepertoire.setId(path.toString().replace(rootPath.toString() + File.separator,""));
+            SeanceRepertoire.setId(path.toString().replace(rootPath + File.separator, ""));
             SeanceRepertoire.setPath(path.toString());
 
             SeanceRepertoires.add(SeanceRepertoire);
