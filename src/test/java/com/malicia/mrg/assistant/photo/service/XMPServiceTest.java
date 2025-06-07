@@ -1,12 +1,14 @@
 package com.malicia.mrg.assistant.photo.service;
 
 import com.adobe.internal.xmp.XMPException;
+import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.dto.XMPPhotoDto;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,7 +17,8 @@ import java.nio.file.StandardCopyOption;
 
 @SpringBootTest
 class XMPServiceTest {
-
+    @MockBean
+    private CacheService redisTemplate;
     @Autowired
     private MyConfig mockConfig; // Mocking the MyConfig dependency
 

@@ -9,6 +9,9 @@ spring:
 #      password: yourpassword  # Optional, if your Redis instance requires authentication
       timeout: 2000  # Optional timeout in milliseconds
 
+redis:
+  enabled: true
+
 application:
   version: "@project.version@"
   ipWan: '192.212.5.200'

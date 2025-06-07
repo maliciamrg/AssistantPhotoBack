@@ -1,5 +1,6 @@
 package com.malicia.mrg.assistant.photo;
 
+import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class MyConfigTest {
-
+    @MockBean
+    private CacheService redisTemplate;
 
     @MockBean
     private PhotoService photoService;

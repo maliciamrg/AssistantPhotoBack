@@ -2,8 +2,9 @@ package com.malicia.mrg.assistant.photo.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.malicia.mrg.assistant.photo.dto.SeanceTypeDto;
 import com.malicia.mrg.assistant.photo.MyConfig;
+import com.malicia.mrg.assistant.photo.cache.CacheService;
+import com.malicia.mrg.assistant.photo.dto.SeanceTypeDto;
 import com.malicia.mrg.assistant.photo.file.WorkWithFile;
 import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
 import com.malicia.mrg.assistant.photo.repertoire.Photo;
@@ -20,8 +21,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
@@ -47,18 +46,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class,
         org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration.class
 })
-public class PhotoSessionControllerTest {
+class PhotoSessionControllerTest {
 
 
     @MockBean
-    private RedisTemplate<String, Object> redisTemplate;
+    public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory;
+    @MockBean
+    private CacheService redisTemplate;
     @MockBean
     private RedisConnectionFactory redisConnectionFactory;
     @MockBean
     private ReactiveHealthContributor redisHealthContributor;
-    @MockBean
-    public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory;
-
     @Autowired
     private RootRepertoire rootRep;
     @Autowired
@@ -75,17 +73,15 @@ public class PhotoSessionControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        ValueOperations<String, Object> valueOperations = mock(ValueOperations.class);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(valueOperations.get(anyString())).thenReturn(null);
-        doNothing().when(valueOperations).set(anyString(), any(), any());
+        when(redisTemplate.get(anyString())).thenReturn(null);
+        doNothing().when(redisTemplate).set(anyString(), any(), any());
     }
 
 
     @Test
     void getSeanceTypes_ShouldReturnSeanceTypes() throws Exception {
         // Initialize controller with the real RootRepertoire bean
-        PhotoSessionController controller = new PhotoSessionController(myConfig,photoSessionService);
+        PhotoSessionController controller = new PhotoSessionController(myConfig, photoSessionService);
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
         //given
@@ -121,7 +117,7 @@ public class PhotoSessionControllerTest {
     @Test
     void getSeanceRepertoires_ShouldReturnSeanceRepertoires() throws Exception {
         // Initialize controller with the real RootRepertoire bean
-        PhotoSessionController controller = new PhotoSessionController(myConfig,photoSessionService);
+        PhotoSessionController controller = new PhotoSessionController(myConfig, photoSessionService);
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
         //given
@@ -170,7 +166,7 @@ public class PhotoSessionControllerTest {
     @Test
     void testGetSeancesParType() {
         // Initialize controller with the real RootRepertoire bean
-        PhotoSessionController controller = new PhotoSessionController(myConfig,photoSessionService);
+        PhotoSessionController controller = new PhotoSessionController(myConfig, photoSessionService);
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         Path rootTest = Paths.get("src", "test", "resources");
         String jsonDest = "./" + rootTest + "/" + "/testGetSeancesParTypeTEST.json";
@@ -189,7 +185,7 @@ public class PhotoSessionControllerTest {
 
         ResponseEntity<List<Photo>> response = photoSessionController.getPhotosDeSeance("ALL_IN", "subOne");
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals(7, response.getBody().size());
 
         WorkWithFile.putIntoJsonFile(response, jsonDest);
@@ -202,7 +198,7 @@ public class PhotoSessionControllerTest {
 
         ResponseEntity<List<Photo>> response = photoSessionController.getPhotosDeSeance("ALL_IN", "session1");
 
-        assertEquals(404, response.getStatusCodeValue());
+        assertEquals(404, response.getStatusCode().value());
         assertNull(response.getBody());
     }
 }

@@ -1,2 +1,10 @@
 assistant:
   rootPath: Y:\
+
+redis:
+  enabled: false
+
+management:
+  health:
+    redis:
+      enabled: false

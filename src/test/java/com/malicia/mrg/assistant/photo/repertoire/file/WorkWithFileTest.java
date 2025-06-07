@@ -1,5 +1,6 @@
 package com.malicia.mrg.assistant.photo.repertoire.file;
 
+import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.file.WorkWithFile;
 import com.malicia.mrg.assistant.photo.repertoire.Photo;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
@@ -17,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class WorkWithFileTest {
-
+    @MockBean
+    private CacheService redisTemplate;
     @MockBean
     private PhotoService photoService;
 
