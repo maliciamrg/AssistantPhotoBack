@@ -3,6 +3,7 @@ package com.malicia.mrg.assistant.photo.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
+import com.malicia.mrg.assistant.photo.exception.CustomException;
 import com.malicia.mrg.assistant.photo.parameter.RepertoireOfType;
 import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
 import com.malicia.mrg.assistant.photo.file.WorkWithFile;
@@ -33,15 +34,21 @@ public class RootRepertoire {
         controlConfig(config);
     }
 
-    public static int moveGroupToAssistantWork(String destinationFolder, GroupOfPhotos groupOfPhotoFrom, boolean dryRun) {
+    public static int moveGroupToDestinationFolder(String destinationFolder, GroupOfPhotos groupOfPhotoFrom, boolean addAutoSubFolder, boolean dryRun) {
         AtomicInteger ret = new AtomicInteger();
-        String folderNameDatePart = groupOfPhotoFrom.getPhotos().get(0).getExifDate().split(" ")[0].replace(":", "_");
-        String folderNameNumPart = String.format("%05d", groupOfPhotoFrom.size());
-        String folderWor = folderNameDatePart + "_(" + folderNameNumPart + ")";
+
+        String folderWor = "";
+        if (addAutoSubFolder) {
+            String folderNameDatePart = groupOfPhotoFrom.getPhotos().get(0).getExifDate().split(" ")[0].replace(":", "_");
+            String folderNameNumPart = String.format("%05d", groupOfPhotoFrom.size());
+            folderWor = folderNameDatePart + "_(" + folderNameNumPart + ")" + "\\";
+        }
+
+        String finalFolderWor = folderWor;
         groupOfPhotoFrom.forEach(photo -> {
             String src = photo.getPath();
             String newName = WorkWithFile.sanitizeFileName(photo.getRelativeToPath());
-            String dest = WorkWithFile.getNormalizedPath(destinationFolder + "\\" + folderWor + "\\" + newName);
+            String dest = WorkWithFile.getNormalizedPath(destinationFolder + "\\" + finalFolderWor + newName);
             try {
                 if (WorkWithFile.moveFileWithTimestamp(src, dest, dryRun)) {
                     ret.incrementAndGet();
@@ -57,7 +64,7 @@ public class RootRepertoire {
 
     private void controlConfig(MyConfig config) {
         try {
-            if (config.getRootPath().isEmpty()) {
+            if (config.getRootPath() == null || config.getRootPath().isEmpty()) {
                 throw new CustomException("Root Path is empty");
             }
 
@@ -261,8 +268,3 @@ public class RootRepertoire {
     }
 }
 
-class CustomException extends Exception {
-    public CustomException(String message) {
-        super(message);
-    }
-}

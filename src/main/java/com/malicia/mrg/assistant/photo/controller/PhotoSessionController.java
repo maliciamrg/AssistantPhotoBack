@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -57,12 +59,20 @@ public class PhotoSessionController {
 
     // 3. Liste des photos d'une séance
     @GetMapping("/{typeName}/{seanceId}")
-    public ResponseEntity<List<Photo>> getPhotosDeSeance(@PathVariable String typeName, @PathVariable String seanceId) {
+    public ResponseEntity<Map<String, Object>> getPhotosDeSeance(@PathVariable String typeName, @PathVariable String seanceId) {
         try {
             List<SeanceRepertoire> seanceList = photoSessionService.getSeanceRepertoireList(typeName);
 
             List<Photo> allPhotoFromPhotoRepertoire = photoSessionService.getAllPhotoFromPhotoRepertoire(seanceId, seanceList);
-            return ResponseEntity.ok(allPhotoFromPhotoRepertoire);
+
+            HashMap<String,Object> metaDataFromPhotoRepertoire= photoSessionService.getMetaDataFromPhotoRepertoire(seanceId, seanceList);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("photos", allPhotoFromPhotoRepertoire);
+            response.put("metadata", metaDataFromPhotoRepertoire);
+
+            return ResponseEntity.ok(response);
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(null);
         }

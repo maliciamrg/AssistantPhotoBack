@@ -1,9 +1,9 @@
-package com.malicia.mrg.assistant.photo.dto;
+package com.malicia.mrg.assistant.photo.pojo;
 
 
 import java.util.Arrays;
 
-public class XMPPhotoDto {
+public class XMPPhoto {
     private String make;
     private String model;
     private String dateTimeOriginal;
@@ -79,7 +79,7 @@ public class XMPPhotoDto {
 
     @Override
     public String toString() {
-        return "XMPPhotoDto{" +
+        return "XMPPhoto{" +
                 "make='" + make + '\'' +
                 ", model='" + model + '\'' +
                 ", dateTimeOriginal='" + dateTimeOriginal + '\'' +

@@ -8,6 +8,13 @@ public class GroupOfPhotos implements Iterable<Photo> {
 
     private List<Photo> photos = new ArrayList();
 
+    public GroupOfPhotos(List<Photo> photos) {
+        this.photos = photos;
+    }
+
+    public GroupOfPhotos() {
+    }
+
     public List<Photo> getPhotos() {
         return photos;
     }

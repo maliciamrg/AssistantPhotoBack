@@ -2,7 +2,7 @@ package com.malicia.mrg.assistant.photo.service;
 
 import com.adobe.internal.xmp.XMPException;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
-import com.malicia.mrg.assistant.photo.dto.XMPPhotoDto;
+import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ class XMPServiceTest {
     @Test
     void testReadMetadata() throws IOException, XMPException {
 
-        XMPPhotoDto result = XMPService.readMetadata(mockConfig.getRootPath() + "20250522-_DSC5845.xmp");
+        XMPPhoto result = XMPService.readMetadata(mockConfig.getRootPath() + "20250522-_DSC5845.xmp");
         Assertions.assertEquals(-1, result.getPick());
         Assertions.assertEquals("Blue", result.getLabel());
         Assertions.assertEquals(4, result.getKeywords().length);
@@ -44,7 +44,7 @@ class XMPServiceTest {
         Files.copy(new File(sourceXmpPath).toPath(), new File(testXmpPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         // 3. Créer un DTO avec des valeurs modifiées
-        XMPPhotoDto dto = new XMPPhotoDto();
+        XMPPhoto dto = new XMPPhoto();
         dto.setRating(5); // Changer la note
         dto.setLabel("Green"); // Nouveau label
         dto.setCreateDate("2025-06-01T18:30:00"); // Date différente
@@ -55,7 +55,7 @@ class XMPServiceTest {
         XMPService.storeMetadata(dto, testXmpPath);
 
         // 5. Lire à nouveau pour vérifier les valeurs modifiées
-        XMPPhotoDto result = XMPService.readMetadata(testXmpPath);
+        XMPPhoto result = XMPService.readMetadata(testXmpPath);
 
         Assertions.assertEquals(5, result.getRating());
         Assertions.assertEquals("Green", result.getLabel());

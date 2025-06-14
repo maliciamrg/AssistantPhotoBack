@@ -6,7 +6,7 @@ import com.adobe.internal.xmp.impl.XMPMetaImpl;
 import com.adobe.internal.xmp.impl.XMPSerializerHelper;
 import com.adobe.internal.xmp.options.PropertyOptions;
 import com.adobe.internal.xmp.properties.XMPProperty;
-import com.malicia.mrg.assistant.photo.dto.XMPPhotoDto;
+import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -14,7 +14,7 @@ import java.io.*;
 @Service
 public class XMPService {
 
-    public static void storeMetadata(XMPPhotoDto xmpPhotoDto, String xmpPath) throws IOException, XMPException {
+    public static void storeMetadata(XMPPhoto xmpPhoto, String xmpPath) throws IOException, XMPException {
         File xmpFile = new File(xmpPath);
         XMPMeta xmpMeta;
 
@@ -28,31 +28,31 @@ public class XMPService {
         }
 
         // 2. Mettre à jour uniquement les propriétés modifiées ou nouvelles
-//        if (xmpPhotoDto.getRating() != null)
-            xmpMeta.setProperty(XMPConst.NS_XMP, "Rating", xmpPhotoDto.getRating());
+//        if (xmpPhoto.getRating() != null)
+            xmpMeta.setProperty(XMPConst.NS_XMP, "Rating", xmpPhoto.getRating());
 
-        if (xmpPhotoDto.getLabel() != null)
-            xmpMeta.setProperty(XMPConst.NS_XMP, "Label", xmpPhotoDto.getLabel());
+        if (xmpPhoto.getLabel() != null)
+            xmpMeta.setProperty(XMPConst.NS_XMP, "Label", xmpPhoto.getLabel());
 
-        if (xmpPhotoDto.getCreateDate() != null)
-            xmpMeta.setProperty(XMPConst.NS_XMP, "CreateDate", xmpPhotoDto.getCreateDate());
+        if (xmpPhoto.getCreateDate() != null)
+            xmpMeta.setProperty(XMPConst.NS_XMP, "CreateDate", xmpPhoto.getCreateDate());
 
-        if (xmpPhotoDto.getMake() != null)
-            xmpMeta.setProperty(XMPConst.NS_TIFF, "Make", xmpPhotoDto.getMake());
+        if (xmpPhoto.getMake() != null)
+            xmpMeta.setProperty(XMPConst.NS_TIFF, "Make", xmpPhoto.getMake());
 
-        if (xmpPhotoDto.getModel() != null)
-            xmpMeta.setProperty(XMPConst.NS_TIFF, "Model", xmpPhotoDto.getModel());
+        if (xmpPhoto.getModel() != null)
+            xmpMeta.setProperty(XMPConst.NS_TIFF, "Model", xmpPhoto.getModel());
 
-        if (xmpPhotoDto.getDateTimeOriginal() != null)
-            xmpMeta.setProperty(XMPConst.NS_EXIFX, "DateTimeOriginal", xmpPhotoDto.getDateTimeOriginal());
+        if (xmpPhoto.getDateTimeOriginal() != null)
+            xmpMeta.setProperty(XMPConst.NS_EXIFX, "DateTimeOriginal", xmpPhoto.getDateTimeOriginal());
 
-//        if (xmpPhotoDto.getPick() != null)
-            xmpMeta.setProperty("http://ns.adobe.com/lightroom/1.0/", "Pick", xmpPhotoDto.getPick());
+//        if (xmpPhoto.getPick() != null)
+            xmpMeta.setProperty("http://ns.adobe.com/lightroom/1.0/", "Pick", xmpPhoto.getPick());
 
         // Mots-clés (dc:subject)
-        if (xmpPhotoDto.getKeywords() != null && xmpPhotoDto.getKeywords().length > 0) {
+        if (xmpPhoto.getKeywords() != null && xmpPhoto.getKeywords().length > 0) {
             xmpMeta.deleteProperty(XMPConst.NS_DC, "subject"); // Supprimer l'ancien tableau pour éviter doublons
-            for (String keyword : xmpPhotoDto.getKeywords()) {
+            for (String keyword : xmpPhoto.getKeywords()) {
                 xmpMeta.appendArrayItem(XMPConst.NS_DC, "subject", new PropertyOptions(PropertyOptions.ARRAY_ORDERED | PropertyOptions.ARRAY_ALTERNATE), keyword, null);
             }
         }
@@ -63,13 +63,13 @@ public class XMPService {
         }
     }
 
-    public static XMPPhotoDto readMetadata(String xmpPath) throws IOException, XMPException {
-        XMPPhotoDto xmpPhotoDto = new XMPPhotoDto();
+    public static XMPPhoto readMetadata(String xmpPath) throws IOException, XMPException {
+        XMPPhoto xmpPhoto = new XMPPhoto();
         File xmpFile = new File(xmpPath);
 
         if (!xmpFile.exists()) {
             System.out.println("XMP sidecar file does not exist.");
-            return xmpPhotoDto;
+            return xmpPhoto;
         }
 
         try (InputStream inputStream = new FileInputStream(xmpFile)) {
@@ -77,32 +77,32 @@ public class XMPService {
 
             // XMP Core
             if (xmpMeta.doesPropertyExist(XMPConst.NS_XMP, "CreateDate")) {
-                xmpPhotoDto.setCreateDate(xmpMeta.getPropertyString(XMPConst.NS_XMP, "CreateDate"));
+                xmpPhoto.setCreateDate(xmpMeta.getPropertyString(XMPConst.NS_XMP, "CreateDate"));
             }
 
             if (xmpMeta.doesPropertyExist(XMPConst.NS_XMP, "Rating")) {
                 String ratingStr = xmpMeta.getPropertyString(XMPConst.NS_XMP, "Rating");
-                xmpPhotoDto.setRating(ratingStr != null ? Integer.parseInt(ratingStr) : 0);
+                xmpPhoto.setRating(ratingStr != null ? Integer.parseInt(ratingStr) : 0);
             } else {
-                xmpPhotoDto.setRating(0);
+                xmpPhoto.setRating(0);
             }
 
             if (xmpMeta.doesPropertyExist(XMPConst.NS_XMP, "Label")) {
-                xmpPhotoDto.setLabel(xmpMeta.getPropertyString(XMPConst.NS_XMP, "Label"));
+                xmpPhoto.setLabel(xmpMeta.getPropertyString(XMPConst.NS_XMP, "Label"));
             }
 
             // TIFF
             if (xmpMeta.doesPropertyExist(XMPConst.NS_TIFF, "Make")) {
-                xmpPhotoDto.setMake(xmpMeta.getPropertyString(XMPConst.NS_TIFF, "Make"));
+                xmpPhoto.setMake(xmpMeta.getPropertyString(XMPConst.NS_TIFF, "Make"));
             }
 
             if (xmpMeta.doesPropertyExist(XMPConst.NS_TIFF, "Model")) {
-                xmpPhotoDto.setModel(xmpMeta.getPropertyString(XMPConst.NS_TIFF, "Model"));
+                xmpPhoto.setModel(xmpMeta.getPropertyString(XMPConst.NS_TIFF, "Model"));
             }
 
             // EXIF
             if (xmpMeta.doesPropertyExist(XMPConst.NS_EXIFX, "DateTimeOriginal")) {
-                xmpPhotoDto.setDateTimeOriginal(xmpMeta.getPropertyString(XMPConst.NS_EXIFX, "DateTimeOriginal"));
+                xmpPhoto.setDateTimeOriginal(xmpMeta.getPropertyString(XMPConst.NS_EXIFX, "DateTimeOriginal"));
             }
 
             // Keywords (dc:subject array)
@@ -115,23 +115,23 @@ public class XMPService {
                         tmpKeyWord[i - 1] = tag.getValue();
                     }
                 }
-                xmpPhotoDto.setKeywords(tmpKeyWord);
+                xmpPhoto.setKeywords(tmpKeyWord);
             }
 
             // Lightroom Pick flag
             final String LIGHTROOM_NS = "http://ns.adobe.com/lightroom/1.0/";
             if (xmpMeta.doesPropertyExist(LIGHTROOM_NS, "Pick")) {
                 String pickStr = xmpMeta.getPropertyString(LIGHTROOM_NS, "Pick");
-                xmpPhotoDto.setPick(pickStr != null ? Integer.parseInt(pickStr) : 0);
+                xmpPhoto.setPick(pickStr != null ? Integer.parseInt(pickStr) : 0);
             } else {
-                xmpPhotoDto.setPick(0);
+                xmpPhoto.setPick(0);
             }
         } catch (XMPException | NumberFormatException e) {
             System.err.println("Error reading or parsing XMP metadata: " + e.getMessage());
             // Optionally, rethrow or log as needed
         }
 
-        return xmpPhotoDto;
+        return xmpPhoto;
     }
 
 }

@@ -6,7 +6,7 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.malicia.mrg.assistant.photo.dto.XMPPhotoDto;
+import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
 import com.malicia.mrg.assistant.photo.repertoire.Photo;
 import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
 import com.malicia.mrg.assistant.photo.service.XMPService;
@@ -82,7 +82,7 @@ public class WorkWithFile {
             photo.setPick(0);
             photo.setLabel("");
             photo.setKeywords(new String[0]);
-            XMPPhotoDto xmpPhoto = new XMPPhotoDto();
+            XMPPhoto xmpPhoto = new XMPPhoto();
             try {
                 xmpPhoto = XMPService.readMetadata(path + ".xmp");
 

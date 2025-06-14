@@ -1,7 +1,7 @@
 package com.malicia.mrg.assistant.photo.service;
 
 import com.adobe.internal.xmp.XMPException;
-import com.malicia.mrg.assistant.photo.dto.XMPPhotoDto;
+import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
 import com.malicia.mrg.assistant.photo.repertoire.Photo;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +20,12 @@ public class PhotoService {
 
             if (writeXmp) {
                 try {
-                    XMPPhotoDto xmpPhotoDto = new XMPPhotoDto();
-                    xmpPhotoDto.setRating(photo.getRating());
-                    xmpPhotoDto.setPick(photo.getPick());
-                    xmpPhotoDto.setCreateDate(photo.getCreatedDate());
-                    xmpPhotoDto.setKeywords(photo.getKeywords());
-                    XMPService.storeMetadata(xmpPhotoDto,photo.getPath()+".xmp");
+                    XMPPhoto xmpPhoto = new XMPPhoto();
+                    xmpPhoto.setRating(photo.getRating());
+                    xmpPhoto.setPick(photo.getPick());
+                    xmpPhoto.setCreateDate(photo.getCreatedDate());
+                    xmpPhoto.setKeywords(photo.getKeywords());
+                    XMPService.storeMetadata(xmpPhoto,photo.getPath()+".xmp");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 } catch (XMPException e) {

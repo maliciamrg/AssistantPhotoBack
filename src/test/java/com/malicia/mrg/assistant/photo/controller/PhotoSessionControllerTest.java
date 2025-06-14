@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -183,10 +184,10 @@ class PhotoSessionControllerTest {
         Path rootTest = Paths.get("src", "test", "resources");
         String jsonDest = "./" + rootTest + "/" + "/testGetPhotosDeSeance_successTEST.json";
 
-        ResponseEntity<List<Photo>> response = photoSessionController.getPhotosDeSeance("ALL_IN", "subOne");
+        ResponseEntity<Map<String, Object>> response = photoSessionController.getPhotosDeSeance("ALL_IN", "subOne");
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(7, response.getBody().size());
+        assertEquals(7, ((List)response.getBody().get("photos")).size());
 
         WorkWithFile.putIntoJsonFile(response, jsonDest);
     }
@@ -196,7 +197,7 @@ class PhotoSessionControllerTest {
         when(photoSessionService.getSeanceRepertoireList("ALL_IN"))
                 .thenThrow(new IllegalArgumentException("Not found"));
 
-        ResponseEntity<List<Photo>> response = photoSessionController.getPhotosDeSeance("ALL_IN", "session1");
+        ResponseEntity<Map<String, Object>> response = photoSessionController.getPhotosDeSeance("ALL_IN", "session1");
 
         assertEquals(404, response.getStatusCode().value());
         assertNull(response.getBody());

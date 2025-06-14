@@ -323,7 +323,7 @@ class RootRepertoireTest {
 
         //when
         List<SeanceRepertoire> allSeanceRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.ASSISTANT_WORK);
-        int ret = RootRepertoire.moveGroupToAssistantWork(mockConfig.getRootPath() + allSeanceRepertoire.get(0).getPath(), groupOfPhotoFrom, true);
+        int ret = RootRepertoire.moveGroupToDestinationFolder(mockConfig.getRootPath() + allSeanceRepertoire.get(0).getPath(), groupOfPhotoFrom, true ,true);
 
         //then
         System.out.println(allSeanceRepertoire);
