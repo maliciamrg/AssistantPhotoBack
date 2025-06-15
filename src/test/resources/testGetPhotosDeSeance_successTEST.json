@@ -2,13 +2,25 @@
   "headers" : { },
   "body" : {
     "metadata" : {
+      "seanceRepertoire" : {
+        "id" : "subOne",
+        "path" : ".\\src\\test\\resources\\00-CheckIn\\subOne",
+        "description" : null
+      },
+      "nbPhotoTotal" : 7,
+      "nbNotSelectedPhoto" : 7,
+      "nbSelectedPhoto" : 0,
+      "nbRejectedPhoto" : 0,
+      "lowerDate" : "2008-07-31",
+      "upperDate" : "2024-07-30",
+      "nbDay" : 5844,
+      "nbStar" : [ 7, 0, 0, 0, 0, 0 ],
       "nbLabel" : {
         "" : 7
       },
-      "nbStar" : [ 7, 0, 0, 0, 0, 0 ],
-      "lowerDate" : "2008-07-31",
-      "nbRejectedPhoto" : 0,
-      "nbPhoto" : 7
+      "nbTag" : { },
+      "repertoireName" : "subOne",
+      "repertoireNameParts" : [ "subOne" ]
     },
     "photos" : [ {
       "id" : null,
@@ -110,6 +122,6 @@
       "pick" : 0
     } ]
   },
-  "statusCodeValue" : 200,
-  "statusCode" : "OK"
+  "statusCode" : "OK",
+  "statusCodeValue" : 200
 }

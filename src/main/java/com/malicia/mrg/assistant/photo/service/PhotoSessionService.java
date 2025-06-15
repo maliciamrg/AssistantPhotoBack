@@ -5,6 +5,7 @@ import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.parameter.SeanceType;
 import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
+import com.malicia.mrg.assistant.photo.pojo.MetaDataRep;
 import com.malicia.mrg.assistant.photo.repertoire.Photo;
 import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
 import org.slf4j.Logger;
@@ -42,8 +43,7 @@ public class PhotoSessionService {
         if (pathToScan.isEmpty()) {
             throw new IllegalArgumentException("Seance ID '" + seanceId + "' not found in provided seance list.");
         }
-        SeanceRepertoire seanceRepertoire = pathToScan.get();
-        return seanceRepertoire;
+        return pathToScan.get();
     }
 
     public List<Photo> getAllPhotoFromPhotoRepertoire(String seanceId, List<SeanceRepertoire> seanceList) {
@@ -83,25 +83,73 @@ public class PhotoSessionService {
         }
     }
 
-    public HashMap<String, Object> getMetaDataFromPhotoRepertoire(String repertoireName, List<SeanceRepertoire> seanceList) {
+    public MetaDataRep getMetaDataFromPhotoRepertoire(String repertoireName, List<SeanceRepertoire> seanceList) {
 
         SeanceRepertoire seanceRepertoire = getSeanceRepertoire(repertoireName, seanceList);
-
         List<Photo> listPhoto = getAllPhotoFromPhotoRepertoire(repertoireName, seanceList);
 
-        String lowerDate = "9999-99-99";
-        String upperDate = "0000-00-00";
-
-        int nbRejectedPhoto = 0;
-        int nbNotSelectedPhoto = 0;
-        int nbSelectedPhoto = 0;
-        int nbPhotoTotal = 0;
-
-        int[] nbStar = new int[6];
-        Map<String, Integer> nbLabel = new HashMap<>();
-        Map<String, Integer> nbTag = new HashMap<>();
+        MetaDataAccumulator accumulator = new MetaDataAccumulator();
 
         for (Photo photo : listPhoto) {
+            accumulator.accumulate(photo);
+        }
+
+        String[] parts = repertoireName.split("_");
+        long daysBetween = computeDaysBetween(accumulator.getLowerDate(), accumulator.getUpperDate());
+
+        MetaDataRep metaDataRep = buildMetaDataRep(seanceRepertoire, repertoireName, parts, accumulator, daysBetween);
+        writeMetaDataToFile(metaDataRep, seanceRepertoire.getPath(), repertoireName);
+
+        return metaDataRep;
+    }
+    private long computeDaysBetween(String lowerDate, String upperDate) {
+        LocalDate start = LocalDate.parse(lowerDate);
+        LocalDate end = LocalDate.parse(upperDate);
+        return ChronoUnit.DAYS.between(start, end) + 1;
+    }
+
+    private MetaDataRep buildMetaDataRep(SeanceRepertoire seanceRepertoire, String name, String[] parts, MetaDataAccumulator acc, long nbDays) {
+        MetaDataRep rep = new MetaDataRep();
+        rep.setSeanceRepertoire(seanceRepertoire);
+        rep.setRepertoireName(name);
+        rep.setRepertoireNameParts(parts);
+        rep.setLowerDate(acc.getLowerDate());
+        rep.setUpperDate(acc.getUpperDate());
+        rep.setNbDay(nbDays);
+        rep.setNbPhotoTotal(acc.getNbPhotoTotal());
+        rep.setNbNotSelectedPhoto(acc.getNbNotSelectedPhoto());
+        rep.setNbSelectedPhoto(acc.getNbSelectedPhoto());
+        rep.setNbRejectedPhoto(acc.getNbRejectedPhoto());
+        rep.setNbStar(acc.getNbStar());
+        rep.setNbLabel(acc.getNbLabel());
+        rep.setNbTag(acc.getNbTag());
+        return rep;
+    }
+
+    private void writeMetaDataToFile(MetaDataRep metaData, String path, String name) {
+        ObjectMapper mapper = new ObjectMapper();
+        File file = new File(path + File.separator + name + "_metadata.json");
+        try {
+            mapper.writerWithDefaultPrettyPrinter().writeValue(file, metaData);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static class MetaDataAccumulator {
+        private String lowerDate = "9999-99-99";
+        private String upperDate = "0000-00-00";
+
+        private int nbRejectedPhoto = 0;
+        private int nbNotSelectedPhoto = 0;
+        private int nbSelectedPhoto = 0;
+        private int nbPhotoTotal = 0;
+
+        private final int[] nbStar = new int[6];
+        private final Map<String, Integer> nbLabel = new HashMap<>();
+        private final Map<String, Integer> nbTag = new HashMap<>();
+
+        public void accumulate(Photo photo) {
             nbPhotoTotal++;
 
             int pick = photo.getPick();
@@ -120,12 +168,11 @@ public class PhotoSessionService {
                 case 1:
                     nbSelectedPhoto++;
                     break;
+                default:
+                    break;
             }
 
-            if (pick == -1) {
-                nbRejectedPhoto++;
-                continue; // exit loop as all other counting are to be done for pick 0 ou 1
-            }
+            if (pick == -1) return;
 
             if (rating >= 0 && rating < nbStar.length) {
                 nbStar[rating]++;
@@ -136,45 +183,26 @@ public class PhotoSessionService {
                 nbTag.merge(tag, 1, Integer::sum);
             }
 
-            if (exifDate != null && exifDate.compareTo(lowerDate) < 0) {
-                lowerDate = exifDate.substring(0, 10);
-            }
-            if (exifDate != null && exifDate.compareTo(upperDate) > 0) {
-                upperDate = exifDate.substring(0, 10);
+            updateDateBounds(exifDate);
+        }
+
+        private void updateDateBounds(String exifDate) {
+            if (exifDate != null && exifDate.length() >= 10) {
+                String date = exifDate.substring(0, 10);
+                if (date.compareTo(lowerDate) < 0) lowerDate = date;
+                if (date.compareTo(upperDate) > 0) upperDate = date;
             }
         }
 
-        String[] parts = repertoireName.split("_");
-        // Parse the strings to LocalDate
-        LocalDate startDate = LocalDate.parse(lowerDate);
-        LocalDate endDate = LocalDate.parse(upperDate);
-        // Calculate the number of days between the two dates
-        long daysBetween = ChronoUnit.DAYS.between(startDate, endDate);
-
-        HashMap<String, Object> metaDataRep = new HashMap<>();
-        metaDataRep.put("seanceRepertoire", seanceRepertoire);
-        metaDataRep.put("nbPhotoTotal", nbPhotoTotal);
-        metaDataRep.put("nbNotSelectedPhoto", nbNotSelectedPhoto);
-        metaDataRep.put("nbSelectedPhoto", nbSelectedPhoto);
-        metaDataRep.put("nbRejectedPhoto", nbRejectedPhoto);
-        metaDataRep.put("lowerDate", lowerDate);
-        metaDataRep.put("upperDate", upperDate);
-        metaDataRep.put("nbDay", daysBetween + 1);
-        metaDataRep.put("nbStar", nbStar);
-        metaDataRep.put("nbLabel", nbLabel);
-        metaDataRep.put("nbTag", nbTag);
-        metaDataRep.put("repertoireName", repertoireName);
-        metaDataRep.put("repertoireNameParts", parts);
-
-        //save metaDataRep into file
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            mapper.writerWithDefaultPrettyPrinter().writeValue(new File(seanceRepertoire.getPath() + File.separator + repertoireName + "_metadata.json"), metaDataRep);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return metaDataRep;
-
+        public String getLowerDate() { return lowerDate; }
+        public String getUpperDate() { return upperDate; }
+        public int getNbRejectedPhoto() { return nbRejectedPhoto; }
+        public int getNbNotSelectedPhoto() { return nbNotSelectedPhoto; }
+        public int getNbSelectedPhoto() { return nbSelectedPhoto; }
+        public int getNbPhotoTotal() { return nbPhotoTotal; }
+        public int[] getNbStar() { return nbStar; }
+        public Map<String, Integer> getNbLabel() { return nbLabel; }
+        public Map<String, Integer> getNbTag() { return nbTag; }
     }
+
 }

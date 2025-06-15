@@ -7,16 +7,25 @@ public class SeanceType {
     private SeanceTypeEnum nom;
     private int uniteDeJour;
     private int nbMaxParUniteDeJour;
+    private List<Integer> ratioStarMin;
     private List<Integer> ratioStarMax;
     private List<String> zoneValeurAdmise;
     private boolean rapprochementNewOk;
 
+    public List<Integer> getRatioStarMin() {
+        return ratioStarMin;
+    }
+
+    public void setRatioStarMin(List<Integer> ratioStarMin) {
+        this.ratioStarMin = ratioStarMin;
+    }
+
     // Getters and Setters
-    public SeanceTypeEnum  getNom() {
+    public SeanceTypeEnum getNom() {
         return nom;
     }
 
-    public void setNom(SeanceTypeEnum  nom) {
+    public void setNom(SeanceTypeEnum nom) {
         this.nom = nom;
     }
 
