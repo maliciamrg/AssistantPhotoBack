@@ -122,6 +122,6 @@
       "pick" : 0
     } ]
   },
-  "statusCode" : "OK",
-  "statusCodeValue" : 200
+  "statusCodeValue" : 200,
+  "statusCode" : "OK"
 }
