@@ -1,18 +1,18 @@
-package com.malicia.mrg.assistant.photo.repertoire;
+package com.malicia.mrg.assistant.photo.pojo;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class GroupOfPhotos implements Iterable<Photo> {
+public class PhotoGroup implements Iterable<Photo> {
 
     private List<Photo> photos = new ArrayList();
 
-    public GroupOfPhotos(List<Photo> photos) {
+    public PhotoGroup(List<Photo> photos) {
         this.photos = photos;
     }
 
-    public GroupOfPhotos() {
+    public PhotoGroup() {
     }
 
     public List<Photo> getPhotos() {
@@ -43,7 +43,7 @@ public class GroupOfPhotos implements Iterable<Photo> {
         return photos.size();
     }
 
-    public void addAll(GroupOfPhotos group) {
+    public void addAll(PhotoGroup group) {
         photos.addAll(group.photos);
     }
 

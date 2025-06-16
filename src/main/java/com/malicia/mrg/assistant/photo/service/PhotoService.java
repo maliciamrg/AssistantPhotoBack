@@ -2,18 +2,18 @@ package com.malicia.mrg.assistant.photo.service;
 
 import com.adobe.internal.xmp.XMPException;
 import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
-import com.malicia.mrg.assistant.photo.repertoire.Photo;
+import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
+import com.malicia.mrg.assistant.photo.pojo.Photo;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.List;
 
-import static com.malicia.mrg.assistant.photo.file.WorkWithFile.generateThumbnail;
+import static com.malicia.mrg.assistant.photo.service.FileSystemService.generateThumbnail;
 
 @Service
 public class PhotoService {
 
-    public List<Photo> saveAllPhotos(List<Photo> photos, boolean writeXmp) {
+    public PhotoGroup saveAllPhotos(PhotoGroup photos, boolean writeXmp) {
         for (Photo photo : photos) {
 
             generateThumbnail(photo);

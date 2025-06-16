@@ -1,23 +1,14 @@
 package com.malicia.mrg.assistant.photo.dto;
 
 public class UpdateRepertoireNameRequestDto {
-    private String repertoireNameOld;
-    private String repertoireNameNew;
+    private String photoshootNameNew;
 
-    public String getRepertoireNameOld() {
-        return repertoireNameOld;
+    public String getPhotoshootNameNew() {
+        return photoshootNameNew;
     }
 
-    public void setRepertoireNameOld(String repertoireNameOld) {
-        this.repertoireNameOld = repertoireNameOld;
-    }
-
-    public String getRepertoireNameNew() {
-        return repertoireNameNew;
-    }
-
-    public void setRepertoireNameNew(String repertoireNameNew) {
-        this.repertoireNameNew = repertoireNameNew;
+    public void setPhotoshootNameNew(String photoshootNameNew) {
+        this.photoshootNameNew = photoshootNameNew;
     }
 
 }

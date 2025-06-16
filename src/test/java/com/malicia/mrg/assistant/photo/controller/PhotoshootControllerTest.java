@@ -4,12 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
-import com.malicia.mrg.assistant.photo.dto.SeanceTypeDto;
-import com.malicia.mrg.assistant.photo.file.WorkWithFile;
-import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
-import com.malicia.mrg.assistant.photo.repertoire.Photo;
-import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
-import com.malicia.mrg.assistant.photo.service.PhotoSessionService;
+import com.malicia.mrg.assistant.photo.service.FileSystemService;
+import com.malicia.mrg.assistant.photo.pojo.PhotoshootType;
+import com.malicia.mrg.assistant.photo.pojo.PhotoshootTypeEnum;
+import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
+import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -47,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class,
         org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration.class
 })
-class PhotoSessionControllerTest {
+class PhotoshootControllerTest {
 
 
     @MockBean
@@ -61,14 +59,16 @@ class PhotoSessionControllerTest {
     @Autowired
     private RootRepertoire rootRep;
     @Autowired
-    private PhotoSessionService photoSessionService;
+    private PhotoshootService photoshootService;
     @Autowired
     private MyConfig myConfig;
     @Autowired
-    private PhotoSessionController photoSessionController;
+    private PhotoshootController photoshootController;
 
 
     private MockMvc mockMvc;
+    @Autowired
+    private PhotoshootTypeController photoshootTypeController;
 
     @BeforeEach
     void setUp() {
@@ -82,7 +82,7 @@ class PhotoSessionControllerTest {
     @Test
     void getSeanceTypes_ShouldReturnSeanceTypes() throws Exception {
         // Initialize controller with the real RootRepertoire bean
-        PhotoSessionController controller = new PhotoSessionController(myConfig, photoSessionService);
+        PhotoshootController controller = new PhotoshootController(myConfig, photoshootService);
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
         //given
@@ -90,9 +90,9 @@ class PhotoSessionControllerTest {
         String jsonDest = "./" + rootTest + "/" + "/getSeanceTypes_ShouldReturnSeanceTypesTEST.json";
 
         // Perform the request and capture the result
-        MvcResult result = mockMvc.perform(get("/api/sessions"))
+        MvcResult result = mockMvc.perform(get("/api/photoshoot"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(SeanceTypeEnum.values().length)))
+                .andExpect(jsonPath("$", hasSize(PhotoshootTypeEnum.values().length)))
                 .andExpect(jsonPath("$[0].id", is("ALL_IN")))
                 .andExpect(jsonPath("$[0].name", is("ALL_IN")))
                 .andReturn();
@@ -103,10 +103,10 @@ class PhotoSessionControllerTest {
             ObjectMapper objectMapper = new ObjectMapper();
 
             String jsonResponse = result.getResponse().getContentAsString();
-            // Map JSON string to List<SeanceTypeDto>
-            List<SeanceTypeDto> seanceTypeList = objectMapper.readValue(jsonResponse, new TypeReference<>() {
+            // Map JSON string to List<PhotoshootTypeDto>
+            List<PhotoshootType> seanceTypeList = objectMapper.readValue(jsonResponse, new TypeReference<>() {
             });
-            WorkWithFile.putIntoJsonFile(seanceTypeList, jsonDest);
+            FileSystemService.putIntoJsonFile(seanceTypeList, jsonDest);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -118,7 +118,7 @@ class PhotoSessionControllerTest {
     @Test
     void getSeanceRepertoires_ShouldReturnSeanceRepertoires() throws Exception {
         // Initialize controller with the real RootRepertoire bean
-        PhotoSessionController controller = new PhotoSessionController(myConfig, photoSessionService);
+        PhotoshootController controller = new PhotoshootController(myConfig, photoshootService);
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
 
         //given
@@ -127,7 +127,7 @@ class PhotoSessionControllerTest {
 
 
         // Perform the request and capture the result
-        MvcResult result = mockMvc.perform(get("/api/sessions/ALL_IN")
+        MvcResult result = mockMvc.perform(get("/api/photoshoot/ALL_IN")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -142,62 +142,62 @@ class PhotoSessionControllerTest {
             ObjectMapper objectMapper = new ObjectMapper();
 
             String jsonResponse = result.getResponse().getContentAsString();
-            // Map JSON string to List<SeanceTypeDto>
-            List<SeanceRepertoire> seanceTypeList = objectMapper.readValue(jsonResponse, new TypeReference<>() {
+            // Map JSON string to List<PhotoshootTypeDto>
+            List<Photoshoot> seanceTypeList = objectMapper.readValue(jsonResponse, new TypeReference<>() {
             });
-            WorkWithFile.putIntoJsonFile(seanceTypeList, jsonDest);
+            FileSystemService.putIntoJsonFile(seanceTypeList, jsonDest);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    void testGetTypesDeSeance() {
+    void testGetPhotoshootType() {
         Path rootTest = Paths.get("src", "test", "resources");
         String jsonDest = "./" + rootTest + "/" + "/testGetTypesDeSeanceTEST.json";
 
-        List<SeanceTypeDto> result = photoSessionController.getTypesDeSeance();
+        List<PhotoshootType> result = photoshootTypeController.getPhotoshootType();
 
         assertEquals(7, result.size());
-        assertEquals("ALL_IN", result.get(0).getId());
+        assertEquals("ALL_IN", result.get(0).getNom().name());
 
-        WorkWithFile.putIntoJsonFile(result, jsonDest);
+        FileSystemService.putIntoJsonFile(result, jsonDest);
     }
 
     @Test
-    void testGetSeancesParType() {
+    void testGetPhotoshootByType() {
         // Initialize controller with the real RootRepertoire bean
-        PhotoSessionController controller = new PhotoSessionController(myConfig, photoSessionService);
+        PhotoshootController controller = new PhotoshootController(myConfig, photoshootService);
         this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
         Path rootTest = Paths.get("src", "test", "resources");
         String jsonDest = "./" + rootTest + "/" + "/testGetSeancesParTypeTEST.json";
 
-        List<SeanceRepertoire> result = photoSessionController.getSeancesParType("ALL_IN");
+        List<Photoshoot> result = photoshootTypeController.getPhotoshootByType("ALL_IN");
 
         assertEquals(2, result.size());
 
-        WorkWithFile.putIntoJsonFile(result, jsonDest);
+        FileSystemService.putIntoJsonFile(result, jsonDest);
     }
 
     @Test
-    void testGetPhotosDeSeance_success() {
+    void testGetPhotoshoot_success() {
         Path rootTest = Paths.get("src", "test", "resources");
         String jsonDest = "./" + rootTest + "/" + "/testGetPhotosDeSeance_successTEST.json";
 
-        ResponseEntity<Map<String, Object>> response = photoSessionController.getPhotosDeSeance("ALL_IN", "subOne");
+        ResponseEntity<Photoshoot> response = photoshootController.getPhotoshoot("ALL_IN", "subOne");
 
         assertEquals(200, response.getStatusCode().value());
-        assertEquals(7, ((List)response.getBody().get("photos")).size());
+        assertEquals(7, (response.getBody().getGroupOfPhoto().size()));
 
-        WorkWithFile.putIntoJsonFile(response, jsonDest);
+        FileSystemService.putIntoJsonFile(response, jsonDest);
     }
 
     @Test
-    void testGetPhotosDeSeance_notFound() {
-        when(photoSessionService.getSeanceRepertoireList("ALL_IN"))
+    void testGetPhotoshoot_notFound() {
+        when(photoshootService.getPhotoshootList("ALL_IN"))
                 .thenThrow(new IllegalArgumentException("Not found"));
 
-        ResponseEntity<Map<String, Object>> response = photoSessionController.getPhotosDeSeance("ALL_IN", "session1");
+        ResponseEntity<Photoshoot> response = photoshootController.getPhotoshoot("ALL_IN", "session1");
 
         assertEquals(404, response.getStatusCode().value());
         assertNull(response.getBody());

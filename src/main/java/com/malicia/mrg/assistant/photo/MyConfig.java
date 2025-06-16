@@ -2,14 +2,11 @@ package com.malicia.mrg.assistant.photo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.malicia.mrg.assistant.photo.parameter.GroupPhoto;
-import com.malicia.mrg.assistant.photo.parameter.RepertoireOfType;
-import com.malicia.mrg.assistant.photo.parameter.SeanceType;
+import com.malicia.mrg.assistant.photo.pojo.PhotoshootType;
 import com.malicia.mrg.assistant.photo.pojo.TagNode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -24,8 +21,7 @@ public class MyConfig {
     private String rootPath;
     private List<String> fileExtensionsToWorkWith;
     private GroupPhoto groupPhoto;
-    private List<SeanceType> seanceType;
-    private List<RepertoireOfType> repertoireOfType;
+    private List<PhotoshootType> photoshootType;
 
     public MyConfig() {
         try {
@@ -56,21 +52,14 @@ public class MyConfig {
         this.name = name;
     }
 
-    public List<SeanceType> getSeanceType() {
-        return seanceType;
+    public List<PhotoshootType> getPhotoshootType() {
+        return photoshootType;
     }
 
-    public void setSeanceType(List<SeanceType> seanceType) {
-        this.seanceType = seanceType;
+    public void setPhotoshootType(List<PhotoshootType> photoshootType) {
+        this.photoshootType = photoshootType;
     }
 
-    public List<RepertoireOfType> getRepertoireOfType() {
-        return repertoireOfType;
-    }
-
-    public void setRepertoireOfType(List<RepertoireOfType> repertoireOfType) {
-        this.repertoireOfType = repertoireOfType;
-    }
 
     public String getRootPath() {
         return rootPath;
@@ -106,7 +95,29 @@ public class MyConfig {
 
     private List<TagNode> loadTagsFromJson() throws IOException {
         InputStream is = getClass().getClassLoader().getResourceAsStream("lightroom_tags_grouped.json");
-        List<TagNode> tags = new ObjectMapper().readValue(is, new TypeReference<List<TagNode>>() {});
+        List<TagNode> tags = new ObjectMapper().readValue(is, new TypeReference<List<TagNode>>() {
+        });
         return tags;
+    }
+
+    public static class GroupPhoto {
+        private int ecartEnMinutes;
+        private int photoMin;
+
+        public int getPhotoMin() {
+            return photoMin;
+        }
+
+        public void setPhotoMin(int photoMin) {
+            this.photoMin = photoMin;
+        }
+
+        public int getEcartEnMinutes() {
+            return ecartEnMinutes;
+        }
+
+        public void setEcartEnMinutes(int ecartEnMinutes) {
+            this.ecartEnMinutes = ecartEnMinutes;
+        }
     }
 }

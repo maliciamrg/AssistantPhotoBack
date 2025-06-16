@@ -1,6 +1,6 @@
-package com.malicia.mrg.assistant.photo.parameter;
+package com.malicia.mrg.assistant.photo.pojo;
 
-public enum SeanceTypeEnum {
+public enum PhotoshootTypeEnum {
     EVENTS,
     HOLIDAYS,
     ALL_IN,

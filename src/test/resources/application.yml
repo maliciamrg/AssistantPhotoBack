@@ -4,10 +4,7 @@ spring:
 
 application:
   version: "@project.version@"
-my:
-  app:
-    name: TestApp
-    version: "1.0"
+
 assistant:
   dryRun: true
   name: assistant

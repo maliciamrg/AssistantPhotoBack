@@ -1,16 +1,17 @@
-package com.malicia.mrg.assistant.photo.parameter;
+package com.malicia.mrg.assistant.photo.pojo;
 
 import java.util.List;
 
 // Inner Classes for seanceType and seanceRepertoire
-public class SeanceType {
-    private SeanceTypeEnum nom;
+public class PhotoshootType {
+    private PhotoshootTypeEnum nom;
     private int uniteDeJour;
     private int nbMaxParUniteDeJour;
     private List<Integer> ratioStarMin;
     private List<Integer> ratioStarMax;
     private List<String> zoneValeurAdmise;
     private boolean rapprochementNewOk;
+    private List<Photoshoot> photoshootList;
 
     public List<Integer> getRatioStarMin() {
         return ratioStarMin;
@@ -21,11 +22,11 @@ public class SeanceType {
     }
 
     // Getters and Setters
-    public SeanceTypeEnum getNom() {
+    public PhotoshootTypeEnum getNom() {
         return nom;
     }
 
-    public void setNom(SeanceTypeEnum nom) {
+    public void setNom(PhotoshootTypeEnum nom) {
         this.nom = nom;
     }
 
@@ -69,5 +70,12 @@ public class SeanceType {
         this.rapprochementNewOk = rapprochementNewOk;
     }
 
+    public List<Photoshoot> getPhotoshootList() {
+        return photoshootList;
+    }
+
+    public void setPhotoshootList(List<Photoshoot> photoshootList) {
+        this.photoshootList = photoshootList;
+    }
 }
 

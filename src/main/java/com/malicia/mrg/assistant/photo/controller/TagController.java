@@ -1,6 +1,6 @@
 package com.malicia.mrg.assistant.photo.controller;
 
-import com.malicia.mrg.assistant.photo.exception.TagNotFoundException;
+import com.malicia.mrg.assistant.photo.exception.NotFoundException;
 import com.malicia.mrg.assistant.photo.pojo.TagNode;
 import com.malicia.mrg.assistant.photo.service.TagService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +29,7 @@ public class TagController {
     public TagNode getTagById(@PathVariable Long id) {
         TagNode node = tagService.getTagById(id);
         if (node == null) {
-            throw new TagNotFoundException("Tag with ID " + id + " not found");
+            throw new NotFoundException("Tag with ID " + id + " not found");
         }
         return node;
     }
@@ -38,7 +38,7 @@ public class TagController {
     public TagNode getTagByName(@PathVariable String name) {
         TagNode node = tagService.getTagByName(name);
         if (node == null) {
-            throw new TagNotFoundException("Tag with name '" + name + "' not found");
+            throw new NotFoundException("Tag with name '" + name + "' not found");
         }
         return node;
     }

@@ -1,6 +1,6 @@
 package com.malicia.mrg.assistant.photo.controller;
 
-import com.malicia.mrg.assistant.photo.exception.TagNotFoundException;
+import com.malicia.mrg.assistant.photo.exception.NotFoundException;
 import com.malicia.mrg.assistant.photo.pojo.TagNode;
 import com.malicia.mrg.assistant.photo.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +63,7 @@ public class TagControllerTest {
         when(tagService.getTagById(id)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(TagNotFoundException.class, () -> tagController.getTagById(id));
+        assertThrows(NotFoundException.class, () -> tagController.getTagById(id));
     }
 
     @Test
@@ -87,6 +87,6 @@ public class TagControllerTest {
         when(tagService.getTagByName(name)).thenReturn(null);
 
         // Act & Assert
-        assertThrows(TagNotFoundException.class, () -> tagController.getTagByName(name));
+        assertThrows(NotFoundException.class, () -> tagController.getTagByName(name));
     }
 }

@@ -3,14 +3,8 @@ package com.malicia.mrg.assistant.photo.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
-import com.malicia.mrg.assistant.photo.exception.CustomException;
-import com.malicia.mrg.assistant.photo.parameter.RepertoireOfType;
-import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
-import com.malicia.mrg.assistant.photo.file.WorkWithFile;
-import com.malicia.mrg.assistant.photo.repertoire.GroupOfPhotos;
-import com.malicia.mrg.assistant.photo.repertoire.Photo;
-import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
-import org.springframework.stereotype.Component;
+import com.malicia.mrg.assistant.photo.pojo.*;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Component
+@Service
 public class RootRepertoire {
 
     private final MyConfig config;
@@ -34,23 +28,23 @@ public class RootRepertoire {
         controlConfig(config);
     }
 
-    public static int moveGroupToDestinationFolder(String destinationFolder, GroupOfPhotos groupOfPhotoFrom, boolean addAutoSubFolder, boolean dryRun) {
+    public static int moveGroupToDestinationFolder(String destinationFolder, PhotoGroup photoGroupFrom, boolean addAutoSubFolder, boolean dryRun) {
         AtomicInteger ret = new AtomicInteger();
 
         String folderWor = "";
         if (addAutoSubFolder) {
-            String folderNameDatePart = groupOfPhotoFrom.getPhotos().get(0).getExifDate().split(" ")[0].replace(":", "_");
-            String folderNameNumPart = String.format("%05d", groupOfPhotoFrom.size());
+            String folderNameDatePart = photoGroupFrom.getPhotos().get(0).getExifDate().split(" ")[0].replace(":", "_");
+            String folderNameNumPart = String.format("%05d", photoGroupFrom.size());
             folderWor = folderNameDatePart + "_(" + folderNameNumPart + ")" + "\\";
         }
 
         String finalFolderWor = folderWor;
-        groupOfPhotoFrom.forEach(photo -> {
+        photoGroupFrom.forEach(photo -> {
             String src = photo.getPath();
-            String newName = WorkWithFile.sanitizeFileName(photo.getRelativeToPath());
-            String dest = WorkWithFile.getNormalizedPath(destinationFolder + "\\" + finalFolderWor + newName);
+            String newName = FileSystemService.sanitizeFileName(photo.getRelativeToPath());
+            String dest = FileSystemService.getNormalizedPath(destinationFolder + "\\" + finalFolderWor + newName);
             try {
-                if (WorkWithFile.moveFileWithTimestamp(src, dest, dryRun)) {
+                if (FileSystemService.moveFileWithTimestamp(src, dest, dryRun)) {
                     ret.incrementAndGet();
                     System.out.println(ret + " : " + src + " ==> " + dest);
                 }
@@ -63,48 +57,34 @@ public class RootRepertoire {
     }
 
     private void controlConfig(MyConfig config) {
-        try {
-            if (config.getRootPath() == null || config.getRootPath().isEmpty()) {
-                throw new CustomException("Root Path is empty");
-            }
-
-//            int size = getAllSeanceRepertoire(SeanceTypeEnum.ASSISTANT_WORK).size();
-//            if (size > 1) {
-//                throw new CustomException("ASSISTANT_WORK has more than one element.");
-//            }
-//            if (size == 0) {
-//                throw new CustomException("ASSISTANT_WORK has no element.");
-//            }
-
-        } catch (CustomException e) {
-            throw new RuntimeException(e);
+        if (config.getRootPath() == null || config.getRootPath().isEmpty()) {
+            throw new IllegalArgumentException("Root Path is empty");
         }
     }
 
-    public List<SeanceRepertoire> getAllSeanceRepertoire(SeanceTypeEnum typeOfSceance) {
-        List<SeanceRepertoire> expectedList = new ArrayList<>();
+    public List<Photoshoot> getAllPhotoshoot(PhotoshootTypeEnum photoshootTypEnum) {
+        List<Photoshoot> expectedList = new ArrayList<>();
 
-        // Using enhanced for-each loop
-        for (RepertoireOfType repertoireOfType : config.getRepertoireOfType()) {
-            if (repertoireOfType.getSeanceType() == typeOfSceance) {
-                for (SeanceRepertoire seanceRepertoire : repertoireOfType.getRepertoire()){
-                    expectedList.addAll(getAllSeanceRepertoire(seanceRepertoire));
+        for (PhotoshootType photoshootType : config.getPhotoshootType()) {
+            if (photoshootTypEnum == photoshootType.getNom()) {
+                for (Photoshoot photoshoot : photoshootType.getPhotoshootList()) {
+                    expectedList.addAll(getAllPhotoshoot(photoshoot));
                 }
             }
         }
         return expectedList;
     }
 
-    public List<Photo> getAllPhotoFromSeanceRepertoire(SeanceRepertoire repertoire) {
-        List<Photo> expectedList = new ArrayList<>();
+    public PhotoGroup getAllPhotoFromSeanceRepertoire(Photoshoot photoshoot) {
+        PhotoGroup expectedList = new PhotoGroup();
 
-//        String pathToScan = config.getRootPath() + repertoire.getPath();
-        String pathToScan = repertoire.getPath();
+//        String pathToScan = config.getRootPath() + photoshoot.getPath();
+        String pathToScan = photoshoot.getPath();
         List<String> includeTypeFile = config.getFileExtensionsToWorkWith();
 
         try {
-            List<Path> listPath = WorkWithFile.getAllFilesFromFolderAndSubFolderWithType(pathToScan, includeTypeFile);
-            expectedList = WorkWithFile.convertPathsToPhotos(pathToScan, listPath);
+            List<Path> listPath = FileSystemService.getAllFilesFromFolderAndSubFolderWithType(pathToScan, includeTypeFile);
+            expectedList = FileSystemService.convertPathsToPhotos(pathToScan, listPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -112,27 +92,27 @@ public class RootRepertoire {
         return expectedList;
     }
 
-    public List<Photo> getAllPhotoFromSeanceRepertoire(List<SeanceRepertoire> repertoires) {
-        List<Photo> expectedList = new ArrayList<>();
-        for (SeanceRepertoire repertoire : repertoires) {
+    public PhotoGroup getAllPhotoFromSeanceRepertoire(List<Photoshoot> repertoires) {
+        PhotoGroup expectedList = new PhotoGroup();
+        for (Photoshoot repertoire : repertoires) {
             expectedList.addAll(getAllPhotoFromSeanceRepertoire(repertoire));
         }
 
         return expectedList;
     }
 
-    public List<String> getAllPathFromSeanceRepertoire(List<SeanceRepertoire> repertoires) {
+    public List<String> getAllPathFromSeanceRepertoire(List<Photoshoot> repertoires) {
         List<String> expectedList = new ArrayList<>();
-        for (SeanceRepertoire repertoire : repertoires) {
+        for (Photoshoot repertoire : repertoires) {
             expectedList.add(Paths.get(config.getRootPath() + repertoire.getPath()).toString());
         }
         return expectedList;
     }
 
-    public List<Photo> getAllPhotoFromSeanceRepertoireToJson(List<SeanceRepertoire> repertoires, String jsonDest) {
-        List<Photo> expectedList = getAllPhotoFromSeanceRepertoire(repertoires);
+    public PhotoGroup getAllPhotoFromSeanceRepertoireToJson(List<Photoshoot> repertoires, String jsonDest) {
+        PhotoGroup expectedList = getAllPhotoFromSeanceRepertoire(repertoires);
 
-        WorkWithFile.putIntoJsonFile(expectedList, jsonDest);
+        FileSystemService.putIntoJsonFile(expectedList, jsonDest);
 
         return expectedList;
     }
@@ -150,8 +130,8 @@ public class RootRepertoire {
         return allPhotoFromSeanceRepertoireFromFile;
     }
 
-    public List<GroupOfPhotos> getGroupOfPhotoFrom(List<Photo> allPhotos) {
-        List<GroupOfPhotos> groupedPhotos = new ArrayList<>();
+    public List<PhotoGroup> getGroupOfPhotoFrom(List<Photo> allPhotos) {
+        List<PhotoGroup> groupedPhotos = new ArrayList<>();
 
         // Sort photos based on exifDate (ascending), using fake LocalDateTime for invalid dates
         allPhotos.sort((p1, p2) -> {
@@ -160,8 +140,8 @@ public class RootRepertoire {
             return p1Date.compareTo(p2Date);
         });
 
-        GroupOfPhotos currentGroup = new GroupOfPhotos();
-        GroupOfPhotos nullExifGroup = new GroupOfPhotos(); // Separate group for photos with null or invalid exifDate
+        PhotoGroup currentGroup = new PhotoGroup();
+        PhotoGroup nullExifGroup = new PhotoGroup(); // Separate group for photos with null or invalid exifDate
 
         for (Photo photo : allPhotos) {
             if (photo.getExifDate() == null || photo.getExifDate().equals("Unknown")) {
@@ -191,7 +171,7 @@ public class RootRepertoire {
                 if (!currentGroup.empty()) {
                     groupedPhotos.add(currentGroup); // Save the current group
                 }
-                currentGroup = new GroupOfPhotos();
+                currentGroup = new PhotoGroup();
                 currentGroup.add(photo); // Start a new group with the current photo
             }
         }
@@ -202,11 +182,11 @@ public class RootRepertoire {
         }
 
         // Now group all groups with less than 5 photos into a big group
-        GroupOfPhotos bigGroup = new GroupOfPhotos();
-        Iterator<GroupOfPhotos> iterator = groupedPhotos.iterator();
+        PhotoGroup bigGroup = new PhotoGroup();
+        Iterator<PhotoGroup> iterator = groupedPhotos.iterator();
 
         while (iterator.hasNext()) {
-            GroupOfPhotos group = iterator.next();
+            PhotoGroup group = iterator.next();
             if (group.size() < config.getGroupPhoto().getPhotoMin()) {
                 bigGroup.addAll(group); // Add small group to the big group
                 iterator.remove(); // Remove the small group from the list
@@ -236,30 +216,30 @@ public class RootRepertoire {
         }
     }
 
-    public List<SeanceRepertoire> getAllSeanceRepertoire(SeanceRepertoire seanceRepertoire) {
-        List<SeanceRepertoire> expectedList = new ArrayList<>();
+    public List<Photoshoot> getAllPhotoshoot(Photoshoot photoshoot) {
+        List<Photoshoot> expectedList = new ArrayList<>();
 
-        String pathToScan = config.getRootPath() + seanceRepertoire.getPath();
-        //String pathToScan = seanceRepertoire.getPath();
+        String pathToScan = config.getRootPath() + photoshoot.getPath();
+        //String pathToScan = photoshoot.getPath();
 
         try {
-            List<Path> listPath = WorkWithFile.getAllFolder(pathToScan);
-            expectedList = WorkWithFile.convertPathsToSeanceRepertoire(pathToScan, listPath);
+            List<Path> listPath = FileSystemService.getAllFolder(pathToScan);
+            expectedList = FileSystemService.convertPathsToSeanceRepertoire(pathToScan, listPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
         return expectedList;
     }
 
-    public List<Photo> getAllPhotoFromPhotoRepertoire(SeanceRepertoire SeanceRepertoire) {
-        List<Photo> expectedList = new ArrayList<>();
+    public PhotoGroup getAllPhotoFromPhotoshoot(Photoshoot photoshoot) {
+        PhotoGroup expectedList = new PhotoGroup();
 
-        String pathToScan = SeanceRepertoire.getPath();
+        String pathToScan = photoshoot.getPath();
         List<String> includeTypeFile = config.getFileExtensionsToWorkWith();
 
         try {
-            List<Path> listPath = WorkWithFile.getAllFilesFromFolderAndSubFolderWithType(pathToScan, includeTypeFile);
-            expectedList = WorkWithFile.convertPathsToPhotos(pathToScan, listPath);
+            List<Path> listPath = FileSystemService.getAllFilesFromFolderAndSubFolderWithType(pathToScan, includeTypeFile);
+            expectedList.addAll(FileSystemService.convertPathsToPhotos(pathToScan, listPath));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

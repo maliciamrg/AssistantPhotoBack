@@ -1,4 +1,4 @@
-package com.malicia.mrg.assistant.photo.repertoire;
+package com.malicia.mrg.assistant.photo.pojo;
 
 
 import java.io.Serializable;

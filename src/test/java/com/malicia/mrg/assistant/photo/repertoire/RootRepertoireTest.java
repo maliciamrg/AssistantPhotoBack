@@ -4,8 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
-import com.malicia.mrg.assistant.photo.file.WorkWithFile;
-import com.malicia.mrg.assistant.photo.parameter.SeanceTypeEnum;
+import com.malicia.mrg.assistant.photo.service.FileSystemService;
+import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
+import com.malicia.mrg.assistant.photo.pojo.Photo;
+import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
+import com.malicia.mrg.assistant.photo.pojo.PhotoshootTypeEnum;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
 import org.junit.jupiter.api.Disabled;
@@ -36,19 +39,19 @@ class RootRepertoireTest {
 
     // recuperer uniquement les Repertoires AllIn (photo non rafiné a tirer /grouper)
     @Test
-    void getAllSeanceRepertoireAllin() {
+    void getAllPhotoshootAllin() {
         //given
         RootRepertoire rootRep = new RootRepertoire(mockConfig);
 
         //when
-        List<SeanceRepertoire> allSeanceRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.ALL_IN);
+        List<Photoshoot> allPhotoshoot = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.ALL_IN);
 
         //then
-        System.out.println(allSeanceRepertoire);
-        for (SeanceRepertoire seanceRepertoire : allSeanceRepertoire) {
-            System.out.println(seanceRepertoire);
+        System.out.println(allPhotoshoot);
+        for (Photoshoot photoshoot : allPhotoshoot) {
+            System.out.println(photoshoot);
         }
-        assertEquals(2, allSeanceRepertoire.size());
+        assertEquals(2, allPhotoshoot.size());
     }
 
     // recuperer uniquement les photo repertoire EVENTS
@@ -58,31 +61,31 @@ class RootRepertoireTest {
         RootRepertoire rootRep = new RootRepertoire(mockConfig);
 
         //when
-        List<SeanceRepertoire> allSeanceRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.EVENTS);
+        List<Photoshoot> allPhotoshoot = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.EVENTS);
 
         //then
-        System.out.println(allSeanceRepertoire);
-        for (SeanceRepertoire SeanceRepertoire : allSeanceRepertoire) {
-            System.out.println(SeanceRepertoire.toString());
+        System.out.println(allPhotoshoot);
+        for (Photoshoot Photoshoot : allPhotoshoot) {
+            System.out.println(Photoshoot.toString());
         }
-        assertEquals(2, allSeanceRepertoire.size());
+        assertEquals(2, allPhotoshoot.size());
     }
 
-    // recuperer uniquement les photo repertoire AllIn du SeanceRepertoire
+    // recuperer uniquement les photo repertoire AllIn du Photoshoot
     @Test
     void getAllPhotoRepertoireAllInFromSeanceRepertoire() {
         //given
         RootRepertoire rootRep = new RootRepertoire(mockConfig);
 
         //when
-        List<SeanceRepertoire> seanceRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.ALL_IN);
+        List<Photoshoot> photoshoot = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.ALL_IN);
 
         //then
-        System.out.println(seanceRepertoire);
-        for (SeanceRepertoire SeanceRepertoire : seanceRepertoire) {
-            System.out.println(SeanceRepertoire.toString());
+        System.out.println(photoshoot);
+        for (Photoshoot Photoshoot : photoshoot) {
+            System.out.println(Photoshoot.toString());
         }
-        assertEquals(2, seanceRepertoire.size());
+        assertEquals(2, photoshoot.size());
     }
 
     // recuperer uniquement les photo repertoire AllIn
@@ -92,14 +95,14 @@ class RootRepertoireTest {
         RootRepertoire rootRep = new RootRepertoire(mockConfig);
 
         //when
-        List<SeanceRepertoire> allSeanceRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.ALL_IN);
+        List<Photoshoot> allPhotoshoot = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.ALL_IN);
 
         //then
-        System.out.println(allSeanceRepertoire);
-        for (SeanceRepertoire SeanceRepertoire : allSeanceRepertoire) {
-            System.out.println(SeanceRepertoire.toString());
+        System.out.println(allPhotoshoot);
+        for (Photoshoot Photoshoot : allPhotoshoot) {
+            System.out.println(Photoshoot.toString());
         }
-        assertEquals(2, allSeanceRepertoire.size());
+        assertEquals(2, allPhotoshoot.size());
     }
 
     // recuperer uniquement le Repertoires de travail de assitant
@@ -109,15 +112,15 @@ class RootRepertoireTest {
         RootRepertoire rootRep = new RootRepertoire(mockConfig);
 
         //when
-        List<SeanceRepertoire> allSeanceRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.ASSISTANT_WORK);
+        List<Photoshoot> allPhotoshoot = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.ASSISTANT_WORK);
 
         //then
-        System.out.println(allSeanceRepertoire);
-        for (SeanceRepertoire seanceRepertoire : allSeanceRepertoire) {
-            System.out.println(seanceRepertoire);
+        System.out.println(allPhotoshoot);
+        for (Photoshoot photoshoot : allPhotoshoot) {
+            System.out.println(photoshoot);
         }
-        assertEquals(1, allSeanceRepertoire.size());
-        assertEquals(".\\src\\test\\resources\\10-Assistant_work\\2023_04_08_(00026)", allSeanceRepertoire.get(0).getPath());
+        assertEquals(1, allPhotoshoot.size());
+        assertEquals(".\\src\\test\\resources\\10-Assistant_work\\2023_04_08_(00026)", allPhotoshoot.get(0).getPath());
     }
 
     // recupere un list de photo depuis un repertoire
@@ -129,8 +132,8 @@ class RootRepertoireTest {
         RootRepertoire rootRep = new RootRepertoire(mockConfig);
 
         //when
-        List<SeanceRepertoire> assistantRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.ALL_IN);
-        List<Photo> allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoire(assistantRepertoire);
+        List<Photoshoot> assistantRepertoire = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.ALL_IN);
+        PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoire(assistantRepertoire);
 
         //then
         System.out.println(allPhotoFromSeanceRepertoire);
@@ -149,9 +152,9 @@ class RootRepertoireTest {
         RootRepertoire rootRep = new RootRepertoire(mockConfig);
 
         //when
-        List<SeanceRepertoire> assistantRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.EVENTS);
-        List<Photo> allPhotoFromPhotoRepertoire0 = rootRep.getAllPhotoFromPhotoRepertoire(assistantRepertoire.get(0));
-        List<Photo> allPhotoFromPhotoRepertoire1 = rootRep.getAllPhotoFromPhotoRepertoire(assistantRepertoire.get(1));
+        List<Photoshoot> assistantRepertoire = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.EVENTS);
+        PhotoGroup allPhotoFromPhotoRepertoire0 = rootRep.getAllPhotoFromPhotoshoot(assistantRepertoire.get(0));
+        PhotoGroup allPhotoFromPhotoRepertoire1 = rootRep.getAllPhotoFromPhotoshoot(assistantRepertoire.get(1));
 
         //then
         System.out.println(allPhotoFromPhotoRepertoire0);
@@ -178,8 +181,8 @@ class RootRepertoireTest {
         String jsonDest = mockConfig.getRootPath() + "/getAllPhotoFromAllInToJsonTEST.json";
 
         //when
-        List<SeanceRepertoire> assistantRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.ALL_IN);
-        List<Photo> allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoireToJson(assistantRepertoire, jsonDest);
+        List<Photoshoot> assistantRepertoire = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.ALL_IN);
+        PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoireToJson(assistantRepertoire, jsonDest);
 
         //then
         ObjectMapper objectMapper = new ObjectMapper();
@@ -225,8 +228,8 @@ class RootRepertoireTest {
         String jsonDest = mockConfig.getRootPath() + "/getAllPhotoFromAllInRealToJsonTEST-out.json";
 
         //when
-        List<SeanceRepertoire> assistantRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.ALL_IN);
-        List<Photo> allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoireToJson(assistantRepertoire, jsonDest);
+        List<Photoshoot> assistantRepertoire = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.ALL_IN);
+        PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoireToJson(assistantRepertoire, jsonDest);
 
         //then
         ObjectMapper objectMapper = new ObjectMapper();
@@ -252,8 +255,8 @@ class RootRepertoireTest {
         RootRepertoire rootRep = new RootRepertoire(mockConfig);
 
         //when
-        List<SeanceRepertoire> assistantRepertoires = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.EVENTS);
-        List<Photo> allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoire(assistantRepertoires.get(0));
+        List<Photoshoot> assistantRepertoires = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.EVENTS);
+        PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoire(assistantRepertoires.get(0));
 
         //then
         System.out.println(assistantRepertoires);
@@ -283,22 +286,22 @@ class RootRepertoireTest {
         }
 
         //when
-        List<GroupOfPhotos> repGroupOfPhotoFrom = rootRep.getGroupOfPhotoFrom(allPhotoFromSeanceRepertoireFromFile);
+        List<PhotoGroup> repPhotoGroupFrom = rootRep.getGroupOfPhotoFrom(allPhotoFromSeanceRepertoireFromFile);
 
         //then
-        System.out.println(" --> " + allPhotoFromSeanceRepertoireFromFile.size() + " == " + repGroupOfPhotoFrom.size() + " <-- ");
-        assertEquals(145, repGroupOfPhotoFrom.size());
-        assertEquals(5, repGroupOfPhotoFrom.get(0).size());
-        assertEquals(8, repGroupOfPhotoFrom.get(1).size());
-        assertEquals(26, repGroupOfPhotoFrom.get(2).size());
-        System.out.println(repGroupOfPhotoFrom.get(2).toString());
-        assertEquals(13, repGroupOfPhotoFrom.get(3).size());
-        assertEquals(12, repGroupOfPhotoFrom.get(4).size());
-        assertEquals(6161, repGroupOfPhotoFrom.get(repGroupOfPhotoFrom.size() - 1).size());
+        System.out.println(" --> " + allPhotoFromSeanceRepertoireFromFile.size() + " == " + repPhotoGroupFrom.size() + " <-- ");
+        assertEquals(145, repPhotoGroupFrom.size());
+        assertEquals(5, repPhotoGroupFrom.get(0).size());
+        assertEquals(8, repPhotoGroupFrom.get(1).size());
+        assertEquals(26, repPhotoGroupFrom.get(2).size());
+        System.out.println(repPhotoGroupFrom.get(2).toString());
+        assertEquals(13, repPhotoGroupFrom.get(3).size());
+        assertEquals(12, repPhotoGroupFrom.get(4).size());
+        assertEquals(6161, repPhotoGroupFrom.get(repPhotoGroupFrom.size() - 1).size());
 
         //given
         String jsonDest = mockConfig.getRootPath() + "/getGroupOfPhotoTEST-out.json";
-        WorkWithFile.putIntoJsonFile(repGroupOfPhotoFrom.get(2), jsonDest);
+        FileSystemService.putIntoJsonFile(repPhotoGroupFrom.get(2), jsonDest);
 
     }
 
@@ -313,21 +316,21 @@ class RootRepertoireTest {
         String jsonSrc = mockConfig.getRootPath() + "/getGroupOfPhotoTEST.json";
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(jsonSrc);
-        GroupOfPhotos groupOfPhotoFrom = new GroupOfPhotos();
+        PhotoGroup photoGroupFrom = new PhotoGroup();
         try {
-            groupOfPhotoFrom = objectMapper.readValue(file, new TypeReference<GroupOfPhotos>() {
+            photoGroupFrom = objectMapper.readValue(file, new TypeReference<PhotoGroup>() {
             });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         //when
-        List<SeanceRepertoire> allSeanceRepertoire = rootRep.getAllSeanceRepertoire(SeanceTypeEnum.ASSISTANT_WORK);
-        int ret = RootRepertoire.moveGroupToDestinationFolder(mockConfig.getRootPath() + allSeanceRepertoire.get(0).getPath(), groupOfPhotoFrom, true ,true);
+        List<Photoshoot> allPhotoshoot = rootRep.getAllPhotoshoot(PhotoshootTypeEnum.ASSISTANT_WORK);
+        int ret = RootRepertoire.moveGroupToDestinationFolder(mockConfig.getRootPath() + allPhotoshoot.get(0).getPath(), photoGroupFrom, true ,true);
 
         //then
-        System.out.println(allSeanceRepertoire);
-        assertEquals(26, groupOfPhotoFrom.size());
+        System.out.println(allPhotoshoot);
+        assertEquals(26, photoGroupFrom.size());
         assertEquals(26, ret);
     }
 }

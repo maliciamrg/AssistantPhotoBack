@@ -4,9 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.dto.UpdateRepertoireNameRequestDto;
-import com.malicia.mrg.assistant.photo.pojo.MetaDataRep;
-import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
-import com.malicia.mrg.assistant.photo.service.PhotoSessionService;
+import com.malicia.mrg.assistant.photo.pojo.PhotoshootMetaData;
+import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
+import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import com.malicia.mrg.assistant.photo.service.TagService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class,
         org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration.class
 })
-class RepertoireControllerTest {
+class PhotoshootTypeControllerTest {
 
     @MockBean
     public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory;
@@ -56,7 +56,7 @@ class RepertoireControllerTest {
     @MockBean
     private TagService tagService;
     @MockBean
-    private PhotoSessionService photoSessionService;
+    private PhotoshootService photoshootService;
 
     @Autowired
     private MyConfig config;
@@ -76,36 +76,36 @@ class RepertoireControllerTest {
         when(tagService.getTagListByName("00_WHAT")).thenReturn(Arrays.asList("train", "boat"));
         when(tagService.getTagListByName("00_WHO")).thenReturn(Arrays.asList("bob", "franck"));
 
-        MetaDataRep metaData = new MetaDataRep();
+        PhotoshootMetaData metaData = new PhotoshootMetaData();
         metaData.setLowerDate("2023-06-01");
         metaData.setNbDay(10);
         metaData.setNbSelectedPhoto(10);
         metaData.setNbStar(new int[]{0, 1, 1, 0, 0, 0});
-        when(photoSessionService.getMetaDataFromPhotoRepertoire(any(), any()))
+        when(photoshootService.getMetaDataFromPhotoshoot(any(), any()))
                 .thenReturn(metaData);
     }
 
     @Test
-    void validateRepertoireName_shouldReturnValid_whenInputIsCorrect() throws Exception {
+    void validatePhotoshootName_shouldReturnValid_whenInputIsCorrect() throws Exception {
 
-        when(photoSessionService.getSeanceRepertoireList("EVENTS"))
-                .thenReturn(Collections.singletonList(new SeanceRepertoire()));
+        when(photoshootService.getPhotoshootList("EVENTS"))
+                .thenReturn(Collections.singletonList(new Photoshoot()));
 
-        mockMvc.perform(get("/api/repertoires/validate/EVENTS/2023-06-01_fete_maison_bob"))
+        mockMvc.perform(get("/api/photoshoot-type/validate/EVENTS/2023-06-01_fete_maison_bob"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.valid").value(true))
                 .andExpect(jsonPath("$.message").value("valid"));
 
-        mockMvc.perform(get("/api/repertoires/validate/EVENTS/2023-06-01_fete_maison_boat"))
+        mockMvc.perform(get("/api/photoshoot-type/validate/EVENTS/2023-06-01_fete_maison_boat"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.valid").value(true))
                 .andExpect(jsonPath("$.message").value("valid"));
     }
 
     @Test
-    void getRepertoireNameConfig_shouldReturnZoneValeurAdmise() throws Exception {
+    void getPhotoshootParam_shouldReturnZoneValeurAdmise() throws Exception {
 
-        mockMvc.perform(get("/api/repertoires/name/config/EVENTS"))
+        mockMvc.perform(get("/api/photoshoot-type/name/config/EVENTS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.seanceType.zoneValeurAdmise").isArray())
                 .andExpect(jsonPath("$.seanceType.zoneValeurAdmise[0]").value("£DATE£"))
@@ -115,10 +115,9 @@ class RepertoireControllerTest {
     @Test
     void updateRepertoireName_shouldReturnSuccessResponse() throws Exception {
         UpdateRepertoireNameRequestDto request = new UpdateRepertoireNameRequestDto();
-        request.setRepertoireNameOld("old_name");
-        request.setRepertoireNameNew("2023-06-01_fete_maison_bob");
+        request.setPhotoshootNameNew("2023-06-01_fete_maison_bob");
 
-        mockMvc.perform(put("/api/repertoires/EVENTS/name")
+        mockMvc.perform(put("/api/photoshoot-type/EVENTS/name")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -130,10 +129,9 @@ class RepertoireControllerTest {
     @Test
     void updateRepertoireName_shouldReturnInvalid_whenWrongPartCount() throws Exception {
         UpdateRepertoireNameRequestDto request = new UpdateRepertoireNameRequestDto();
-        request.setRepertoireNameOld("old_name");
-        request.setRepertoireNameNew("new_name");
+        request.setPhotoshootNameNew("new_name");
 
-        mockMvc.perform(put("/api/repertoires/EVENTS/name")
+        mockMvc.perform(put("/api/photoshoot-type/EVENTS/name")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -143,9 +141,9 @@ class RepertoireControllerTest {
     }
 
     @Test
-    void validateRepertoireName_shouldReturnInvalid_whenWrongPartCount() throws Exception {
+    void validatePhotoshootName_shouldReturnInvalid_whenWrongPartCount() throws Exception {
 
-        mockMvc.perform(get("/api/repertoires/validate/EVENTS/ONLY_THREE_PART"))
+        mockMvc.perform(get("/api/photoshoot-type/validate/EVENTS/ONLY_THREE_PART"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.valid").value(false))
                 .andExpect(jsonPath("$.message").value(Matchers.containsString("3 champs pour 4 attendu")));

@@ -1,10 +1,8 @@
 package com.malicia.mrg.assistant.photo.pojo;
-import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
 
 import java.util.Map;
 
-public class MetaDataRep {
-    private SeanceRepertoire seanceRepertoire;
+public class PhotoshootMetaData {
     private int nbPhotoTotal;
     private int nbNotSelectedPhoto;
     private int nbSelectedPhoto;
@@ -15,17 +13,8 @@ public class MetaDataRep {
     private int[] nbStar;
     private Map<String, Integer> nbLabel;
     private Map<String, Integer> nbTag;
-    private String repertoireName;
-    private String[] repertoireNameParts;
-
-    // Getters and Setters
-    public SeanceRepertoire getSeanceRepertoire() {
-        return seanceRepertoire;
-    }
-
-    public void setSeanceRepertoire(SeanceRepertoire seanceRepertoire) {
-        this.seanceRepertoire = seanceRepertoire;
-    }
+    private String photoshootName;
+    private String[] photoshootNameParts;
 
     public int getNbPhotoTotal() {
         return nbPhotoTotal;
@@ -107,19 +96,19 @@ public class MetaDataRep {
         this.nbTag = nbTag;
     }
 
-    public String getRepertoireName() {
-        return repertoireName;
+    public String getPhotoshootName() {
+        return photoshootName;
     }
 
-    public void setRepertoireName(String repertoireName) {
-        this.repertoireName = repertoireName;
+    public void setPhotoshootName(String photoshootName) {
+        this.photoshootName = photoshootName;
     }
 
-    public String[] getRepertoireNameParts() {
-        return repertoireNameParts;
+    public String[] getPhotoshootNameParts() {
+        return photoshootNameParts;
     }
 
-    public void setRepertoireNameParts(String[] repertoireNameParts) {
-        this.repertoireNameParts = repertoireNameParts;
+    public void setPhotoshootNameParts(String[] photoshootNameParts) {
+        this.photoshootNameParts = photoshootNameParts;
     }
 }

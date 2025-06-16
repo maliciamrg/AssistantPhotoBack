@@ -1,8 +1,8 @@
 package com.malicia.mrg.assistant.photo.repertoire.file;
 
 import com.malicia.mrg.assistant.photo.cache.CacheService;
-import com.malicia.mrg.assistant.photo.file.WorkWithFile;
-import com.malicia.mrg.assistant.photo.repertoire.Photo;
+import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
+import com.malicia.mrg.assistant.photo.service.FileSystemService;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,7 +17,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-class WorkWithFileTest {
+class FileSystemServiceTest {
     @MockBean
     private CacheService redisTemplate;
     @MockBean
@@ -29,11 +29,11 @@ class WorkWithFileTest {
         Path rootFileTest = Paths.get("src", "test", "resources","00-CheckIn","20240212-_DSC4316.ARW");
         List<Path> rootFilesTest = new ArrayList<>();
         rootFilesTest.add(rootFileTest);
-        List<Photo> expectedList = new ArrayList<>();
+        PhotoGroup expectedList = new PhotoGroup();
 
         //when
         try {
-            expectedList = WorkWithFile.convertPathsToPhotos("\\src\\test\\resources\\00-CheckIn\\", rootFilesTest);
+            expectedList = FileSystemService.convertPathsToPhotos("\\src\\test\\resources\\00-CheckIn\\", rootFilesTest);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -41,6 +41,6 @@ class WorkWithFileTest {
         //then
         System.out.println(expectedList);
         assertEquals(1, expectedList.size());
-        assertEquals("2024-02-12 10:49:42", expectedList.get(0).getExifDate());
+        assertEquals("2024-02-12 10:49:42", expectedList.getPhotos().get(0).getExifDate());
     }
 }

@@ -1,4 +1,4 @@
-package com.malicia.mrg.assistant.photo.file;
+package com.malicia.mrg.assistant.photo.service;
 
 import com.adobe.internal.xmp.XMPException;
 import com.drew.imaging.ImageMetadataReader;
@@ -7,9 +7,9 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
-import com.malicia.mrg.assistant.photo.repertoire.Photo;
-import com.malicia.mrg.assistant.photo.repertoire.SeanceRepertoire;
-import com.malicia.mrg.assistant.photo.service.XMPService;
+import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
+import com.malicia.mrg.assistant.photo.pojo.Photo;
+import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -28,9 +28,9 @@ import java.util.List;
 
 import static com.drew.metadata.exif.ExifDirectoryBase.TAG_DATETIME;
 
-public class WorkWithFile {
+public class FileSystemService {
 
-    private WorkWithFile() {
+    private FileSystemService() {
     }
 
     public static List<Path> getAllFilesFromFolderAndSubFolderWithType(String rootDir, List<String> authorizedExtensions) throws IOException {
@@ -61,8 +61,8 @@ public class WorkWithFile {
         return matchingFiles;
     }
 
-    public static List<Photo> convertPathsToPhotos(String pathToScan, List<Path> paths) throws IOException {
-        List<Photo> photos = new ArrayList<>();
+    public static PhotoGroup convertPathsToPhotos(String pathToScan, List<Path> paths) throws IOException {
+        PhotoGroup photos = new PhotoGroup();
 
         for (Path path : paths) {
             // Create a new Photo object
@@ -314,19 +314,19 @@ public class WorkWithFile {
         return subdirectories;
     }
 
-    public static List<SeanceRepertoire> convertPathsToSeanceRepertoire(String pathToScan, List<Path> listPath) {
-        List<SeanceRepertoire> SeanceRepertoires = new ArrayList<>();
+    public static List<Photoshoot> convertPathsToSeanceRepertoire(String pathToScan, List<Path> listPath) {
+        List<Photoshoot> photoshoots = new ArrayList<>();
         Path rootPath = Paths.get(pathToScan);
         for (Path path : listPath) {
             // Create a new Photo object
-            SeanceRepertoire SeanceRepertoire = new SeanceRepertoire();
-            SeanceRepertoire.setId(path.toString().replace(rootPath + File.separator, ""));
-            SeanceRepertoire.setPath(path.toString());
+            Photoshoot photoshoot = new Photoshoot();
+            photoshoot.setName(path.toString().replace(rootPath + File.separator, ""));
+            photoshoot.setPath(path.toString());
 
-            SeanceRepertoires.add(SeanceRepertoire);
+            photoshoots.add(photoshoot);
         }
 
-        return SeanceRepertoires;
+        return photoshoots;
     }
 }
 

@@ -1,6 +1,7 @@
 package com.malicia.mrg.assistant.photo.controller;
 
-import com.malicia.mrg.assistant.photo.repertoire.Photo;
+import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
+import com.malicia.mrg.assistant.photo.pojo.Photo;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
 import com.malicia.mrg.assistant.photo.service.XMPService;
@@ -36,9 +37,11 @@ class PhotoControllerTest {
     @Test
     void batchUpdate_shouldReturnPhotoCount_whenPhotosAreValid() {
         // Arrange
-        List<Photo> photos = List.of(new Photo(), new Photo());
+        PhotoGroup photos = new PhotoGroup();
+        photos.add(new Photo());
+        photos.add(new Photo());
         //doNothing().when(photoService).saveAllPhotos(photos, true);
-        when(photoService.saveAllPhotos(anyList(), eq(true))).thenReturn(photos);
+        when(photoService.saveAllPhotos(anyObject(), eq(true))).thenReturn(photos);
 
         // Act
         ResponseEntity<Map<String, String>> response = photoController.batchUpdate(photos);
@@ -54,7 +57,7 @@ class PhotoControllerTest {
     @Test
     void batchUpdate_shouldReturnBadRequest_whenIllegalArgumentThrown() {
         // Arrange
-        List<Photo> photos = List.of(new Photo());
+        PhotoGroup photos = new PhotoGroup();
         doThrow(new IllegalArgumentException("Invalid")).when(photoService).saveAllPhotos(photos, true);
 
         // Act
