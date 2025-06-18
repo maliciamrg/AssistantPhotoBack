@@ -8,7 +8,7 @@ application:
 assistant:
   dryRun: true
   name: assistant
-  rootPath: ./src/test/resources/
+  rootPath: ./backend/src/test/resources/
   fileExtensionsToWorkWith:
     - jpg
     - tif
@@ -32,12 +32,29 @@ assistant:
   groupPhoto:
     ecartEnMinutes: 20
     photoMin: 5
-  seanceType:
+  photoshootType:
     - nom: all_in
+      photoshootList:
+        - path: "00-CheckIn"
+          description: "Main check-in folder"
+        - path: "00-CheckIn2"
+          description: "Main check-in folder 2"
     - nom: Assistant_Work
+      photoshootList:
+        - path: "10-Assistant_work"
+          description: "Work folder for the Assistant"
     - nom: Rejet
+      photoshootList:
+        - path: "99-Rejet"
+          description: "Rejected items"
     - nom: Sauvegarde
+      photoshootList:
+        - path: "50-Phototheque\\#Sauvegarde 999 j"
+          description: "Backup photographs"
     - nom: Events
+      photoshootList:
+        - path: "50-Phototheque\\##Events 10-15 j"
+          description: "Events photographs"
       uniteDeJour: 1
       nbMaxParUniteDeJour: 15
       ratioStarMin:
@@ -59,6 +76,9 @@ assistant:
         - "@00_WHAT@|@00_WHO@"
       rapprochementNewOk: true
     - nom: Holidays
+      photoshootList:
+        - path: "50-Phototheque\\##Holidays 20-30 sem"
+          description: "Holiday photographs"
       uniteDeJour: 7
       nbMaxParUniteDeJour: 30
       ratioStarMin:
@@ -80,6 +100,9 @@ assistant:
         - "@00_WHAT@|@00_WHO@"
       rapprochementNewOk: true
     - nom: Shooting
+      photoshootList:
+        - path: "50-Phototheque\\##Shooting 03-05 j"
+          description: "Shooting session photographs"
       uniteDeJour: 1
       nbMaxParUniteDeJour: 5
       ratioStarMin:
@@ -100,37 +123,6 @@ assistant:
         - "@00_WHERE@"
         - "@00_WHAT@|@00_WHO@"
       rapprochementNewOk: true
-  repertoireOfType:
-    - seanceType: all_in
-      repertoire:
-        - path: "00-CheckIn"
-          description: "Main check-in folder"
-        - path: "00-CheckIn-2"
-          description: "Backup check-in folder"
-    - seanceType: assistant_work
-      repertoire:
-        - path: "10-Assistant_work"
-          description: "Work folder for the Assistant"
-    - seanceType: Events
-      repertoire:
-        - path: "50-Phototheque\\##Events 10-15 j"
-          description: "Events photographs"
-    - seanceType: Holidays
-      repertoire:
-        - path: "50-Phototheque\\##Holidays 20-30 sem"
-          description: "Holiday photographs"
-    - seanceType: Shooting
-      repertoire:
-        - path: "50-Phototheque\\##Shooting 03-05 j"
-          description: "Shooting session photographs"
-    - seanceType: Rejet
-      repertoire:
-        - path: "99-Rejet"
-          description: "Rejected items"
-    - seanceType: Sauvegarde
-      repertoire:
-        - path: "50-Phototheque\\#Sauvegarde 999 j"
-          description: "Backup photographs"
 info:
   application:
     name: ${spring.application.name}

@@ -144,23 +144,20 @@ public class PhotoshootService {
                 .filter(type -> type.getNom().name().equals(photoshootTypeName))
                 .findFirst();
 
+        Photoshoot photoshootRet = new Photoshoot();
         if (photoshootType.isPresent()) {
 
             for (Photoshoot photoshoot : photoshootType.get().getPhotoshootList()) {
 
-                if (photoshoot.getName().equals(photoshootName)) {
+                photoshootRet.setGroupOfPhoto(rootRep.getAllPhotoFromPhotoshoot(photoshoot));
 
-                    photoshoot.setGroupOfPhoto(rootRep.getAllPhotoFromPhotoshoot(photoshoot));
+                photoshootRet.setMetaDataFromPhotoshoot(getMetaDataFromPhotoshoot(photoshoot));
 
-                    photoshoot.setMetaDataFromPhotoshoot(getMetaDataFromPhotoshoot(photoshoot));
-
-                    return photoshoot;
-                }
             }
 
         }
 
-        return null;
+        return photoshootRet;
 
     }
 

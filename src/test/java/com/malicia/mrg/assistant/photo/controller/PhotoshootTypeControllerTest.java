@@ -6,9 +6,11 @@ import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.dto.UpdateRepertoireNameRequestDto;
 import com.malicia.mrg.assistant.photo.pojo.PhotoshootMetaData;
 import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
+import com.malicia.mrg.assistant.photo.pojo.PhotoshootType;
 import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import com.malicia.mrg.assistant.photo.service.TagService;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
@@ -25,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -55,9 +58,9 @@ class PhotoshootTypeControllerTest {
     private ReactiveHealthContributor redisHealthContributor;
     @MockBean
     private TagService tagService;
-    @MockBean
-    private PhotoshootService photoshootService;
 
+    @Autowired
+    private PhotoshootService photoshootService;
     @Autowired
     private MyConfig config;
     @Autowired
@@ -76,27 +79,51 @@ class PhotoshootTypeControllerTest {
         when(tagService.getTagListByName("00_WHAT")).thenReturn(Arrays.asList("train", "boat"));
         when(tagService.getTagListByName("00_WHO")).thenReturn(Arrays.asList("bob", "franck"));
 
-        PhotoshootMetaData metaData = new PhotoshootMetaData();
-        metaData.setLowerDate("2023-06-01");
-        metaData.setNbDay(10);
-        metaData.setNbSelectedPhoto(10);
-        metaData.setNbStar(new int[]{0, 1, 1, 0, 0, 0});
-        when(photoshootService.getMetaDataFromPhotoshoot(any(), any()))
-                .thenReturn(metaData);
+//        PhotoshootMetaData metaData = new PhotoshootMetaData();
+//        metaData.setLowerDate("2023-06-01");
+//        metaData.setNbDay(10);
+//        metaData.setNbSelectedPhoto(10);
+//        metaData.setNbStar(new int[]{0, 1, 1, 0, 0, 0});
+//        when(photoshootService.getMetaDataFromPhotoshoot(any(), any()))
+//                .thenReturn(metaData);
+    }
+
+    @Test
+    void testGetPhotoshootType() throws Exception {
+        mockMvc.perform(get("/api/photoshoot-type"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(7))
+                .andExpect(jsonPath("$[1]").value("£DATE£"))
+                .andExpect(jsonPath("$[1].nom").value("ALL_IN"));
+        ;
+    }
+
+    @Test
+    void testGetPhotoshootParam() throws Exception {
+        mockMvc.perform(get("/api/photoshoot-type/EVENTS"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valid").value(true));
+    }
+
+    @Test
+    void testGetPhotoshootByType() throws Exception {
+        mockMvc.perform(get("/api/photoshoot-type/EVENTS/photoshoot"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.valid").value(true));
     }
 
     @Test
     void validatePhotoshootName_shouldReturnValid_whenInputIsCorrect() throws Exception {
 
-        when(photoshootService.getPhotoshootList("EVENTS"))
-                .thenReturn(Collections.singletonList(new Photoshoot()));
+//        when(photoshootService.getPhotoshootList("EVENTS"))
+//                .thenReturn(Collections.singletonList(new Photoshoot()));
 
-        mockMvc.perform(get("/api/photoshoot-type/validate/EVENTS/2023-06-01_fete_maison_bob"))
+        mockMvc.perform(get("/api/photoshoot/EVENTS/2023-06-01_fete_maison_bob/validate"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.valid").value(true))
                 .andExpect(jsonPath("$.message").value("valid"));
 
-        mockMvc.perform(get("/api/photoshoot-type/validate/EVENTS/2023-06-01_fete_maison_boat"))
+        mockMvc.perform(get("/api/photoshoot/EVENTS/2023-06-01_fete_maison_boat/validate"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.valid").value(true))
                 .andExpect(jsonPath("$.message").value("valid"));
