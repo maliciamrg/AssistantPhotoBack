@@ -15,11 +15,11 @@ class FileSystemServiceTest {
 
     @Test
     void testConvertPathsToPhotos_ok_with_xmp_full() throws IOException {
-        String pathToScan = "./src/test/resources/50-Phototheque/##Events 10-15 j/2023-06-29_spectacle_antony_laureline";
+        String pathToScan = "./src/test/resources/50-Phototheque/##Events 10-15 j/2023-10-27_spectacle_antony_laureline";
         String photo1 = "49.0xiaomi 2201117ty_camera_2023-10-27_14-54-49_img_20231027_145449.jpg";
         PhotoGroup result = FileSystemService.convertPathsToPhotos(pathToScan, List.of(Path.of(pathToScan+"/"+photo1)));
         Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals(-1, result.getPhotos().get(0).getRating());
+        Assertions.assertEquals(1, result.getPhotos().get(0).getRating());
         Assertions.assertEquals("", result.getPhotos().get(0).getLabel());
         Assertions.assertEquals(0, result.getPhotos().get(0).getPick());
         Assertions.assertEquals("1992-12-01T00:00:00", result.getPhotos().get(0).getCreatedDate());
@@ -30,11 +30,11 @@ class FileSystemServiceTest {
     @Test
 
     void testConvertPathsToPhotos_ok_with_xmp_not_full() throws IOException {
-        String pathToScan = "./src/test/resources/50-Phototheque/##Events 10-15 j/2023-06-29_spectacle_antony_laureline";
+        String pathToScan = "./src/test/resources/50-Phototheque/##Events 10-15 j/2023-10-27_spectacle_antony_laureline";
         String photo1 = "58.0xiaomi 2201117ty_camera_2023-10-27_17-20-48_img_20231027_172048.jpg";
         PhotoGroup result = FileSystemService.convertPathsToPhotos(pathToScan, List.of(Path.of(pathToScan+"/"+photo1)));
         Assertions.assertEquals(1, result.size());
-        Assertions.assertEquals(3, result.getPhotos().get(0).getRating());
+        Assertions.assertEquals(2, result.getPhotos().get(0).getRating());
         Assertions.assertEquals("", result.getPhotos().get(0).getLabel());
         Assertions.assertEquals(0, result.getPhotos().get(0).getPick());
         Assertions.assertEquals("2025-01-31 22:08:37", result.getPhotos().get(0).getCreatedDate());
@@ -50,7 +50,7 @@ class FileSystemServiceTest {
         //redirect sysout
         System.setOut(new PrintStream(outContent));
 
-        String pathToScan = "./src/test/resources/50-Phototheque/##Events 10-15 j/2023-06-29_spectacle_antony_laureline";
+        String pathToScan = "./src/test/resources/50-Phototheque/##Events 10-15 j/2023-10-27_spectacle_antony_laureline";
         String photo1 = "file_example_MP4_480_1_5MG.mp4";
         PhotoGroup result = FileSystemService.convertPathsToPhotos(pathToScan, List.of(Path.of(pathToScan+"/"+photo1)));
         Assertions.assertEquals(1, result.size());

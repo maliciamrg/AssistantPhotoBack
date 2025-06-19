@@ -3,6 +3,7 @@ package com.malicia.mrg.assistant.photo.controller;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.dto.UpdateRepertoireNameRequestDto;
 import com.malicia.mrg.assistant.photo.dto.ValidationResult;
+import com.malicia.mrg.assistant.photo.exception.NotFoundException;
 import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
 import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
@@ -30,7 +31,7 @@ public class PhotoshootController {
         try {
             return ResponseEntity.ok().body(photoshootService.getPhotoshoot(photoshootTypeName,photoshootName));
 
-        } catch (IllegalArgumentException e) {
+        } catch (NotFoundException e) {
             return ResponseEntity.status(404).body(null);
         }
     }

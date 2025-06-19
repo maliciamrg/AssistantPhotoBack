@@ -8,7 +8,7 @@ application:
 assistant:
   dryRun: true
   name: assistant
-  rootPath: ./backend/src/test/resources/
+  rootPath: ./src/test/resources/
   fileExtensionsToWorkWith:
     - jpg
     - tif
@@ -33,25 +33,25 @@ assistant:
     ecartEnMinutes: 20
     photoMin: 5
   photoshootType:
-    - nom: all_in
+    - photoshootTypeEnum: all_in
       photoshootList:
         - path: "00-CheckIn"
           description: "Main check-in folder"
-        - path: "00-CheckIn2"
+        - path: "00-CheckIn-2"
           description: "Main check-in folder 2"
-    - nom: Assistant_Work
+    - photoshootTypeEnum: Assistant_Work
       photoshootList:
         - path: "10-Assistant_work"
           description: "Work folder for the Assistant"
-    - nom: Rejet
+    - photoshootTypeEnum: Rejet
       photoshootList:
         - path: "99-Rejet"
           description: "Rejected items"
-    - nom: Sauvegarde
+    - photoshootTypeEnum: Sauvegarde
       photoshootList:
         - path: "50-Phototheque\\#Sauvegarde 999 j"
           description: "Backup photographs"
-    - nom: Events
+    - photoshootTypeEnum: Events
       photoshootList:
         - path: "50-Phototheque\\##Events 10-15 j"
           description: "Events photographs"
@@ -75,7 +75,7 @@ assistant:
         - "@00_WHERE@"
         - "@00_WHAT@|@00_WHO@"
       rapprochementNewOk: true
-    - nom: Holidays
+    - photoshootTypeEnum: Holidays
       photoshootList:
         - path: "50-Phototheque\\##Holidays 20-30 sem"
           description: "Holiday photographs"
@@ -99,7 +99,7 @@ assistant:
         - "@00_WHERE@"
         - "@00_WHAT@|@00_WHO@"
       rapprochementNewOk: true
-    - nom: Shooting
+    - photoshootTypeEnum: Shooting
       photoshootList:
         - path: "50-Phototheque\\##Shooting 03-05 j"
           description: "Shooting session photographs"

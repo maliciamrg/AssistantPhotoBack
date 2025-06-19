@@ -62,13 +62,22 @@ public class RootRepertoire {
         }
     }
 
-    public List<Photoshoot> getAllPhotoshoot(PhotoshootTypeEnum photoshootTypEnum) {
+    public List<Photoshoot> getPhotoshootList(PhotoshootTypeEnum photoshootTypEnum) {
         List<Photoshoot> expectedList = new ArrayList<>();
 
         for (PhotoshootType photoshootType : config.getPhotoshootType()) {
-            if (photoshootTypEnum == photoshootType.getNom()) {
+            if (photoshootTypEnum.name().equals(photoshootType.getPhotoshootTypeEnum().name())) {
                 for (Photoshoot photoshoot : photoshootType.getPhotoshootList()) {
-                    expectedList.addAll(getAllPhotoshoot(photoshoot));
+
+                    String pathToScan = config.getRootPath() + photoshoot.getPath();
+
+                    try {
+                        List<Path> listPath = FileSystemService.getAllFolder(pathToScan);
+                        expectedList.addAll(FileSystemService.convertPathsToSeanceRepertoire(pathToScan, listPath));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
                 }
             }
         }
@@ -216,7 +225,7 @@ public class RootRepertoire {
         }
     }
 
-    public List<Photoshoot> getAllPhotoshoot(Photoshoot photoshoot) {
+    public List<Photoshoot> getPhotoshootList(Photoshoot photoshoot) {
         List<Photoshoot> expectedList = new ArrayList<>();
 
         String pathToScan = config.getRootPath() + photoshoot.getPath();

@@ -4,7 +4,7 @@ import java.util.List;
 
 // Inner Classes for seanceType and seanceRepertoire
 public class PhotoshootType {
-    private PhotoshootTypeEnum nom;
+    private PhotoshootTypeEnum photoshootTypeEnum;
     private int uniteDeJour;
     private int nbMaxParUniteDeJour;
     private List<Integer> ratioStarMin;
@@ -22,12 +22,12 @@ public class PhotoshootType {
     }
 
     // Getters and Setters
-    public PhotoshootTypeEnum getNom() {
-        return nom;
+    public PhotoshootTypeEnum getPhotoshootTypeEnum() {
+        return photoshootTypeEnum;
     }
 
-    public void setNom(PhotoshootTypeEnum nom) {
-        this.nom = nom;
+    public void setPhotoshootTypeEnum(PhotoshootTypeEnum photoshootTypeEnum) {
+        this.photoshootTypeEnum = photoshootTypeEnum;
     }
 
     public int getUniteDeJour() {

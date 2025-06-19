@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.dto.ValidationResult;
+import com.malicia.mrg.assistant.photo.exception.NotFoundException;
 import com.malicia.mrg.assistant.photo.pojo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,22 +65,24 @@ public class PhotoshootService {
         return allPhotoFromPhotoRepertoire;
     }
 
-    public List<Photoshoot> getPhotoshootList(String typeName) {
-        List<Photoshoot> cachedSeances = (List<Photoshoot>) redisTemplate.get(typeName);
-        if (cachedSeances != null) {
-            Long ttlKey = redisTemplate.getExpire(typeName);
-            logger.info("TTL for key '{}' is: {} seconds", typeName, ttlKey);
-            return cachedSeances;
+    public List<Photoshoot> getPhotoshootList(String photoshootTypeName) {
+        List<Photoshoot> photoshootListCached = (List<Photoshoot>) redisTemplate.get(photoshootTypeName);
+        if (photoshootListCached != null) {
+            Long ttlKey = redisTemplate.getExpire(photoshootTypeName);
+            logger.info("TTL for key '{}' is: {} seconds", photoshootTypeName, ttlKey);
+            return photoshootListCached;
         }
-        Optional<PhotoshootTypeEnum> type = config.getPhotoshootType().stream()
-                .map(PhotoshootType::getNom)
-                .filter(seanceTypeEnum -> seanceTypeEnum.toString().equals(typeName))
-                .findFirst();
-        if (type.isPresent()) {
-            List<Photoshoot> seanceList = rootRep.getAllPhotoshoot(type.get());
-            redisTemplate.set(typeName, seanceList, ttl);
-            logger.info("redisTemplate.opsForValue().set :{}", typeName);
-            return seanceList;
+
+        PhotoshootType photoshootType = getPhotoshootType(photoshootTypeName);
+
+        if (photoshootType != null) {
+
+            List<Photoshoot> photoshootList = rootRep.getPhotoshootList(photoshootType.getPhotoshootTypeEnum());
+
+            redisTemplate.set(photoshootTypeName, photoshootList, ttl);
+            logger.info("redisTemplate.opsForValue().set :{}", photoshootTypeName);
+
+            return photoshootList;
         } else {
             return Collections.emptyList();
         }
@@ -140,24 +143,16 @@ public class PhotoshootService {
 
     public Photoshoot getPhotoshoot(String photoshootTypeName, String photoshootName) {
 
-        Optional<PhotoshootType> photoshootType = config.getPhotoshootType().stream()
-                .filter(type -> type.getNom().name().equals(photoshootTypeName))
-                .findFirst();
+        List<Photoshoot> photoshootList = getPhotoshootList(photoshootTypeName);
 
-        Photoshoot photoshootRet = new Photoshoot();
-        if (photoshootType.isPresent()) {
-
-            for (Photoshoot photoshoot : photoshootType.get().getPhotoshootList()) {
-
-                photoshootRet.setGroupOfPhoto(rootRep.getAllPhotoFromPhotoshoot(photoshoot));
-
-                photoshootRet.setMetaDataFromPhotoshoot(getMetaDataFromPhotoshoot(photoshoot));
-
+        for (Photoshoot photoshoot : photoshootList) {
+            if (photoshoot.getName().equals(photoshootName)) {
+                photoshoot.setGroupOfPhoto(rootRep.getAllPhotoFromPhotoshoot(photoshoot));
+                photoshoot.setMetaDataFromPhotoshoot(getMetaDataFromPhotoshoot(photoshoot));
+                return photoshoot;
             }
-
         }
-
-        return photoshootRet;
+        throw new NotFoundException("photoshootName " + photoshootName + " not found");
 
     }
 
@@ -302,7 +297,7 @@ public class PhotoshootService {
     }
 
     public PhotoshootType getPhotoshootType(String photoshootTypeName) {
-        Optional<PhotoshootType> photoshootType = config.getPhotoshootType().stream().filter(seance -> photoshootTypeName.equals(seance.getNom().name())).findFirst();
+        Optional<PhotoshootType> photoshootType = config.getPhotoshootType().stream().filter(seance -> photoshootTypeName.equals(seance.getPhotoshootTypeEnum().name())).findFirst();
 
         if (!photoshootType.isEmpty()) {
             return photoshootType.get();

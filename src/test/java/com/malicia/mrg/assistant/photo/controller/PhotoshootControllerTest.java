@@ -1,34 +1,33 @@
 package com.malicia.mrg.assistant.photo.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
-import com.malicia.mrg.assistant.photo.service.FileSystemService;
-import com.malicia.mrg.assistant.photo.pojo.PhotoshootType;
-import com.malicia.mrg.assistant.photo.pojo.PhotoshootTypeEnum;
-import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
+import com.malicia.mrg.assistant.photo.dto.UpdateRepertoireNameRequestDto;
 import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
+import com.malicia.mrg.assistant.photo.service.TagService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration;
+import org.springframework.boot.actuate.autoconfigure.health.HealthEndpointAutoConfiguration;
 import org.springframework.boot.actuate.health.ReactiveHealthContributor;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -36,14 +35,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @ImportAutoConfiguration(exclude = {
-        org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration.class,
-        org.springframework.boot.actuate.autoconfigure.health.HealthEndpointAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration.class
+        HealthContributorAutoConfiguration.class,
+        HealthEndpointAutoConfiguration.class,
+        RedisAutoConfiguration.class,
+        RedisRepositoriesAutoConfiguration.class
 })
 class PhotoshootControllerTest {
 
@@ -56,6 +58,9 @@ class PhotoshootControllerTest {
     private RedisConnectionFactory redisConnectionFactory;
     @MockBean
     private ReactiveHealthContributor redisHealthContributor;
+    @MockBean
+    private TagService tagService;
+
     @Autowired
     private RootRepertoire rootRep;
     @Autowired
@@ -63,12 +68,9 @@ class PhotoshootControllerTest {
     @Autowired
     private MyConfig myConfig;
     @Autowired
-    private PhotoshootController photoshootController;
-
-
-    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
     @Autowired
-    private PhotoshootTypeController photoshootTypeController;
+    private MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
@@ -76,130 +78,55 @@ class PhotoshootControllerTest {
 
         when(redisTemplate.get(anyString())).thenReturn(null);
         doNothing().when(redisTemplate).set(anyString(), any(), any());
+        when(tagService.getTagListByName("00_EVENT")).thenReturn(Arrays.asList("fete","spectacle"));
+        when(tagService.getTagListByName("00_WHERE")).thenReturn(Arrays.asList("maison","antony"));
+        when(tagService.getTagListByName("00_WHAT")).thenReturn(Arrays.asList("train", "boat","laureline"));
+        when(tagService.getTagListByName("00_WHO")).thenReturn(Arrays.asList("bob", "franck"));
     }
 
+    @Test
+    void testGetPhotoshoot_notFound() throws Exception {
+
+        mockMvc.perform(get("/api/photoshoot/ALL_IN/session1"))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
-    void getSeanceTypes_ShouldReturnSeanceTypes() throws Exception {
-        // Initialize controller with the real RootRepertoire bean
-        PhotoshootController controller = new PhotoshootController(myConfig, photoshootService);
-        this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+    void validatePhotoshootName_shouldReturnValid_whenInputIsCorrect() throws Exception {
 
-        //given
-        Path rootTest = Paths.get("src", "test", "resources");
-        String jsonDest = "./" + rootTest + "/" + "/getSeanceTypes_ShouldReturnSeanceTypesTEST.json";
-
-        // Perform the request and capture the result
-        MvcResult result = mockMvc.perform(get("/api/photoshoot"))
+        mockMvc.perform(get("/api/photoshoot/EVENTS/2023-10-27_spectacle_antony_laureline/validate"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(PhotoshootTypeEnum.values().length)))
-                .andExpect(jsonPath("$[0].id", is("ALL_IN")))
-                .andExpect(jsonPath("$[0].name", is("ALL_IN")))
-                .andReturn();
-
-
-        try {
-            // Create ObjectMapper instance
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            String jsonResponse = result.getResponse().getContentAsString();
-            // Map JSON string to List<PhotoshootTypeDto>
-            List<PhotoshootType> seanceTypeList = objectMapper.readValue(jsonResponse, new TypeReference<>() {
-            });
-            FileSystemService.putIntoJsonFile(seanceTypeList, jsonDest);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+                .andExpect(jsonPath("$.valid").value(true))
+                .andExpect(jsonPath("$.message").value("valid"));
 
     }
 
-
     @Test
-    void getSeanceRepertoires_ShouldReturnSeanceRepertoires() throws Exception {
-        // Initialize controller with the real RootRepertoire bean
-        PhotoshootController controller = new PhotoshootController(myConfig, photoshootService);
-        this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+    void updateRepertoireName_shouldReturnSuccessResponse() throws Exception {
+        UpdateRepertoireNameRequestDto request = new UpdateRepertoireNameRequestDto();
+        request.setPhotoshootNameNew("2023-10-27_fete_maison_bob");
 
-        //given
-        Path rootTest = Paths.get("src", "test", "resources");
-        String jsonDest = "./" + rootTest + "/" + "/getSeanceRepertoires_ShouldReturnSeanceRepertoiresTEST.json";
-
-
-        // Perform the request and capture the result
-        MvcResult result = mockMvc.perform(get("/api/photoshoot/ALL_IN")
-                        .accept(MediaType.APPLICATION_JSON))
+        mockMvc.perform(put("/api/photoshoot/EVENTS/2023-10-27_spectacle_antony_laureline/rename")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.length()").value(2))
-//                .andExpect(jsonPath("$[0].name").value("Repertoire 1"))
-                //              .andExpect(jsonPath("$[1].name").value("Repertoire 2"))
-                .andReturn();
-
-
-        try {
-            // Create ObjectMapper instance
-            ObjectMapper objectMapper = new ObjectMapper();
-
-            String jsonResponse = result.getResponse().getContentAsString();
-            // Map JSON string to List<PhotoshootTypeDto>
-            List<Photoshoot> seanceTypeList = objectMapper.readValue(jsonResponse, new TypeReference<>() {
-            });
-            FileSystemService.putIntoJsonFile(seanceTypeList, jsonDest);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                .andExpect(jsonPath("$.photoshootName").value("2023-10-27_spectacle_antony_laureline"))
+                .andExpect(jsonPath("$.photoshootNameNew").value("2023-10-27_fete_maison_bob"))
+                .andExpect(jsonPath("$.message").value(Matchers.containsString("Repertoire name updated successfully.")));
     }
 
     @Test
-    void testGetPhotoshootType() {
-        Path rootTest = Paths.get("src", "test", "resources");
-        String jsonDest = "./" + rootTest + "/" + "/testGetTypesDeSeanceTEST.json";
+    void updateRepertoireName_shouldReturnInvalid_whenWrongPartCount() throws Exception {
+        UpdateRepertoireNameRequestDto request = new UpdateRepertoireNameRequestDto();
+        request.setPhotoshootNameNew("new_name");
 
-        List<PhotoshootType> result = photoshootTypeController.getPhotoshootType();
-
-        assertEquals(7, result.size());
-        assertEquals("ALL_IN", result.get(0).getNom().name());
-
-        FileSystemService.putIntoJsonFile(result, jsonDest);
+        mockMvc.perform(put("/api/photoshoot/EVENTS/2023-10-27_spectacle_antony_laureline/rename")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photoshootName").value("2023-10-27_spectacle_antony_laureline"))
+                .andExpect(jsonPath("$.photoshootNameNew").value("new_name"))
+                .andExpect(jsonPath("$.message").value(Matchers.containsString("2 champs pour 4 attendu")));
     }
 
-    @Test
-    void testGetPhotoshootByType() {
-        // Initialize controller with the real RootRepertoire bean
-        PhotoshootController controller = new PhotoshootController(myConfig, photoshootService);
-        this.mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
-        Path rootTest = Paths.get("src", "test", "resources");
-        String jsonDest = "./" + rootTest + "/" + "/testGetSeancesParTypeTEST.json";
-
-        List<Photoshoot> result = photoshootTypeController.getPhotoshootByType("ALL_IN");
-
-        assertEquals(2, result.size());
-
-        FileSystemService.putIntoJsonFile(result, jsonDest);
-    }
-
-    @Test
-    void testGetPhotoshoot_success() {
-        Path rootTest = Paths.get("src", "test", "resources");
-        String jsonDest = "./" + rootTest + "/" + "/testGetPhotosDeSeance_successTEST.json";
-
-        ResponseEntity<Photoshoot> response = photoshootController.getPhotoshoot("ALL_IN", "subOne");
-
-        assertEquals(200, response.getStatusCode().value());
-        assertEquals(7, (response.getBody().getGroupOfPhoto().size()));
-
-        FileSystemService.putIntoJsonFile(response, jsonDest);
-    }
-
-    @Test
-    void testGetPhotoshoot_notFound() {
-        when(photoshootService.getPhotoshootList("ALL_IN"))
-                .thenThrow(new IllegalArgumentException("Not found"));
-
-        ResponseEntity<Photoshoot> response = photoshootController.getPhotoshoot("ALL_IN", "session1");
-
-        assertEquals(404, response.getStatusCode().value());
-        assertNull(response.getBody());
-    }
 }

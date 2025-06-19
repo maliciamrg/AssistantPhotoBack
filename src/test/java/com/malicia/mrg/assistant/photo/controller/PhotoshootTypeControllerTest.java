@@ -3,14 +3,8 @@ package com.malicia.mrg.assistant.photo.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
-import com.malicia.mrg.assistant.photo.dto.UpdateRepertoireNameRequestDto;
-import com.malicia.mrg.assistant.photo.pojo.PhotoshootMetaData;
-import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
-import com.malicia.mrg.assistant.photo.pojo.PhotoshootType;
 import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import com.malicia.mrg.assistant.photo.service.TagService;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
@@ -22,19 +16,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -56,8 +48,7 @@ class PhotoshootTypeControllerTest {
     private RedisConnectionFactory redisConnectionFactory;
     @MockBean
     private ReactiveHealthContributor redisHealthContributor;
-    @MockBean
-    private TagService tagService;
+
 
     @Autowired
     private PhotoshootService photoshootService;
@@ -74,10 +65,6 @@ class PhotoshootTypeControllerTest {
 
         when(redisTemplate.get(anyString())).thenReturn(null);
         doNothing().when(redisTemplate).set(anyString(), any(), any());
-        when(tagService.getTagListByName("00_EVENT")).thenReturn(Collections.singletonList("fete"));
-        when(tagService.getTagListByName("00_WHERE")).thenReturn(Collections.singletonList("maison"));
-        when(tagService.getTagListByName("00_WHAT")).thenReturn(Arrays.asList("train", "boat"));
-        when(tagService.getTagListByName("00_WHO")).thenReturn(Arrays.asList("bob", "franck"));
 
 //        PhotoshootMetaData metaData = new PhotoshootMetaData();
 //        metaData.setLowerDate("2023-06-01");
@@ -93,86 +80,42 @@ class PhotoshootTypeControllerTest {
         mockMvc.perform(get("/api/photoshoot-type"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(7))
-                .andExpect(jsonPath("$[1]").value("£DATE£"))
-                .andExpect(jsonPath("$[1].nom").value("ALL_IN"));
-        ;
+                .andExpect(jsonPath("$[0].photoshootTypeEnum").value("ALL_IN"))
+                .andExpect(jsonPath("$[0].photoshootList[0].path").value("00-CheckIn"))
+                .andDo(print());
     }
 
     @Test
     void testGetPhotoshootParam() throws Exception {
         mockMvc.perform(get("/api/photoshoot-type/EVENTS"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.valid").value(true));
+                .andExpect(jsonPath("$.photoshootTypeEnum").value("EVENTS"))
+                .andExpect(jsonPath("$.photoshootList.length()").value(1));
+    }
+
+    @Test
+    void testGetPhotoshootParamMultiple() throws Exception {
+        mockMvc.perform(get("/api/photoshoot-type/ALL_IN"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photoshootTypeEnum").value("ALL_IN"))
+                .andExpect(jsonPath("$.photoshootList.length()").value(2));
+    }
+
+    @Test
+    void getPhotoshootParam_shouldReturnZoneValeurAdmise() throws Exception {
+
+        mockMvc.perform(get("/api/photoshoot-type/EVENTS"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.zoneValeurAdmise").isArray())
+                .andExpect(jsonPath("$.zoneValeurAdmise[0]").value("£DATE£"))
+                .andExpect(jsonPath("$.zoneValeurAdmise[1]").value("@00_EVENT@"));
     }
 
     @Test
     void testGetPhotoshootByType() throws Exception {
         mockMvc.perform(get("/api/photoshoot-type/EVENTS/photoshoot"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.valid").value(true));
+                .andExpect(jsonPath("$[0].name").value("2023-10-27_spectacle_antony_laureline"));
     }
 
-    @Test
-    void validatePhotoshootName_shouldReturnValid_whenInputIsCorrect() throws Exception {
-
-//        when(photoshootService.getPhotoshootList("EVENTS"))
-//                .thenReturn(Collections.singletonList(new Photoshoot()));
-
-        mockMvc.perform(get("/api/photoshoot/EVENTS/2023-06-01_fete_maison_bob/validate"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.valid").value(true))
-                .andExpect(jsonPath("$.message").value("valid"));
-
-        mockMvc.perform(get("/api/photoshoot/EVENTS/2023-06-01_fete_maison_boat/validate"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.valid").value(true))
-                .andExpect(jsonPath("$.message").value("valid"));
-    }
-
-    @Test
-    void getPhotoshootParam_shouldReturnZoneValeurAdmise() throws Exception {
-
-        mockMvc.perform(get("/api/photoshoot-type/name/config/EVENTS"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.seanceType.zoneValeurAdmise").isArray())
-                .andExpect(jsonPath("$.seanceType.zoneValeurAdmise[0]").value("£DATE£"))
-                .andExpect(jsonPath("$.seanceType.zoneValeurAdmise[1]").value("@00_EVENT@"));
-    }
-
-    @Test
-    void updateRepertoireName_shouldReturnSuccessResponse() throws Exception {
-        UpdateRepertoireNameRequestDto request = new UpdateRepertoireNameRequestDto();
-        request.setPhotoshootNameNew("2023-06-01_fete_maison_bob");
-
-        mockMvc.perform(put("/api/photoshoot-type/EVENTS/name")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.old").value("old_name"))
-                .andExpect(jsonPath("$.repertoireName").value("2023-06-01_fete_maison_bob"))
-                .andExpect(jsonPath("$.message").value(Matchers.containsString("Repertoire name updated successfully.")));
-    }
-
-    @Test
-    void updateRepertoireName_shouldReturnInvalid_whenWrongPartCount() throws Exception {
-        UpdateRepertoireNameRequestDto request = new UpdateRepertoireNameRequestDto();
-        request.setPhotoshootNameNew("new_name");
-
-        mockMvc.perform(put("/api/photoshoot-type/EVENTS/name")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.old").value("old_name"))
-                .andExpect(jsonPath("$.repertoireName").value("new_name"))
-                .andExpect(jsonPath("$.message").value(Matchers.containsString("2 champs pour 4 attendu")));
-    }
-
-    @Test
-    void validatePhotoshootName_shouldReturnInvalid_whenWrongPartCount() throws Exception {
-
-        mockMvc.perform(get("/api/photoshoot-type/validate/EVENTS/ONLY_THREE_PART"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.valid").value(false))
-                .andExpect(jsonPath("$.message").value(Matchers.containsString("3 champs pour 4 attendu")));
-    }
 }

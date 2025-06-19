@@ -1,9 +1,13 @@
 [ {
-  "id" : "subOne",
+  "name" : "subOne",
   "path" : ".\\src\\test\\resources\\00-CheckIn\\subOne",
-  "description" : null
+  "description" : null,
+  "metaDataFromPhotoshoot" : null,
+  "groupOfPhoto" : null
 }, {
-  "id" : "subOneTwo",
+  "name" : "subOneTwo",
   "path" : ".\\src\\test\\resources\\00-CheckIn-2\\subOneTwo",
-  "description" : null
+  "description" : null,
+  "metaDataFromPhotoshoot" : null,
+  "groupOfPhoto" : null
 } ]
