@@ -7,6 +7,9 @@ services:
     environment:
       - SPRING_DATA_REDIS_HOST=redis
       - ASSISTANT_ROOTPATH=/Photo/
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/photosdb
+      - SPRING_DATASOURCE_USERNAME=photos_user
+      - SPRING_DATASOURCE_PASSWORD=photos_pass
     ports:
       - "8999:8099"
     volumes:
@@ -14,6 +17,7 @@ services:
       - '/Photo:/Photo'
     depends_on:
       - redis
+      - postgres
     networks:
       - assistant-photo
 
@@ -23,7 +27,22 @@ services:
     ports:
       - "6379:6379"  # Expose Redis port 6379 to the host
     volumes:
-      - redis_data:/data  # Persist Redis data on the host machine
+      - redis_data:/data
+    restart: always
+    networks:
+      - assistant-photo
+
+  postgres:
+    image: postgres:15
+    container_name: postgres_container
+    environment:
+      POSTGRES_DB: photosdb
+      POSTGRES_USER: photos_user
+      POSTGRES_PASSWORD: photos_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     restart: always
     networks:
       - assistant-photo
@@ -33,4 +52,6 @@ networks:
 
 volumes:
   redis_data:
+    driver: local
+  postgres_data:
     driver: local

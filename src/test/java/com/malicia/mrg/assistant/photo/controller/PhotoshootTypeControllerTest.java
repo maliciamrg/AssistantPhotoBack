@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.service.PhotoshootService;
-import com.malicia.mrg.assistant.photo.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
@@ -17,9 +16,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.connection.ReactiveRedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Arrays;
-import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -64,7 +60,7 @@ class PhotoshootTypeControllerTest {
         MockitoAnnotations.openMocks(this);
 
         when(redisTemplate.get(anyString())).thenReturn(null);
-        doNothing().when(redisTemplate).set(anyString(), any(), any());
+        doNothing().when(redisTemplate).set(anyString(), any());
 
 //        PhotoshootMetaData metaData = new PhotoshootMetaData();
 //        metaData.setLowerDate("2023-06-01");

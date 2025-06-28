@@ -1,9 +1,11 @@
 package com.malicia.mrg.assistant.photo.pojo;
 
+import java.io.Serializable;
 import java.util.List;
 
 // Inner Classes for seanceType and seanceRepertoire
-public class PhotoshootType {
+public class PhotoshootType implements Serializable {
+    private static final long serialVersionUID = 1L;
     private PhotoshootTypeEnum photoshootTypeEnum;
     private int uniteDeJour;
     private int nbMaxParUniteDeJour;

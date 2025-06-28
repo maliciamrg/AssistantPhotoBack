@@ -1,9 +1,7 @@
 package com.malicia.mrg.assistant.photo.cache;
 
-import java.time.Duration;
-
 public interface CacheService {
-    void set(String key, Object value, Duration ttl);
+    void set(String key, Object value);
     Object get(String key);
     Long getExpire(String typeName);
 }

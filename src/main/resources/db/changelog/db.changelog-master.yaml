@@ -1,0 +1,78 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: you
+      changes:
+        - createTable:
+            tableName: photos
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: hash
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: path
+                  type: TEXT
+              - column:
+                  name: relative_to_path
+                  type: TEXT
+              - column:
+                  name: filename
+                  type: TEXT
+              - column:
+                  name: extension
+                  type: TEXT
+              - column:
+                  name: created_date
+                  type: TEXT
+              - column:
+                  name: exif_date
+                  type: TEXT
+              - column:
+                  name: date_taken
+                  type: TEXT
+              - column:
+                  name: rating
+                  type: INTEGER
+              - column:
+                  name: label
+                  type: TEXT
+              - column:
+                  name: pick
+                  type: INTEGER
+
+  - changeSet:
+      id: 2
+      author: you
+      changes:
+        - createTable:
+            tableName: photo_thumbnail
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: photo_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: data
+                  type: BYTEA
+        - addForeignKeyConstraint:
+            baseTableName: photo_thumbnail
+            baseColumnNames: photo_id
+            constraintName: fk_photo_thumbnail_photo
+            referencedTableName: photos
+            referencedColumnNames: id
+            onDelete: CASCADE

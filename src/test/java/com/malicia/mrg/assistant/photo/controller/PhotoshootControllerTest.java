@@ -27,7 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -77,7 +76,7 @@ class PhotoshootControllerTest {
         MockitoAnnotations.openMocks(this);
 
         when(redisTemplate.get(anyString())).thenReturn(null);
-        doNothing().when(redisTemplate).set(anyString(), any(), any());
+        doNothing().when(redisTemplate).set(anyString(), any());
         when(tagService.getTagListByName("00_EVENT")).thenReturn(Arrays.asList("fete","spectacle"));
         when(tagService.getTagListByName("00_WHERE")).thenReturn(Arrays.asList("maison","antony"));
         when(tagService.getTagListByName("00_WHAT")).thenReturn(Arrays.asList("train", "boat","laureline"));

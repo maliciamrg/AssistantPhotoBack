@@ -1,7 +1,7 @@
 package com.malicia.mrg.assistant.photo.controller;
 
 import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
-import com.malicia.mrg.assistant.photo.pojo.Photo;
+import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
 import com.malicia.mrg.assistant.photo.service.XMPService;

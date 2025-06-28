@@ -4,10 +4,34 @@ spring:
   data:
     redis:
       database: 0
-      host: localhost
+      host: 192.212.10.200
       port: 6379
 #      password: yourpassword  # Optional, if your Redis instance requires authentication
       timeout: 2000  # Optional timeout in milliseconds
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000  # TTL in milliseconds (e.g., 600000ms = 10 minutes)
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    contexts: baseline
+    drop-first: false
+  datasource:
+    url: jdbc:postgresql://192.212.10.200:5432/photosdb
+    username: photos_user
+    password: photos_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    open-in-view: false
+
 
 redis:
   enabled: true
@@ -22,8 +46,9 @@ server:
   port: 8099
 logging:
   level:
-    org:
-      springdoc: DEBUG
+    org.springdoc: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 springdoc:
   show-actuator: true
 
@@ -31,6 +56,7 @@ my:
   app:
     name: AssistantPhoto
     version: "1.0"
+
 assistant:
   dryRun: true
   name: assistant
@@ -151,11 +177,12 @@ info:
   application:
     name: ${spring.application.name}
     version: ${application.version}
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,openapi,swagger-ui
+        include: health,info,metrics,openapi,swagger-ui,flyway
   info:
     build:
       enabled: true

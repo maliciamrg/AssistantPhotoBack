@@ -2,6 +2,7 @@ package com.malicia.mrg.assistant.photo.pojo;
 
 
 import java.util.Arrays;
+import java.util.List;
 
 public class XMPPhoto {
     private String make;
@@ -10,7 +11,7 @@ public class XMPPhoto {
     private String createDate;
     private Integer rating;
     private String label;
-    private String[] keywords;
+    private List<String> keywords;
     private Integer pick;
 
     public String getMake() {
@@ -61,18 +62,17 @@ public class XMPPhoto {
         this.label = label;
     }
 
-    public String[] getKeywords() {
+    public List<String> getKeywords() {
         return keywords;
     }
 
-    public void setKeywords(String[] keywords) {
+    public void setKeywords(List<String> keywords) {
         this.keywords = keywords;
     }
 
     public Integer getPick() {
         return pick;
     }
-
     public void setPick(Integer pick) {
         this.pick = pick;
     }
@@ -86,7 +86,7 @@ public class XMPPhoto {
                 ", createDate='" + createDate + '\'' +
                 ", rating=" + rating +
                 ", label='" + label + '\'' +
-                ", keywords=" + Arrays.toString(keywords) +
+                ", keywords=" + keywords.toString() +
                 ", pick=" + pick +
                 '}';
     }

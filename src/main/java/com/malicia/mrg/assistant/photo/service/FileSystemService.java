@@ -1,20 +1,14 @@
 package com.malicia.mrg.assistant.photo.service;
 
-import com.adobe.internal.xmp.XMPException;
 import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.exif.ExifIFD0Directory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
-import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
-import com.malicia.mrg.assistant.photo.pojo.Photo;
 import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -22,11 +16,8 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-
-import static com.drew.metadata.exif.ExifDirectoryBase.TAG_DATETIME;
 
 public class FileSystemService {
 
@@ -61,122 +52,6 @@ public class FileSystemService {
         return matchingFiles;
     }
 
-    public static PhotoGroup convertPathsToPhotos(String pathToScan, List<Path> paths) throws IOException {
-        PhotoGroup photos = new PhotoGroup();
-
-        for (Path path : paths) {
-            // Create a new Photo object
-            Photo photo = new Photo();
-            photo.setPath(path.toString());
-
-            photo.setRelativeToPath(getNormalizedPath(path.toString()).replace(getNormalizedPath(pathToScan), ""));
-
-            // Extract filename and extension
-            String filename = path.getFileName().toString();
-            String extension = getFileExtension(filename);
-            photo.setFilename(filename);
-            photo.setExtension(extension);
-
-            // Reach xmp if exist
-            photo.setRating(0);
-            photo.setPick(0);
-            photo.setLabel("");
-            photo.setKeywords(new String[0]);
-            XMPPhoto xmpPhoto = new XMPPhoto();
-            try {
-                xmpPhoto = XMPService.readMetadata(path + ".xmp");
-
-                Integer rating = xmpPhoto.getRating();
-                if (rating != null) {
-                    photo.setRating(rating);
-                }
-
-                Integer pick = xmpPhoto.getPick();
-                if (pick != null) {
-                    photo.setPick(pick);
-                }
-
-                String[] keywords = xmpPhoto.getKeywords();
-                if (keywords != null) {
-                    photo.setKeywords(keywords);
-                }
-
-                String label = xmpPhoto.getLabel();
-                if (label != null) {
-                    photo.setLabel(label);
-                }
-            } catch (XMPException e) {
-                throw new RuntimeException(e);
-            }
-
-
-            // Get file creation date (from filesystem)
-            photo.setCreatedDate(getFileCreatedDate(path));
-            if (xmpPhoto.getCreateDate() != null) {
-                if (xmpPhoto.getCreateDate().compareTo("null") != 0) {
-                    photo.setCreatedDate(xmpPhoto.getCreateDate());
-                }
-            }
-
-            // set file tags
-            photo.setKeywords(new String[0]);
-            if (xmpPhoto.getKeywords() != null) {
-                if (xmpPhoto.getKeywords().length > 0) {
-                    photo.setKeywords(xmpPhoto.getKeywords());
-                }
-            }
-
-
-            // Try to extract EXIF date (only if the file is an image)
-            if (extension.equalsIgnoreCase("ARW") || extension.equalsIgnoreCase("jpg") || extension.equalsIgnoreCase("jpeg") || extension.equalsIgnoreCase("png")) {
-                photo.setExifDate(getExifDate(path));
-            }
-
-            generateThumbnail(photo);
-
-            photos.add(photo);
-        }
-
-        return photos;
-    }
-
-    public static void generateThumbnail(Photo photo) {
-        try {
-            File imgFile = new File(photo.getPath());
-            // Load the image file
-            BufferedImage originalImage = ImageIO.read(imgFile);
-
-            if (originalImage != null) {
-                // Set the dimensions for the thumbnail
-                int thumbnailWidth = originalImage.getWidth() / 5; // Set desired thumbnail width
-                int thumbnailHeight = originalImage.getHeight() / 5; // Set desired thumbnail height
-
-                // Create a scaled instance (thumbnail)
-                Image thumbnail = originalImage.getScaledInstance(thumbnailWidth, thumbnailHeight, Image.SCALE_SMOOTH);
-
-                // Optionally, you can create a BufferedImage for the thumbnail if you need it in BufferedImage format
-                BufferedImage bufferedThumbnail = new BufferedImage(thumbnailWidth, thumbnailHeight, BufferedImage.TYPE_INT_ARGB);
-                bufferedThumbnail.getGraphics().drawImage(thumbnail, 0, 0, null);
-
-                // Convert BufferedImage to byte array
-                byte[] thumbnailBytes = imageToByteArray(bufferedThumbnail, "PNG");
-
-                photo.setThumbnail(thumbnailBytes);
-
-            }
-
-        } catch (IOException e) {
-            System.out.println("Error reading the image file: " + e.getMessage());
-        }
-    }
-
-    // Utility method to convert a BufferedImage to a byte array
-    private static byte[] imageToByteArray(BufferedImage image, String format) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ImageIO.write(image, format, byteArrayOutputStream);  // Write the image to the byte array output stream
-        return byteArrayOutputStream.toByteArray();  // Return the byte array
-    }
-
     public static String getNormalizedPath(String pathToScan) {
         Path pathScan = Paths.get(pathToScan);
         Path normalizedPath = pathScan.normalize();
@@ -208,7 +83,7 @@ public class FileSystemService {
     }
 
     // Helper method to get file creation date
-    private static String getFileCreatedDate(Path path) throws IOException {
+    public static String getFileCreatedDate(Path path) throws IOException {
         try {
             FileTime fileTime = (FileTime) Files.getAttribute(path, "creationTime");
             Date date = new Date(fileTime.toMillis());
@@ -216,32 +91,6 @@ public class FileSystemService {
         } catch (IOException e) {
             return "Unknown"; // If creation date can't be fetched
         }
-    }
-
-    // Helper method to get EXIF date from an image file
-    private static String getExifDate(Path path) {
-        try {
-            // Read EXIF data if the file is an image
-            File file = path.toFile();
-            Metadata metadata = ImageMetadataReader.readMetadata(file);
-
-            // Get the EXIF directory
-            ExifIFD0Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-
-            if (directory != null) {
-                // Access EXIF DateTimeOriginal tag directly (tag ID 0x9003)
-                String exifDate = directory.getString(TAG_DATETIME);
-                exifDate = exifDate.replaceFirst("^(\\d{4}):(\\d{2}):(\\d{2})", "$1-$2-$3");
-
-                if (exifDate != null) {
-                    return exifDate; // Return the EXIF datetime
-                }
-            }
-        } catch (Exception e) {
-            // If no EXIF data or error, return "Unknown"
-            e.printStackTrace();
-        }
-        return "Unknown";
     }
 
     public static void putIntoJsonFile(Object expectedList, String jsonDest) {
@@ -267,10 +116,10 @@ public class FileSystemService {
             throw new IOException("Source file does not exist: " + sourcePathStr);
         }
 
-        // Ensure the destination directory exists
-        Files.createDirectories(destinationPath.getParent());
-
         if (!dryRun) {
+            // Ensure the destination directory exists
+            Files.createDirectories(destinationPath.getParent());
+
             // Move the file
             Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
 
@@ -283,22 +132,6 @@ public class FileSystemService {
         }
 
         return true;
-    }
-
-    // Helper method to encode an image to Base64
-    private static String encodeImageToBase64(BufferedImage image) {
-        try {
-            // Convert BufferedImage to byte array
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ImageIO.write(image, "PNG", byteArrayOutputStream);
-            byte[] imageBytes = byteArrayOutputStream.toByteArray();
-
-            // Encode the byte array to Base64
-            return Base64.getEncoder().encodeToString(imageBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     public static List<Path> getAllFolder(String pathToScan) throws IOException {
@@ -327,6 +160,20 @@ public class FileSystemService {
         }
 
         return photoshoots;
+    }
+
+    public static byte[] getReadAllBytes(Path imagePath) throws IOException {
+        return Files.readAllBytes(imagePath);
+    }
+
+    public static BufferedImage getBufferedImage(String path) throws IOException {
+        File imgFile = new File(path);
+        return ImageIO.read(imgFile);
+    }
+
+    public static Metadata getMetadata(Path path) throws ImageProcessingException, IOException {
+        File file = path.toFile();
+        return ImageMetadataReader.readMetadata(file);
     }
 }
 

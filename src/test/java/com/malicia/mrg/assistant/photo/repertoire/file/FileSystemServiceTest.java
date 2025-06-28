@@ -2,7 +2,6 @@ package com.malicia.mrg.assistant.photo.repertoire.file;
 
 import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
-import com.malicia.mrg.assistant.photo.service.FileSystemService;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,7 +32,7 @@ class FileSystemServiceTest {
 
         //when
         try {
-            expectedList = FileSystemService.convertPathsToPhotos("\\src\\test\\resources\\00-CheckIn\\", rootFilesTest);
+            expectedList = photoService.convertPathsToPhotos("\\src\\test\\resources\\00-CheckIn\\", rootFilesTest);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

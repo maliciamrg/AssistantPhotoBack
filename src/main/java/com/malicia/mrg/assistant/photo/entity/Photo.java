@@ -1,16 +1,27 @@
-package com.malicia.mrg.assistant.photo.pojo;
+package com.malicia.mrg.assistant.photo.entity;
 
+
+import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 
+@Entity
+@Table(name = "photos")
 public class Photo implements Serializable {
     public static final String T_09_15_00_Z = "2024-03-12T09:15:00Z";
     private static final long serialVersionUID = 1L;
-    private UUID id;
-
+    @Id
+    @GeneratedValue
+    private UUID id;  // Will use UUID.randomUUID() or Hibernate strategy
+    private String hash;
     private String path;
-    private byte[] thumbnail;  // BLOB stored as byte array
+
+    @OneToOne(fetch = FetchType.LAZY,mappedBy = "photo", cascade = CascadeType.ALL)
+//    @JoinColumn(name = "thumbnail_id")  // Optional: foreign key on photo table
+    private PhotoThumbnail thumbnail;
+
     private String relativeToPath;
     private String filename;
     private String extension;
@@ -19,11 +30,45 @@ public class Photo implements Serializable {
     private String dateTaken;
     private int rating;
     private String label;
-    private String[] keywords;
     private int pick;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "photo_keywords", joinColumns = @JoinColumn(name = "photo_id"))
+    @Column(name = "keyword")
+    private List<String> keywords;
     public Photo() {
-        //       this.date_taken = T_09_15_00_Z;
+    }
+
+    public PhotoThumbnail getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(PhotoThumbnail thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public List<String> getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(List<String> keywords) {
+        this.keywords = keywords;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
     }
 
     public int getRating() {
@@ -42,14 +87,6 @@ public class Photo implements Serializable {
         this.label = label;
     }
 
-    public String[] getKeywords() {
-        return keywords;
-    }
-
-    public void setKeywords(String[] keywords) {
-        this.keywords = keywords;
-    }
-
     public int getPick() {
         return pick;
     }
@@ -64,14 +101,6 @@ public class Photo implements Serializable {
 
     public void setDateTaken(String dateTaken) {
         this.dateTaken = dateTaken;
-    }
-
-    public byte[] getThumbnail() {
-        return thumbnail;
-    }
-
-    public void setThumbnail(byte[] thumbnailBytes) {
-        this.thumbnail = thumbnailBytes;  // Store the binary data directly
     }
 
     // Getters and setters
@@ -132,9 +161,6 @@ public class Photo implements Serializable {
         this.relativeToPath = relativeToPath;
     }
 
-    public UUID getId() {
-        return id;
-    }
 
     public void mergeFrom(Photo other) {
         if (other == null) {

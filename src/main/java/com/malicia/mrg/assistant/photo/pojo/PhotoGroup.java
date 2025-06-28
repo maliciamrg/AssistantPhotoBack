@@ -1,30 +1,35 @@
 package com.malicia.mrg.assistant.photo.pojo;
 
+import com.malicia.mrg.assistant.photo.dto.PhotoData;
+import com.malicia.mrg.assistant.photo.entity.Photo;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class PhotoGroup implements Iterable<Photo> {
+public class PhotoGroup implements Iterable<PhotoData>, Serializable {
 
-    private List<Photo> photos = new ArrayList();
+    private List<PhotoData> photos = new ArrayList();
 
-    public PhotoGroup(List<Photo> photos) {
+    public PhotoGroup(List<PhotoData> photos) {
         this.photos = photos;
     }
 
     public PhotoGroup() {
     }
 
-    public List<Photo> getPhotos() {
+    public List<PhotoData> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(List<Photo> photos) {
+    public void setPhotos(List<PhotoData> photos) {
         this.photos = photos;
     }
 
     public void add(Photo photo) {
-        photos.add(photo);
+
+        photos.add(new PhotoData(photo.getId(),photo.getHash(),photo.getPath(),photo.getRelativeToPath(),photo.getFilename(),photo.getExtension(),photo.getCreatedDate(),photo.getExifDate(),photo.getDateTaken(),photo.getRating(),photo.getLabel(),photo.getPick(),photo.getKeywords()));
     }
 
     public boolean empty() {
@@ -48,7 +53,7 @@ public class PhotoGroup implements Iterable<Photo> {
     }
 
     @Override
-    public Iterator<Photo> iterator() {
+    public Iterator<PhotoData> iterator() {
         return photos.iterator();
     }
 

@@ -1,8 +1,18 @@
+spring:
+  data:
+    redis:
+      database: 0
+      host: 192.212.10.200
+      port: 6379
+      #      password: yourpassword  # Optional, if your Redis instance requires authentication
+      timeout: 2000  # Optional timeout in milliseconds
+
 assistant:
   rootPath: Y:\
 
 redis:
   enabled: false
+#  enabled: true
 
 management:
   health:

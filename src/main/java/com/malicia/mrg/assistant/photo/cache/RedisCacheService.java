@@ -4,8 +4,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-
 @Service
 @ConditionalOnProperty(name = "redis.enabled", havingValue = "true")
 public class RedisCacheService implements CacheService {
@@ -15,8 +13,8 @@ public class RedisCacheService implements CacheService {
         this.redisTemplate = redisTemplate;
     }
 
-    public void set(String key, Object value, Duration ttl) {
-        redisTemplate.opsForValue().set(key, value, ttl);
+    public void set(String key, Object value) {
+        redisTemplate.opsForValue().set(key, value);
     }
 
     public Object get(String key) {

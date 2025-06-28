@@ -3,11 +3,14 @@ package com.malicia.mrg.assistant.photo.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
+import com.malicia.mrg.assistant.photo.dto.PhotoData;
 import com.malicia.mrg.assistant.photo.dto.ValidationResult;
+import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.exception.NotFoundException;
 import com.malicia.mrg.assistant.photo.pojo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -50,42 +53,25 @@ public class PhotoshootService {
     }
 
     public PhotoGroup getAllPhotoFromPhotoshoot(String seanceId, List<Photoshoot> seanceList) {
-        PhotoGroup cachedPhotos = (PhotoGroup) redisTemplate.get(seanceId);
-        if (cachedPhotos != null) {
-            Long ttlKey = redisTemplate.getExpire(seanceId);
-            logger.info("TTL for key '{}' is: {} seconds", seanceId, ttlKey);
-            return cachedPhotos;
-        }
 
         Photoshoot photoshoot = getPhotoshoot(seanceId, seanceList);
 
-        PhotoGroup allPhotoFromPhotoRepertoire = rootRep.getAllPhotoFromPhotoshoot(photoshoot);
-        redisTemplate.set(seanceId, allPhotoFromPhotoRepertoire, ttl);
-        logger.info("redisTemplate.opsForValue().set : {} ", seanceId);
-        return allPhotoFromPhotoRepertoire;
+        return rootRep.getAllPhotoFromPhotoshoot(photoshoot);
+
     }
 
+    @Cacheable(value = "getPhotoshootList")
     public List<Photoshoot> getPhotoshootList(String photoshootTypeName) {
-        List<Photoshoot> photoshootListCached = (List<Photoshoot>) redisTemplate.get(photoshootTypeName);
-        if (photoshootListCached != null) {
-            Long ttlKey = redisTemplate.getExpire(photoshootTypeName);
-            logger.info("TTL for key '{}' is: {} seconds", photoshootTypeName, ttlKey);
-            return photoshootListCached;
-        }
 
         PhotoshootType photoshootType = getPhotoshootType(photoshootTypeName);
 
         if (photoshootType != null) {
 
-            List<Photoshoot> photoshootList = rootRep.getPhotoshootList(photoshootType.getPhotoshootTypeEnum());
+            return rootRep.getPhotoshootList(photoshootType.getPhotoshootTypeEnum());
 
-            redisTemplate.set(photoshootTypeName, photoshootList, ttl);
-            logger.info("redisTemplate.opsForValue().set :{}", photoshootTypeName);
-
-            return photoshootList;
-        } else {
-            return Collections.emptyList();
         }
+
+        return Collections.emptyList();
     }
 
     public PhotoshootMetaData getMetaDataFromPhotoshoot(String photoshootName, List<Photoshoot> seanceList) {
@@ -95,7 +81,7 @@ public class PhotoshootService {
 
         PhotoshootMetaDataAccumulator accumulator = new PhotoshootMetaDataAccumulator();
 
-        for (Photo photo : listPhoto) {
+        for (PhotoData photo : listPhoto) {
             accumulator.accumulate(photo);
         }
 
@@ -162,7 +148,7 @@ public class PhotoshootService {
 
         PhotoshootMetaDataAccumulator accumulator = new PhotoshootMetaDataAccumulator();
 
-        for (Photo photo : listPhoto) {
+        for (PhotoData photo : listPhoto) {
             accumulator.accumulate(photo);
         }
 
@@ -296,6 +282,7 @@ public class PhotoshootService {
         return true;
     }
 
+    @Cacheable(value = "getPhotoshootType")
     public PhotoshootType getPhotoshootType(String photoshootTypeName) {
         Optional<PhotoshootType> photoshootType = config.getPhotoshootType().stream().filter(seance -> photoshootTypeName.equals(seance.getPhotoshootTypeEnum().name())).findFirst();
 

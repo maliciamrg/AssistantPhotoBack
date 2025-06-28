@@ -4,9 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.cache.CacheService;
+import com.malicia.mrg.assistant.photo.dto.PhotoData;
 import com.malicia.mrg.assistant.photo.service.FileSystemService;
 import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
-import com.malicia.mrg.assistant.photo.pojo.Photo;
+import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
 import com.malicia.mrg.assistant.photo.pojo.PhotoshootTypeEnum;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
@@ -41,7 +42,7 @@ class RootRepertoireTest {
     @Test
     void getPhotoshootListAllin() {
         //given
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
         List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.ALL_IN);
@@ -58,7 +59,7 @@ class RootRepertoireTest {
     @Test
     void getAllPhotoRepertoireEvents() {
         //given
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
         List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.EVENTS);
@@ -75,7 +76,7 @@ class RootRepertoireTest {
     @Test
     void getAllPhotoRepertoireAllInFromSeanceRepertoire() {
         //given
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
         List<Photoshoot> photoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.ALL_IN);
@@ -92,7 +93,7 @@ class RootRepertoireTest {
     @Test
     void getAllPhotoRepertoireAllIn() {
         //given
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
         List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.ALL_IN);
@@ -109,7 +110,7 @@ class RootRepertoireTest {
     @Test
     void getAssistantWorkRepertoire() {
         //given
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
         List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.ASSISTANT_WORK);
@@ -129,7 +130,7 @@ class RootRepertoireTest {
         //given
         Path rootTest = Paths.get("src", "test", "resources");
         mockConfig.setRootPath("./" + rootTest + "/");
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
         List<Photoshoot> assistantRepertoire = rootRep.getPhotoshootList(PhotoshootTypeEnum.ALL_IN);
@@ -137,7 +138,7 @@ class RootRepertoireTest {
 
         //then
         System.out.println(allPhotoFromSeanceRepertoire);
-        for (Photo photo : allPhotoFromSeanceRepertoire) {
+        for (PhotoData photo : allPhotoFromSeanceRepertoire) {
             System.out.println(photo);
         }
         assertEquals(7, allPhotoFromSeanceRepertoire.size());
@@ -149,7 +150,7 @@ class RootRepertoireTest {
         //given
         Path rootTest = Paths.get("src", "test", "resources");
         mockConfig.setRootPath("./" + rootTest + "/");
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
         List<Photoshoot> assistantRepertoire = rootRep.getPhotoshootList(PhotoshootTypeEnum.EVENTS);
@@ -158,13 +159,13 @@ class RootRepertoireTest {
 
         //then
         System.out.println(allPhotoFromPhotoRepertoire0);
-        for (Photo photo : allPhotoFromPhotoRepertoire0) {
+        for (PhotoData photo : allPhotoFromPhotoRepertoire0) {
             System.out.println(photo);
         }
         assertEquals(3, allPhotoFromPhotoRepertoire0.size());
 
         System.out.println(allPhotoFromPhotoRepertoire1);
-        for (Photo photo : allPhotoFromPhotoRepertoire1) {
+        for (PhotoData photo : allPhotoFromPhotoRepertoire1) {
             System.out.println(photo);
         }
         assertEquals(1, allPhotoFromPhotoRepertoire1.size());
@@ -178,7 +179,7 @@ class RootRepertoireTest {
     void getAllPhotoFromAllInRealToJson() {
         //given
         mockConfig.setRootPath("\\\\192.212.5.111\\80-Photo\\");
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
         String jsonDest = mockConfig.getRootPath() + "/getAllPhotoFromAllInRealToJsonTEST-out.json";
 
         //when
@@ -206,7 +207,7 @@ class RootRepertoireTest {
         //given
         Path rootTest = Paths.get("src", "test", "resources");
         mockConfig.setRootPath("./" + rootTest + "/");
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
         List<Photoshoot> assistantRepertoires = rootRep.getPhotoshootList(PhotoshootTypeEnum.EVENTS);
@@ -215,7 +216,7 @@ class RootRepertoireTest {
         //then
         System.out.println(assistantRepertoires);
         System.out.println(allPhotoFromSeanceRepertoire);
-        for (Photo photo : allPhotoFromSeanceRepertoire) {
+        for (PhotoData photo : allPhotoFromSeanceRepertoire) {
             System.out.println(photo);
         }
         assertEquals(3, allPhotoFromSeanceRepertoire.size());
@@ -227,7 +228,7 @@ class RootRepertoireTest {
         //given
         Path rootTest = Paths.get("src", "test", "resources");
         mockConfig.setRootPath("./" + rootTest + "/");
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
         String jsonSrc = mockConfig.getRootPath() + "/getAllPhotoFromAllInRealToJsonTEST.json";
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(jsonSrc);
@@ -266,7 +267,7 @@ class RootRepertoireTest {
         //given
         Path rootTest = Paths.get("src", "test", "resources");
         mockConfig.setRootPath("./" + rootTest + "/");
-        RootRepertoire rootRep = new RootRepertoire(mockConfig);
+        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
         String jsonSrc = mockConfig.getRootPath() + "/getGroupOfPhotoTEST.json";
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(jsonSrc);

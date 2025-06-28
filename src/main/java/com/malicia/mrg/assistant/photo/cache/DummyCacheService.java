@@ -3,13 +3,11 @@ package com.malicia.mrg.assistant.photo.cache;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-
 @Service
 @ConditionalOnProperty(name = "redis.enabled", havingValue = "false", matchIfMissing = false)
 public class DummyCacheService implements CacheService {
 
-    public void set(String key, Object value, Duration ttl) { // default implementation ignored
+    public void set(String key, Object value) { // default implementation ignored
     }
 
     public Object get(String key) {

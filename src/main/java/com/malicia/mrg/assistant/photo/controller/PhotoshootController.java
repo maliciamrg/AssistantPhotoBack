@@ -54,7 +54,7 @@ public class PhotoshootController {
         String[] photoshootNameNewParts = photoshootNameNew.split("_");
         ValidationResult validationResult = photoshootService.validatePhotoshoot(photoshootTypeName , photoshoot, photoshootNameNewParts);
 
-        RootRepertoire.moveGroupToDestinationFolder(photoshootNameNew, photoshoot.getGroupOfPhoto(), false, config.getDryRun());
+        RootRepertoire.moveGroupToDestinationFolder(config.getRootPath() + photoshootNameNew, photoshoot.getGroupOfPhoto(), false, config.getDryRun());
 
         Map<String, Object> response = new HashMap<>();
         response.put("photoshootName", photoshootName);

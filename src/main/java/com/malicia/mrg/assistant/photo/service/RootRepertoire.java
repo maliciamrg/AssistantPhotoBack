@@ -3,7 +3,10 @@ package com.malicia.mrg.assistant.photo.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
+import com.malicia.mrg.assistant.photo.dto.PhotoData;
+import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.pojo.*;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -22,9 +25,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RootRepertoire {
 
     private final MyConfig config;
+    private final PhotoService photoService;
 
-    public RootRepertoire(MyConfig config) {
+    public RootRepertoire(MyConfig config, PhotoService photoService) {
         this.config = config;
+        this.photoService = photoService;
         controlConfig(config);
     }
 
@@ -93,7 +98,7 @@ public class RootRepertoire {
 
         try {
             List<Path> listPath = FileSystemService.getAllFilesFromFolderAndSubFolderWithType(pathToScan, includeTypeFile);
-            expectedList = FileSystemService.convertPathsToPhotos(pathToScan, listPath);
+            expectedList = photoService.convertPathsToPhotos(pathToScan, listPath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -162,7 +167,7 @@ public class RootRepertoire {
             LocalDateTime photoExifDate = parseDate(photo.getExifDate());
 
             // Check if the photo can be added to the current group
-            for (Photo groupPhoto : currentGroup) {
+            for (PhotoData groupPhoto : currentGroup) {
                 LocalDateTime groupExifDate = parseDate(groupPhoto.getExifDate());
                 // Calculate the difference in minutes
                 long diffInMinutes = Duration.between(groupExifDate, photoExifDate).toMinutes();
@@ -241,19 +246,19 @@ public class RootRepertoire {
     }
 
     public PhotoGroup getAllPhotoFromPhotoshoot(Photoshoot photoshoot) {
-        PhotoGroup expectedList = new PhotoGroup();
+        PhotoGroup photoGroup = new PhotoGroup();
 
         String pathToScan = photoshoot.getPath();
         List<String> includeTypeFile = config.getFileExtensionsToWorkWith();
 
         try {
             List<Path> listPath = FileSystemService.getAllFilesFromFolderAndSubFolderWithType(pathToScan, includeTypeFile);
-            expectedList.addAll(FileSystemService.convertPathsToPhotos(pathToScan, listPath));
+            photoGroup.addAll(photoService.convertPathsToPhotos(pathToScan, listPath));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        return expectedList;
+        return photoGroup;
     }
 }
 

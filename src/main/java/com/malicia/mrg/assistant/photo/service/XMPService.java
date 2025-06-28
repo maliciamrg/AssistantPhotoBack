@@ -10,6 +10,7 @@ import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.List;
 
 @Service
 public class XMPService {
@@ -50,7 +51,7 @@ public class XMPService {
             xmpMeta.setProperty("http://ns.adobe.com/lightroom/1.0/", "Pick", xmpPhoto.getPick());
 
         // Mots-clés (dc:subject)
-        if (xmpPhoto.getKeywords() != null && xmpPhoto.getKeywords().length > 0) {
+        if (xmpPhoto.getKeywords() != null && xmpPhoto.getKeywords().size() > 0) {
             xmpMeta.deleteProperty(XMPConst.NS_DC, "subject"); // Supprimer l'ancien tableau pour éviter doublons
             for (String keyword : xmpPhoto.getKeywords()) {
                 xmpMeta.appendArrayItem(XMPConst.NS_DC, "subject", new PropertyOptions(PropertyOptions.ARRAY_ORDERED | PropertyOptions.ARRAY_ALTERNATE), keyword, null);
@@ -115,7 +116,7 @@ public class XMPService {
                         tmpKeyWord[i - 1] = tag.getValue();
                     }
                 }
-                xmpPhoto.setKeywords(tmpKeyWord);
+                xmpPhoto.setKeywords(List.of(tmpKeyWord));
             }
 
             // Lightroom Pick flag

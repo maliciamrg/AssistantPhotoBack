@@ -1,6 +1,10 @@
 package com.malicia.mrg.assistant.photo.pojo;
 
+import com.malicia.mrg.assistant.photo.dto.PhotoData;
+import com.malicia.mrg.assistant.photo.entity.Photo;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PhotoshootMetaDataAccumulator {
@@ -14,12 +18,12 @@ public class PhotoshootMetaDataAccumulator {
     private int nbSelectedPhoto = 0;
     private int nbPhotoTotal = 0;
 
-    public void accumulate(Photo photo) {
+    public void accumulate(PhotoData photo) {
         nbPhotoTotal++;
 
         int pick = photo.getPick();
         String label = photo.getLabel();
-        String[] tags = photo.getKeywords();
+        List<String> tags = photo.getKeywords();
         String exifDate = photo.getExifDate();
         int rating = photo.getRating();
 
