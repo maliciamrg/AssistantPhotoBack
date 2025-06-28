@@ -18,10 +18,6 @@ public class Photo implements Serializable {
     private String hash;
     private String path;
 
-    @OneToOne(fetch = FetchType.LAZY,mappedBy = "photo", cascade = CascadeType.ALL)
-//    @JoinColumn(name = "thumbnail_id")  // Optional: foreign key on photo table
-    private PhotoThumbnail thumbnail;
-
     private String relativeToPath;
     private String filename;
     private String extension;
@@ -32,10 +28,15 @@ public class Photo implements Serializable {
     private String label;
     private int pick;
 
+
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "photo_keywords", joinColumns = @JoinColumn(name = "photo_id"))
     @Column(name = "keyword")
     private List<String> keywords;
+
+    @OneToOne(mappedBy = "photo", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private PhotoThumbnail thumbnail;
+
     public Photo() {
     }
 
@@ -150,7 +151,14 @@ public class Photo implements Serializable {
 
     @Override
     public String toString() {
-        return "Photo{" + "path='" + path + '\'' + ", relativeToPath='" + relativeToPath + '\'' + ", filename='" + filename + '\'' + ", extension='" + extension + '\'' + ", createdDate='" + createdDate + '\'' + ", exifDate='" + exifDate + '\'' + '}';
+        return "Photo{" +
+                "path='" + path + '\'' +
+                ", relativeToPath='" + relativeToPath + '\'' +
+                ", filename='" + filename + '\'' +
+                ", extension='" + extension + '\'' +
+                ", createdDate='" + createdDate + '\'' +
+                ", exifDate='" + exifDate + '\'' +
+                '}';
     }
 
     public String getRelativeToPath() {

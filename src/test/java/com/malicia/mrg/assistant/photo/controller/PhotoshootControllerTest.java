@@ -2,7 +2,6 @@ package com.malicia.mrg.assistant.photo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
-import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.dto.UpdateRepertoireNameRequestDto;
 import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
@@ -51,8 +50,8 @@ class PhotoshootControllerTest {
 
     @MockBean
     public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory;
-    @MockBean
-    private CacheService redisTemplate;
+//    @MockBean
+//    private CacheService redisTemplate;
     @MockBean
     private RedisConnectionFactory redisConnectionFactory;
     @MockBean
@@ -75,8 +74,8 @@ class PhotoshootControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        when(redisTemplate.get(anyString())).thenReturn(null);
-        doNothing().when(redisTemplate).set(anyString(), any());
+//        when(redisTemplate.get(anyString())).thenReturn(null);
+//        doNothing().when(redisTemplate).set(anyString(), any());
         when(tagService.getTagListByName("00_EVENT")).thenReturn(Arrays.asList("fete","spectacle"));
         when(tagService.getTagListByName("00_WHERE")).thenReturn(Arrays.asList("maison","antony"));
         when(tagService.getTagListByName("00_WHAT")).thenReturn(Arrays.asList("train", "boat","laureline"));

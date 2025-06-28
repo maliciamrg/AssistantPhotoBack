@@ -3,8 +3,7 @@ package com.malicia.mrg.assistant.photo.repertoire;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
-import com.malicia.mrg.assistant.photo.cache.CacheService;
-import com.malicia.mrg.assistant.photo.dto.PhotoData;
+import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 import com.malicia.mrg.assistant.photo.service.FileSystemService;
 import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
 import com.malicia.mrg.assistant.photo.entity.Photo;
@@ -29,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class RootRepertoireTest {
-    @MockBean
-    private CacheService redisTemplate;
+//    @MockBean
+//    private CacheService redisTemplate;
     @Autowired
     private MyConfig mockConfig; // Mocking the MyConfig dependency
 
@@ -138,7 +137,7 @@ class RootRepertoireTest {
 
         //then
         System.out.println(allPhotoFromSeanceRepertoire);
-        for (PhotoData photo : allPhotoFromSeanceRepertoire) {
+        for (PhotoDTO photo : allPhotoFromSeanceRepertoire) {
             System.out.println(photo);
         }
         assertEquals(7, allPhotoFromSeanceRepertoire.size());
@@ -159,13 +158,13 @@ class RootRepertoireTest {
 
         //then
         System.out.println(allPhotoFromPhotoRepertoire0);
-        for (PhotoData photo : allPhotoFromPhotoRepertoire0) {
+        for (PhotoDTO photo : allPhotoFromPhotoRepertoire0) {
             System.out.println(photo);
         }
         assertEquals(3, allPhotoFromPhotoRepertoire0.size());
 
         System.out.println(allPhotoFromPhotoRepertoire1);
-        for (PhotoData photo : allPhotoFromPhotoRepertoire1) {
+        for (PhotoDTO photo : allPhotoFromPhotoRepertoire1) {
             System.out.println(photo);
         }
         assertEquals(1, allPhotoFromPhotoRepertoire1.size());
@@ -211,12 +210,12 @@ class RootRepertoireTest {
 
         //when
         List<Photoshoot> assistantRepertoires = rootRep.getPhotoshootList(PhotoshootTypeEnum.EVENTS);
-        PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoire(assistantRepertoires.get(0));
+        List<PhotoDTO> allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoire(assistantRepertoires.get(0));
 
         //then
         System.out.println(assistantRepertoires);
         System.out.println(allPhotoFromSeanceRepertoire);
-        for (PhotoData photo : allPhotoFromSeanceRepertoire) {
+        for (PhotoDTO photo : allPhotoFromSeanceRepertoire) {
             System.out.println(photo);
         }
         assertEquals(3, allPhotoFromSeanceRepertoire.size());

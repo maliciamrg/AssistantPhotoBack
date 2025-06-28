@@ -1,7 +1,5 @@
 package com.malicia.mrg.assistant.photo.pojo;
 
-import org.springframework.cache.annotation.Cacheable;
-
 import java.io.Serializable;
 
 public class Photoshoot implements Serializable {

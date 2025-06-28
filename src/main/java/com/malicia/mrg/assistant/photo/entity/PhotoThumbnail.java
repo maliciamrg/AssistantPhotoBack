@@ -8,6 +8,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "photo_thumbnail")
 public class PhotoThumbnail implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue
@@ -15,7 +16,7 @@ public class PhotoThumbnail implements Serializable {
 
     private byte[] data;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "photo_id", nullable = false, unique = true)
     private Photo photo;
 

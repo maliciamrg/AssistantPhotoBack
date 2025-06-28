@@ -2,7 +2,6 @@ package com.malicia.mrg.assistant.photo.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
-import com.malicia.mrg.assistant.photo.cache.CacheService;
 import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +38,6 @@ class PhotoshootTypeControllerTest {
     @MockBean
     public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory;
     @MockBean
-    private CacheService redisTemplate;
-    @MockBean
     private RedisConnectionFactory redisConnectionFactory;
     @MockBean
     private ReactiveHealthContributor redisHealthContributor;
@@ -59,8 +56,8 @@ class PhotoshootTypeControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        when(redisTemplate.get(anyString())).thenReturn(null);
-        doNothing().when(redisTemplate).set(anyString(), any());
+//        when(redisTemplate.get(anyString())).thenReturn(null);
+//        doNothing().when(redisTemplate).set(anyString(), any());
 
 //        PhotoshootMetaData metaData = new PhotoshootMetaData();
 //        metaData.setLowerDate("2023-06-01");

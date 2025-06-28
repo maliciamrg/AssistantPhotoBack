@@ -24,30 +24,34 @@ public class FileSystemService {
     private FileSystemService() {
     }
 
-    public static List<Path> getAllFilesFromFolderAndSubFolderWithType(String rootDir, List<String> authorizedExtensions) throws IOException {
+    public static List<Path> getAllFilesFromFolderAndSubFolderWithType(String rootDir, List<String> authorizedExtensions) {
         Path rootPath = Paths.get(rootDir);
         List<Path> matchingFiles = new ArrayList<>();
 
         // Walk through the directory tree
-        Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                // Check if the file has an authorized extension
-                String fileName = file.getFileName().toString();
-                String extension = getFileExtension(fileName);
+        try {
+            Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    // Check if the file has an authorized extension
+                    String fileName = file.getFileName().toString();
+                    String extension = getFileExtension(fileName);
 
-                if (authorizedExtensions.contains(extension)) {
-                    matchingFiles.add(file);
+                    if (authorizedExtensions.contains(extension)) {
+                        matchingFiles.add(file);
+                    }
+                    return FileVisitResult.CONTINUE;
                 }
-                return FileVisitResult.CONTINUE;
-            }
 
-            @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                // Handle errors, such as permissions, here if needed
-                return FileVisitResult.CONTINUE;
-            }
-        });
+                @Override
+                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                    // Handle errors, such as permissions, here if needed
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return matchingFiles;
     }

@@ -2,10 +2,8 @@ package com.malicia.mrg.assistant.photo.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
-import com.malicia.mrg.assistant.photo.cache.CacheService;
-import com.malicia.mrg.assistant.photo.dto.PhotoData;
+import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 import com.malicia.mrg.assistant.photo.dto.ValidationResult;
-import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.exception.NotFoundException;
 import com.malicia.mrg.assistant.photo.pojo.*;
 import org.slf4j.Logger;
@@ -28,15 +26,14 @@ public class PhotoshootService {
 
     private static final Logger logger = LoggerFactory.getLogger(PhotoshootService.class);
 
-    private final CacheService redisTemplate;
     private final RootRepertoire rootRep;
     private final MyConfig config;
     private final TagService tagService;
 
     private final Duration ttl = Duration.ofMinutes(1);
 
-    public PhotoshootService(CacheService redisTemplate, RootRepertoire rootRep, MyConfig config, TagService tagService) {
-        this.redisTemplate = redisTemplate;
+    public PhotoshootService(RootRepertoire rootRep, MyConfig config, TagService tagService) {
+        System.out.println("----- ----- ----> PhotoshootService.cacheService");
         this.rootRep = rootRep;
         this.config = config;
         this.tagService = tagService;
@@ -81,7 +78,7 @@ public class PhotoshootService {
 
         PhotoshootMetaDataAccumulator accumulator = new PhotoshootMetaDataAccumulator();
 
-        for (PhotoData photo : listPhoto) {
+        for (PhotoDTO photo : listPhoto) {
             accumulator.accumulate(photo);
         }
 
@@ -148,7 +145,7 @@ public class PhotoshootService {
 
         PhotoshootMetaDataAccumulator accumulator = new PhotoshootMetaDataAccumulator();
 
-        for (PhotoData photo : listPhoto) {
+        for (PhotoDTO photo : listPhoto) {
             accumulator.accumulate(photo);
         }
 

@@ -16,7 +16,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Optional;
 
-@EnableCaching
 @SpringBootApplication
 public class AssistantPhotoApplication {
     public static final String HTTP_DEFAULT_PORT = "8080";

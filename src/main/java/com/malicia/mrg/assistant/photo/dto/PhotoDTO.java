@@ -1,14 +1,16 @@
 package com.malicia.mrg.assistant.photo.dto;
 
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+public class PhotoDTO implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-public class PhotoData implements Serializable {
+    public PhotoDTO() {
+    }
 
-    private UUID id;  // Will use UUID.randomUUID() or Hibernate strategy
+    private UUID id;
     private String hash;
     private String path;
     private String relativeToPath;
@@ -22,22 +24,19 @@ public class PhotoData implements Serializable {
     private int pick;
     private List<String> keywords;
 
-    public PhotoData() {
-    }
-
-    public PhotoData(UUID id,
-                     String hash,
-                     String path,
-                     String relativeToPath,
-                     String filename,
-                     String extension,
-                     String createdDate,
-                     String exifDate,
-                     String dateTaken,
-                     int rating,
-                     String label,
-                     int pick,
-                     List<String> keywords) {
+    public PhotoDTO(UUID id,
+                    String hash,
+                    String path,
+                    String relativeToPath,
+                    String filename,
+                    String extension,
+                    String createdDate,
+                    String exifDate,
+                    String dateTaken,
+                    int rating,
+                    String label,
+                    int pick,
+                    List<String> keywords) {
         this.id = id;
         this.hash = hash;
         this.path = path;
@@ -156,45 +155,4 @@ public class PhotoData implements Serializable {
     public void setKeywords(List<String> keywords) {
         this.keywords = keywords;
     }
-
-    public void mergeFrom(PhotoData other) {
-        if (other == null) {
-            return;  // No data to merge if the other Photo is null
-        }
-
-        if (other.path != null) {
-            this.path = other.path;
-        }
-        if (other.relativeToPath != null) {
-            this.relativeToPath = other.relativeToPath;
-        }
-        if (other.filename != null) {
-            this.filename = other.filename;
-        }
-        if (other.extension != null) {
-            this.extension = other.extension;
-        }
-        if (other.createdDate != null) {
-            this.createdDate = other.createdDate;
-        }
-        if (other.exifDate != null) {
-            this.exifDate = other.exifDate;
-        }
-        if (other.dateTaken != null) {
-            this.dateTaken = other.dateTaken;
-        }
-        //     if (other.rating != null) {
-        this.rating = other.rating;
-        //     }
-        if (other.label != null) {
-            this.label = other.label;
-        }
-        if (other.keywords != null) {
-            this.keywords = other.keywords;
-        }
-        //    if (other.pick != null) {
-        this.pick = other.pick;
-        //    }
-    }
-
 }

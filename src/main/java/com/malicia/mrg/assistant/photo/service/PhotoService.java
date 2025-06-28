@@ -3,14 +3,15 @@ package com.malicia.mrg.assistant.photo.service;
 import com.adobe.internal.xmp.XMPException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
-import com.malicia.mrg.assistant.photo.dto.PhotoData;
+import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
+import com.malicia.mrg.assistant.photo.dto.PhotoMapper;
 import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.entity.PhotoThumbnail;
 import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
 import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
 import com.malicia.mrg.assistant.photo.repository.PhotoRepository;
 import com.malicia.mrg.assistant.photo.repository.PhotoThumbnailRepository;
-import org.postgresql.jdbc.PgArray;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -31,53 +33,99 @@ import static com.drew.metadata.exif.ExifDirectoryBase.TAG_DATETIME;
 public class PhotoService {
 
     private final PhotoRepository photoRepository;
-    private final PhotoThumbnailRepository photoThumbnailRepository;
+    private final ThumbnailService thumbnailService;
 
-    public PhotoService(PhotoRepository photoRepository, PhotoThumbnailRepository photoThumbnailRepository) {
+    public PhotoService(PhotoRepository photoRepository, ThumbnailService thumbnailService) {
         this.photoRepository = photoRepository;
-        this.photoThumbnailRepository = photoThumbnailRepository;
+        this.thumbnailService = thumbnailService;
     }
 
-    public PhotoGroup convertPathsToPhotos(String rootDir, List<Path> paths) throws IOException {
-        PhotoGroup photoGroup = new PhotoGroup();
+    @Cacheable(value = "convertPathsToPhotos", key = "#rootDir")
+    public List<PhotoDTO> convertPathsToPhotos(String rootDir, List<Path> paths) {
+        List<PhotoDTO> photoDTOList = new ArrayList<>();
 
         for (Path path : paths) {
 
-            Photo photo = getPhotoFromPath(rootDir, path);
+//            System.out.println("@Cacheable key = " + path.getParent().getFileName().toString() + ':' + path.getFileName().toString());
+            PhotoDTO photo = getPhotoDataFromPath(rootDir, path);
 
-            photoGroup.add(photo);
+            photoDTOList.add(photo);
 
         }
 
-        return photoGroup;
+        return photoDTOList;
     }
 
-    @Cacheable(value = "getPhotoFromPath")
-    public Photo getPhotoFromPath(String rootDir, Path path) throws IOException {
+    public Photo getPhotoFromPath(String rootDir, Path path) {
         // Create a new Photo object
         Photo photo = new Photo();
 
         AddPhotoHashFromFile(path, photo);
 
-        Optional<Photo> existingPhoto = photoRepository.findByHash(photo.getHash());
-        if (existingPhoto.isPresent()) {
-            photo = existingPhoto.get();
-            System.out.println("Reusing photo detected with hash: " + photo.getHash() + " \n"+ "[(existing) " + photo.getPath() + " \n"+"[(new)      " + path + " ]");
-        } else {
+        try {
 
-            addPhotoDataFromFile(rootDir, path, photo);
+            Optional<Photo> existingPhoto = photoRepository.findByHash(photo.getHash());
+            if (existingPhoto.isPresent()) {
+                photo = existingPhoto.get();
+                if (photo.getPath().equals(path)) {
+                    System.out.println("/!\\  photo with hash: " + photo.getHash() + " \n" + "[(existing) " + photo.getPath() + " \n" + "[(new)      " + path + " ]");
+                }
+            } else {
 
-            // Reach xmp if exist
-            addPhotoDataFromXmpSidecar(path, photo);
+                addPhotoDataFromFile(rootDir, path, photo);
 
-            photo.setThumbnail(generateThumbnail(photo));
+                // Reach xmp if exist
+                addPhotoDataFromXmpSidecar(path, photo);
 
-            photoRepository.save(photo);
+                photo.setThumbnail(thumbnailService.generateThumbnail(photo));
 
-         //   photoThumbnailRepository.save(generateThumbnail(photo));
+                photoRepository.save(photo);
 
+                //   photoThumbnailRepository.save(generateThumbnail(photo));
+
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
         return photo;
+    }
+
+    @Cacheable(value = "getPhotoDataFromPath", key = "#rootDir")
+    public PhotoDTO getPhotoDataFromPath(String rootDir, Path path) {
+
+        // Create a new Photo object
+        Photo photo = new Photo();
+
+        AddPhotoHashFromFile(path, photo);
+
+        try {
+            Optional<Photo> existingPhoto = photoRepository.findByHash(photo.getHash());
+            if (existingPhoto.isPresent()) {
+                photo = existingPhoto.get();
+                if (photo.getPath().equals(path)) {
+                    System.out.println("/!\\  photo with hash: " + photo.getHash() + " \n" + "[(existing) " + photo.getPath() + " \n" + "[(new)      " + path + " ]");
+                }
+            } else {
+
+                addPhotoDataFromFile(rootDir, path, photo);
+
+                // Reach xmp if exist
+
+                addPhotoDataFromXmpSidecar(path, photo);
+
+
+                photo.setThumbnail(thumbnailService.generateThumbnail(photo));
+
+                photoRepository.save(photo);
+
+                //   photoThumbnailRepository.save(generateThumbnail(photo));
+
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return PhotoMapper.toDto(photo);
     }
 
     private void addPhotoDataFromFile(String rootDir, Path path, Photo photo) {
@@ -164,48 +212,6 @@ public class PhotoService {
         }
     }
 
-    private PhotoThumbnail generateThumbnail(Photo photo) {
-        PhotoThumbnail photoThumbnail = new PhotoThumbnail();
-        photoThumbnail.setPhoto(photo);
-
-        try {
-
-            // Load the image file
-            BufferedImage originalImage = FileSystemService.getBufferedImage(photo.getPath());
-
-            if (originalImage != null) {
-                // Set the dimensions for the thumbnail
-                int thumbnailWidth = originalImage.getWidth() / 5; // Set desired thumbnail width
-                int thumbnailHeight = originalImage.getHeight() / 5; // Set desired thumbnail height
-
-                // Create a scaled instance (thumbnail)
-                Image thumbnail = originalImage.getScaledInstance(thumbnailWidth, thumbnailHeight, Image.SCALE_SMOOTH);
-
-                // Optionally, you can create a BufferedImage for the thumbnail if you need it in BufferedImage format
-                BufferedImage bufferedThumbnail = new BufferedImage(thumbnailWidth, thumbnailHeight, BufferedImage.TYPE_INT_ARGB);
-                bufferedThumbnail.getGraphics().drawImage(thumbnail, 0, 0, null);
-
-                // Convert BufferedImage to byte array
-                byte[] thumbnailBytes = imageToByteArray(bufferedThumbnail, "PNG");
-                System.out.println("Thumbnail size: " + thumbnailBytes.length);
-                System.out.println("First byte: " + thumbnailBytes[0]);
-                photoThumbnail.setData(thumbnailBytes);
-
-            }
-
-        } catch (IOException e) {
-            System.out.println("Error reading the image file: " + e.getMessage());
-        }
-        return photoThumbnail;
-    }
-
-    // Utility method to convert a BufferedImage to a byte array
-    private byte[] imageToByteArray(BufferedImage image, String format) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ImageIO.write(image, format, byteArrayOutputStream);  // Write the image to the byte array output stream
-        return byteArrayOutputStream.toByteArray();  // Return the byte array
-    }
-
     // Helper method to get EXIF date from an image file
     private String getExifDate(Path path) {
         try {
@@ -248,7 +254,7 @@ public class PhotoService {
     }
 
     public PhotoGroup saveAllPhotos(PhotoGroup photos, boolean writeXmp) {
-        for (PhotoData photo : photos) {
+        for (PhotoDTO photo : photos) {
 
             //PhotoThumbnail photoThumbnail = new PhotoThumbnail();
             //photoThumbnail.setPhoto(photo);

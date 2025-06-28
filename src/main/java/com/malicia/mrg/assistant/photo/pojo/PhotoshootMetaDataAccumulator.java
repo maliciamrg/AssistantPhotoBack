@@ -1,7 +1,6 @@
 package com.malicia.mrg.assistant.photo.pojo;
 
-import com.malicia.mrg.assistant.photo.dto.PhotoData;
-import com.malicia.mrg.assistant.photo.entity.Photo;
+import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +17,7 @@ public class PhotoshootMetaDataAccumulator {
     private int nbSelectedPhoto = 0;
     private int nbPhotoTotal = 0;
 
-    public void accumulate(PhotoData photo) {
+    public void accumulate(PhotoDTO photo) {
         nbPhotoTotal++;
 
         int pick = photo.getPick();

@@ -1,6 +1,6 @@
 package com.malicia.mrg.assistant.photo.pojo;
 
-import com.malicia.mrg.assistant.photo.dto.PhotoData;
+import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 import com.malicia.mrg.assistant.photo.entity.Photo;
 
 import java.io.Serializable;
@@ -8,30 +8,32 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class PhotoGroup implements Iterable<PhotoData>, Serializable {
+public class PhotoGroup implements Iterable<PhotoDTO>, Serializable {
 
-    private List<PhotoData> photos = new ArrayList();
+    private List<PhotoDTO> photos = new ArrayList();
 
-    public PhotoGroup(List<PhotoData> photos) {
+    public PhotoGroup(List<PhotoDTO> photos) {
         this.photos = photos;
     }
 
     public PhotoGroup() {
     }
 
-    public List<PhotoData> getPhotos() {
+    public List<PhotoDTO> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(List<PhotoData> photos) {
+    public void setPhotos(List<PhotoDTO> photos) {
         this.photos = photos;
     }
 
     public void add(Photo photo) {
-
-        photos.add(new PhotoData(photo.getId(),photo.getHash(),photo.getPath(),photo.getRelativeToPath(),photo.getFilename(),photo.getExtension(),photo.getCreatedDate(),photo.getExifDate(),photo.getDateTaken(),photo.getRating(),photo.getLabel(),photo.getPick(),photo.getKeywords()));
+        photos.add(new PhotoDTO(photo.getId(),photo.getHash(),photo.getPath(),photo.getRelativeToPath(),photo.getFilename(),photo.getExtension(),photo.getCreatedDate(),photo.getExifDate(),photo.getDateTaken(),photo.getRating(),photo.getLabel(),photo.getPick(),photo.getKeywords()));
     }
 
+    public void add(PhotoDTO photoDTO) {
+        photos.add(photoDTO);
+    }
     public boolean empty() {
         return photos.size() == 0;
     }
@@ -53,7 +55,7 @@ public class PhotoGroup implements Iterable<PhotoData>, Serializable {
     }
 
     @Override
-    public Iterator<PhotoData> iterator() {
+    public Iterator<PhotoDTO> iterator() {
         return photos.iterator();
     }
 
