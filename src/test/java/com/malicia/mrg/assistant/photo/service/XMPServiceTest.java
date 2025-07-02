@@ -17,8 +17,7 @@ import java.util.List;
 
 @SpringBootTest
 class XMPServiceTest {
-//    @MockBean
-//    private CacheService redisTemplate;
+
     @Autowired
     private MyConfig mockConfig; // Mocking the MyConfig dependency
 

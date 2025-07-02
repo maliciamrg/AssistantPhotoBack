@@ -27,21 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ImportAutoConfiguration(exclude = {
-        org.springframework.boot.actuate.autoconfigure.health.HealthContributorAutoConfiguration.class,
-        org.springframework.boot.actuate.autoconfigure.health.HealthEndpointAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class,
-        org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration.class
-})
 class PhotoshootTypeControllerTest {
-
-    @MockBean
-    public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory;
-    @MockBean
-    private RedisConnectionFactory redisConnectionFactory;
-    @MockBean
-    private ReactiveHealthContributor redisHealthContributor;
-
 
     @Autowired
     private PhotoshootService photoshootService;
@@ -74,7 +60,7 @@ class PhotoshootTypeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(7))
                 .andExpect(jsonPath("$[0].photoshootTypeEnum").value("ALL_IN"))
-                .andExpect(jsonPath("$[0].photoshootList[0].path").value("00-CheckIn"))
+                .andExpect(jsonPath("$[0].photoshootRoot[0].path").value("00-CheckIn"))
                 .andDo(print());
     }
 
@@ -83,7 +69,7 @@ class PhotoshootTypeControllerTest {
         mockMvc.perform(get("/api/photoshoot-type/EVENTS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.photoshootTypeEnum").value("EVENTS"))
-                .andExpect(jsonPath("$.photoshootList.length()").value(1));
+                .andExpect(jsonPath("$.photoshootRoot.length()").value(1));
     }
 
     @Test
@@ -91,7 +77,7 @@ class PhotoshootTypeControllerTest {
         mockMvc.perform(get("/api/photoshoot-type/ALL_IN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.photoshootTypeEnum").value("ALL_IN"))
-                .andExpect(jsonPath("$.photoshootList.length()").value(2));
+                .andExpect(jsonPath("$.photoshootRoot.length()").value(2));
     }
 
     @Test
@@ -106,7 +92,7 @@ class PhotoshootTypeControllerTest {
 
     @Test
     void testGetPhotoshootByType() throws Exception {
-        mockMvc.perform(get("/api/photoshoot-type/EVENTS/photoshoot"))
+        mockMvc.perform(get("/api/photoshoot-type/EVENTS/photoshootlist"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("2023-10-27_spectacle_antony_laureline"));
     }

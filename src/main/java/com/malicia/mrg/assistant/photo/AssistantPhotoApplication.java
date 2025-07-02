@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.Environment;
@@ -20,6 +19,7 @@ import java.util.Optional;
 public class AssistantPhotoApplication {
     public static final String HTTP_DEFAULT_PORT = "8080";
     private static final Logger logger = LoggerFactory.getLogger(AssistantPhotoApplication.class);
+
     public static void main(String[] args) throws UnknownHostException {
 
         final Environment env = SpringApplication.run(AssistantPhotoApplication.class, args).getEnvironment();
@@ -48,28 +48,28 @@ public class AssistantPhotoApplication {
         final String ipOutsideDocker = env.getProperty("application.ipWan");
         String appName = env.getProperty("spring.application.name");
         String appVersion = env.getProperty("application.version");
-        String build_date = env.getProperty("application.build_date");
-        String commit_id = env.getProperty("application.commit_id");
+        String buildDate = env.getProperty("application.build_date");
+        String commitId = env.getProperty("application.commit_id");
 
         logger.info("""
-                ---------------------------------------------------------------
-                Application '{}' ({}) #{}@{}' is running!
-                ---------------------------------------------------------------
-                Profile(s):  {}
-                ---------------------------------------------------------------
-                Access URLs:
-                  Local:        {}://localhost:{}{}
-                  Swagger:      {}://localhost:{}{}swagger-ui/index.html
-                ---------------------------------------------------------------
-                External:
-                  Local:        {}://{}:{}{}
-                  Swagger:      {}://{}:{}{}swagger-ui/index.html
-                ---------------------------------------------------------------
-                IpWan:
-                  Local:        {}://{}:{}{}
-                  Swagger:      {}://{}:{}{}swagger-ui/index.html
-                """,
-                appName, appVersion,  commit_id ,   build_date,
+                        ---------------------------------------------------------------
+                        Application '{}' ({}) #{}@{}' is running!
+                        ---------------------------------------------------------------
+                        Profile(s):  {}
+                        ---------------------------------------------------------------
+                        Access URLs:
+                          Local:        {}://localhost:{}{}
+                          Swagger:      {}://localhost:{}{}swagger-ui/index.html
+                        ---------------------------------------------------------------
+                        External:
+                          Local:        {}://{}:{}{}
+                          Swagger:      {}://{}:{}{}swagger-ui/index.html
+                        ---------------------------------------------------------------
+                        IpWan:
+                          Local:        {}://{}:{}{}
+                          Swagger:      {}://{}:{}{}swagger-ui/index.html
+                        """,
+                appName, appVersion, commitId, buildDate,
                 env.getActiveProfiles(),
                 protocol, serverPort, contextPath,
                 protocol, serverPort, contextPath,
@@ -77,7 +77,7 @@ public class AssistantPhotoApplication {
                 protocol, hostAddress, serverPort, contextPath,
                 protocol, ipOutsideDocker, serverPort, contextPath,
                 protocol, ipOutsideDocker, serverPort, contextPath
-                );
+        );
     }
 
     @Bean

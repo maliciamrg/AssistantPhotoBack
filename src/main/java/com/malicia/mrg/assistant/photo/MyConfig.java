@@ -2,6 +2,7 @@ package com.malicia.mrg.assistant.photo;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.malicia.mrg.assistant.photo.exception.CustomException;
 import com.malicia.mrg.assistant.photo.pojo.PhotoshootType;
 import com.malicia.mrg.assistant.photo.pojo.TagNode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -27,7 +28,7 @@ public class MyConfig {
         try {
             setTagsList();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new CustomException(e);
         }
     }
 
@@ -39,7 +40,7 @@ public class MyConfig {
         this.tagsList = tagsList;
     }
 
-    public void setTagsList() throws Exception {
+    public void setTagsList() {
         this.tagsList = loadTagsFromJson();
     }
 
@@ -93,11 +94,14 @@ public class MyConfig {
         this.dryRun = dryRun;
     }
 
-    private List<TagNode> loadTagsFromJson() throws IOException {
+    private List<TagNode> loadTagsFromJson() {
         InputStream is = getClass().getClassLoader().getResourceAsStream("lightroom_tags_grouped.json");
-        List<TagNode> tags = new ObjectMapper().readValue(is, new TypeReference<List<TagNode>>() {
-        });
-        return tags;
+        try {
+            return new ObjectMapper().readValue(is, new TypeReference<List<TagNode>>() {
+            });
+        } catch (IOException e) {
+            throw new CustomException(e);
+        }
     }
 
     public static class GroupPhoto {

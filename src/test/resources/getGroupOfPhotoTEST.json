@@ -1,6 +1,5 @@
 {
   "photos" : [ {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-19-37_IMG_20230408_161937.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-19-37_IMG_20230408_161937.jpg",
     "filename" : "2023-04-08_16-19-37_IMG_20230408_161937.jpg",
@@ -8,7 +7,6 @@
     "createdDate" : "2023-04-08 16:19:37",
     "exifDate" : "2023:04:08 16:19:37"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-19-39_IMG_20230408_161939.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-19-39_IMG_20230408_161939.jpg",
     "filename" : "2023-04-08_16-19-39_IMG_20230408_161939.jpg",
@@ -16,7 +14,6 @@
     "createdDate" : "2023-04-08 16:19:39",
     "exifDate" : "2023:04:08 16:19:39"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-35-43_IMG_20230408_163543.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-35-43_IMG_20230408_163543.jpg",
     "filename" : "2023-04-08_16-35-43_IMG_20230408_163543.jpg",
@@ -24,7 +21,6 @@
     "createdDate" : "2023-04-08 16:35:43",
     "exifDate" : "2023:04:08 16:35:43"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-37-13_IMG_20230408_163713.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-37-13_IMG_20230408_163713.jpg",
     "filename" : "2023-04-08_16-37-13_IMG_20230408_163713.jpg",
@@ -32,7 +28,6 @@
     "createdDate" : "2023-04-08 16:37:13",
     "exifDate" : "2023:04:08 16:37:13"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-38-51_IMG_20230408_163851.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-38-51_IMG_20230408_163851.jpg",
     "filename" : "2023-04-08_16-38-51_IMG_20230408_163851.jpg",
@@ -40,7 +35,6 @@
     "createdDate" : "2023-04-08 16:38:51",
     "exifDate" : "2023:04:08 16:38:51"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-40-03_IMG_20230408_164002.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-40-03_IMG_20230408_164002.jpg",
     "filename" : "2023-04-08_16-40-03_IMG_20230408_164002.jpg",
@@ -48,7 +42,6 @@
     "createdDate" : "2023-04-08 16:40:03",
     "exifDate" : "2023:04:08 16:40:03"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-40-28_IMG_20230408_164027.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-40-28_IMG_20230408_164027.jpg",
     "filename" : "2023-04-08_16-40-28_IMG_20230408_164027.jpg",
@@ -56,7 +49,6 @@
     "createdDate" : "2023-04-08 16:40:28",
     "exifDate" : "2023:04:08 16:40:28"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-40-42_IMG_20230408_164042.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-40-42_IMG_20230408_164042.jpg",
     "filename" : "2023-04-08_16-40-42_IMG_20230408_164042.jpg",
@@ -64,7 +56,6 @@
     "createdDate" : "2023-04-08 16:40:42",
     "exifDate" : "2023:04:08 16:40:42"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-41-03_IMG_20230408_164102.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-41-03_IMG_20230408_164102.jpg",
     "filename" : "2023-04-08_16-41-03_IMG_20230408_164102.jpg",
@@ -72,7 +63,7 @@
     "createdDate" : "2023-04-08 16:41:03",
     "exifDate" : "2023:04:08 16:41:03"
   }, {
-    "thumbnail" : null,
+    
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-41-04_IMG_20230408_164104.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-41-04_IMG_20230408_164104.jpg",
     "filename" : "2023-04-08_16-41-04_IMG_20230408_164104.jpg",
@@ -80,7 +71,6 @@
     "createdDate" : "2023-04-08 16:41:04",
     "exifDate" : "2023:04:08 16:41:04"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-41-05_IMG_20230408_164104_1.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-41-05_IMG_20230408_164104_1.jpg",
     "filename" : "2023-04-08_16-41-05_IMG_20230408_164104_1.jpg",
@@ -88,7 +78,6 @@
     "createdDate" : "2023-04-08 16:41:05",
     "exifDate" : "2023:04:08 16:41:05"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-51-39_IMG_20230408_165139.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-51-39_IMG_20230408_165139.jpg",
     "filename" : "2023-04-08_16-51-39_IMG_20230408_165139.jpg",
@@ -96,7 +85,6 @@
     "createdDate" : "2023-04-08 16:51:39",
     "exifDate" : "2023:04:08 16:51:39"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-52-54_IMG_20230408_165254.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-52-54_IMG_20230408_165254.jpg",
     "filename" : "2023-04-08_16-52-54_IMG_20230408_165254.jpg",
@@ -104,7 +92,6 @@
     "createdDate" : "2023-04-08 16:52:54",
     "exifDate" : "2023:04:08 16:52:54"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-53-06_IMG_20230408_165305.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_16-53-06_IMG_20230408_165305.jpg",
     "filename" : "2023-04-08_16-53-06_IMG_20230408_165305.jpg",
@@ -112,7 +99,6 @@
     "createdDate" : "2023-04-08 16:53:06",
     "exifDate" : "2023:04:08 16:53:06"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-02-09_IMG_20230408_170209.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-02-09_IMG_20230408_170209.jpg",
     "filename" : "2023-04-08_17-02-09_IMG_20230408_170209.jpg",
@@ -120,7 +106,6 @@
     "createdDate" : "2023-04-08 17:02:09",
     "exifDate" : "2023:04:08 17:02:09"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-03-17_IMG_20230408_170316.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-03-17_IMG_20230408_170316.jpg",
     "filename" : "2023-04-08_17-03-17_IMG_20230408_170316.jpg",
@@ -128,7 +113,6 @@
     "createdDate" : "2023-04-08 17:03:17",
     "exifDate" : "2023:04:08 17:03:17"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-03-43_IMG_20230408_170343.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-03-43_IMG_20230408_170343.jpg",
     "filename" : "2023-04-08_17-03-43_IMG_20230408_170343.jpg",
@@ -136,7 +120,6 @@
     "createdDate" : "2023-04-08 17:03:43",
     "exifDate" : "2023:04:08 17:03:43"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-04-33_IMG_20230408_170433.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-04-33_IMG_20230408_170433.jpg",
     "filename" : "2023-04-08_17-04-33_IMG_20230408_170433.jpg",
@@ -144,7 +127,6 @@
     "createdDate" : "2023-04-08 17:04:33",
     "exifDate" : "2023:04:08 17:04:33"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-04-59_IMG_20230408_170459.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-04-59_IMG_20230408_170459.jpg",
     "filename" : "2023-04-08_17-04-59_IMG_20230408_170459.jpg",
@@ -152,7 +134,6 @@
     "createdDate" : "2023-04-08 17:04:59",
     "exifDate" : "2023:04:08 17:04:59"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-05-00_IMG_20230408_170500.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-05-00_IMG_20230408_170500.jpg",
     "filename" : "2023-04-08_17-05-00_IMG_20230408_170500.jpg",
@@ -160,7 +141,6 @@
     "createdDate" : "2023-04-08 17:05:00",
     "exifDate" : "2023:04:08 17:05:00"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-08-49_IMG_20230408_170849.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-08-49_IMG_20230408_170849.jpg",
     "filename" : "2023-04-08_17-08-49_IMG_20230408_170849.jpg",
@@ -168,7 +148,6 @@
     "createdDate" : "2023-04-08 17:08:49",
     "exifDate" : "2023:04:08 17:08:49"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-08-55_IMG_20230408_170855.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-08-55_IMG_20230408_170855.jpg",
     "filename" : "2023-04-08_17-08-55_IMG_20230408_170855.jpg",
@@ -176,7 +155,6 @@
     "createdDate" : "2023-04-08 17:08:55",
     "exifDate" : "2023:04:08 17:08:55"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-08-58_IMG_20230408_170858.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-08-58_IMG_20230408_170858.jpg",
     "filename" : "2023-04-08_17-08-58_IMG_20230408_170858.jpg",
@@ -184,7 +162,6 @@
     "createdDate" : "2023-04-08 17:08:58",
     "exifDate" : "2023:04:08 17:08:58"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-09-02_IMG_20230408_170901.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-09-02_IMG_20230408_170901.jpg",
     "filename" : "2023-04-08_17-09-02_IMG_20230408_170901.jpg",
@@ -192,7 +169,6 @@
     "createdDate" : "2023-04-08 17:09:02",
     "exifDate" : "2023:04:08 17:09:02"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-09-03_IMG_20230408_170903.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-09-03_IMG_20230408_170903.jpg",
     "filename" : "2023-04-08_17-09-03_IMG_20230408_170903.jpg",
@@ -200,7 +176,6 @@
     "createdDate" : "2023-04-08 17:09:03",
     "exifDate" : "2023:04:08 17:09:03"
   }, {
-    "thumbnail" : null,
     "path" : ".\\src\\test\\resources\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-25-58_IMG_20230408_172558.jpg",
     "relativeToPath" : "\\Xiaomi_2201117TY\\Camera\\2023-04-08_17-25-58_IMG_20230408_172558.jpg",
     "filename" : "2023-04-08_17-25-58_IMG_20230408_172558.jpg",

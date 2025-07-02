@@ -6,35 +6,26 @@ import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 import com.malicia.mrg.assistant.photo.dto.ValidationResult;
 import com.malicia.mrg.assistant.photo.exception.NotFoundException;
 import com.malicia.mrg.assistant.photo.pojo.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class PhotoshootService {
 
-    private static final Logger logger = LoggerFactory.getLogger(PhotoshootService.class);
-
-    private final RootRepertoire rootRep;
+    private final RootRepertoire rootRepertoire;
     private final MyConfig config;
     private final TagService tagService;
 
-    private final Duration ttl = Duration.ofMinutes(1);
-
-    public PhotoshootService(RootRepertoire rootRep, MyConfig config, TagService tagService) {
-        System.out.println("----- ----- ----> PhotoshootService.cacheService");
-        this.rootRep = rootRep;
+    public PhotoshootService(RootRepertoire rootRepertoire, MyConfig config, TagService tagService) {
+        this.rootRepertoire = rootRepertoire;
         this.config = config;
         this.tagService = tagService;
     }
@@ -53,42 +44,20 @@ public class PhotoshootService {
 
         Photoshoot photoshoot = getPhotoshoot(seanceId, seanceList);
 
-        return rootRep.getAllPhotoFromPhotoshoot(photoshoot);
+        return rootRepertoire.getAllPhotoFromPhotoshoot(photoshoot);
 
     }
 
     @Cacheable(value = "getPhotoshootList")
-    public List<Photoshoot> getPhotoshootList(String photoshootTypeName) {
+    public List<Photoshoot> getPhotoshootList(PhotoshootType photoshootType) {
+        List<Photoshoot> photoshootArrayList = new ArrayList<>();
 
-        PhotoshootType photoshootType = getPhotoshootType(photoshootTypeName);
+        for (PhotoshootRoot photoshootRoot : photoshootType.getPhotoshootRoot()) {
 
-        if (photoshootType != null) {
-
-            return rootRep.getPhotoshootList(photoshootType.getPhotoshootTypeEnum());
+            photoshootArrayList = rootRepertoire.getPhotoshootList(photoshootRoot);
 
         }
-
-        return Collections.emptyList();
-    }
-
-    public PhotoshootMetaData getMetaDataFromPhotoshoot(String photoshootName, List<Photoshoot> seanceList) {
-
-        Photoshoot photoshoot = getPhotoshoot(photoshootName, seanceList);
-        PhotoGroup listPhoto = getAllPhotoFromPhotoshoot(photoshootName, seanceList);
-
-        PhotoshootMetaDataAccumulator accumulator = new PhotoshootMetaDataAccumulator();
-
-        for (PhotoDTO photo : listPhoto) {
-            accumulator.accumulate(photo);
-        }
-
-        String[] parts = photoshootName.split("_");
-        long daysBetween = computeDaysBetween(accumulator.getLowerDate(), accumulator.getUpperDate());
-
-        PhotoshootMetaData photoshootMetaData = buildMetaDataRep(photoshootName, parts, accumulator, daysBetween);
-        writeMetaDataToFile(photoshootMetaData, photoshoot.getPath(), photoshootName);
-
-        return photoshootMetaData;
+        return photoshootArrayList;
     }
 
     private long computeDaysBetween(String lowerDate, String upperDate) {
@@ -124,13 +93,13 @@ public class PhotoshootService {
         }
     }
 
-    public Photoshoot getPhotoshoot(String photoshootTypeName, String photoshootName) {
+    public Photoshoot getPhotoshoot(PhotoshootType photoshootType, String photoshootName) {
 
-        List<Photoshoot> photoshootList = getPhotoshootList(photoshootTypeName);
+        List<Photoshoot> photoshootList = getPhotoshootList(photoshootType);
 
         for (Photoshoot photoshoot : photoshootList) {
             if (photoshoot.getName().equals(photoshootName)) {
-                photoshoot.setGroupOfPhoto(rootRep.getAllPhotoFromPhotoshoot(photoshoot));
+                photoshoot.setGroupOfPhoto(rootRepertoire.getAllPhotoFromPhotoshoot(photoshoot));
                 photoshoot.setMetaDataFromPhotoshoot(getMetaDataFromPhotoshoot(photoshoot));
                 return photoshoot;
             }
@@ -159,31 +128,14 @@ public class PhotoshootService {
         return photoshootMetaData;
     }
 
-    public ValidationResult validatePhotoshoot(String photoshootTypeName, Photoshoot photoshoot) {
+    public ValidationResult validatePhotoshoot(PhotoshootType photoshootType, Photoshoot photoshoot) {
         String[] parts = photoshoot.getName().split("_");
-        PhotoshootType photoshootType = getPhotoshootType(photoshootTypeName);
         return controlRepertoire(parts, photoshoot.getMetaDataFromPhotoshoot(), photoshootType);
     }
 
-    public ValidationResult validatePhotoshoot(String photoshootTypeName, Photoshoot photoshoot, String[] parts) {
-        PhotoshootType photoshootType = getPhotoshootType(photoshootTypeName);
+    public ValidationResult validatePhotoshoot(PhotoshootType photoshootType, Photoshoot photoshoot, String[] parts) {
         return controlRepertoire(parts, photoshoot.getMetaDataFromPhotoshoot(), photoshootType);
     }
-//
-//    public ValidationResult validatePhotoshoot(String photoshootTypeName, String photoshootName) {
-//        List<Photoshoot> photoshootList = getPhotoshootList(photoshootTypeName);
-//        PhotoshootMetaData metaDataFromPhotoRepertoire = getMetaDataFromPhotoshoot(photoshootName, photoshootList);
-//        String[] parts = photoshootName.split("_");
-//        PhotoshootType photoshootType = getPhotoshootType(photoshootTypeName);
-//        return controlRepertoire(parts, metaDataFromPhotoRepertoire, photoshootType);
-//    }
-//
-//    public ValidationResult validatePhotoshoot(String photoshootTypeName, String photoshootName, String[] parts) {
-//        List<Photoshoot> photoshootList = getPhotoshootList(photoshootTypeName);
-//        PhotoshootMetaData metaDataFromPhotoRepertoire = getMetaDataFromPhotoshoot(photoshootName, photoshootList);
-//        PhotoshootType photoshootType = getPhotoshootType(photoshootTypeName);
-//        return controlRepertoire(parts, metaDataFromPhotoRepertoire, photoshootType);
-//    }
 
     private ValidationResult controlRepertoire(String[] parts, PhotoshootMetaData metaData, PhotoshootType photoshootType) {
         boolean isValid = true;
@@ -205,39 +157,47 @@ public class PhotoshootService {
     }
 
     private boolean validatePhotoshootName(String[] parts, String expectedDate, List<List<String>> expectedValues, StringBuilder message) {
-        boolean valid = true;
-
         if (expectedValues.size() != parts.length) {
-            message.append(parts.length).append(" champs pour ").append(expectedValues.size()).append(" attendu \n");
+            message.append(parts.length)
+                    .append(" champs pour ")
+                    .append(expectedValues.size())
+                    .append(" attendu \n");
             return false;
         }
 
-        for (int i = 0; i < expectedValues.size(); i++) {
-            String expected = expectedValues.get(i).get(0);
+        boolean valid = true;
 
-            if (expected.startsWith("£") && expected.endsWith("£")) {
-                String key = expected.substring(1, expected.length() - 1);
+        for (int i = 0; i < parts.length; i++) {
 
-                if ("DATE".equals(key)) {
+            List<String> expected = expectedValues.get(i);
+            String specialExpectedValues = isSpecialExpectedValues(expected);
+
+            switch (specialExpectedValues){
+                case "DATE":
                     if (!expectedDate.equals(parts[i])) {
                         message.append("zone ").append(i).append(" : ").append(parts[i])
                                 .append(" non valid for ").append(expected)
                                 .append(" (").append(expectedDate).append(") \n");
                         valid = false;
                     }
-                } else {
-                    message.append("zone ").append(i).append(" : part ").append(expected).append(" non reconnu \n");
-                    valid = false;
-                }
-            } else {
-                if (!expectedValues.get(i).contains(parts[i])) {
-                    message.append("zone ").append(i).append(" : ").append(parts[i]).append(" non valid \n");
-                    valid = false;
-                }
+                    break;
+                default:
+                    if (!expected.contains(parts[i])) {
+                        message.append("zone ").append(i).append(" : ").append(parts[i]).append(" non valid \n");
+                        valid = false;
+                    }
+                    break;
             }
         }
 
         return valid;
+    }
+
+    private String isSpecialExpectedValues(List<String> expected) {
+        if (expected.get(0).startsWith("£") && expected.get(0).endsWith("£")) {
+            return expected.get(0).substring(1, expected.get(0).length() - 1);
+        }
+        return "";
     }
 
     private boolean validateStarRatios(PhotoshootMetaData metaData, PhotoshootType photoshootType, StringBuilder message) {
@@ -287,7 +247,7 @@ public class PhotoshootService {
             return photoshootType.get();
         }
 
-        return null;
+        return new PhotoshootType();
     }
 
     public List<List<String>> getPhotoshootTypeZoneValeurAdmise(PhotoshootType photoshootType) {
@@ -314,4 +274,7 @@ public class PhotoshootService {
         return possibleValueForPhotoshoot;
     }
 
+    public List<PhotoshootType> getPhotoshootType() {
+        return config.getPhotoshootType();
+    }
 }

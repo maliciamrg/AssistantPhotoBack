@@ -6,24 +6,16 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 import com.malicia.mrg.assistant.photo.dto.PhotoMapper;
 import com.malicia.mrg.assistant.photo.entity.Photo;
-import com.malicia.mrg.assistant.photo.entity.PhotoThumbnail;
 import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
 import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
 import com.malicia.mrg.assistant.photo.repository.PhotoRepository;
-import com.malicia.mrg.assistant.photo.repository.PhotoThumbnailRepository;
-import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,13 +32,11 @@ public class PhotoService {
         this.thumbnailService = thumbnailService;
     }
 
-    @Cacheable(value = "convertPathsToPhotos", key = "#rootDir")
     public List<PhotoDTO> convertPathsToPhotos(String rootDir, List<Path> paths) {
         List<PhotoDTO> photoDTOList = new ArrayList<>();
 
         for (Path path : paths) {
 
-//            System.out.println("@Cacheable key = " + path.getParent().getFileName().toString() + ':' + path.getFileName().toString());
             PhotoDTO photo = getPhotoDataFromPath(rootDir, path);
 
             photoDTOList.add(photo);
@@ -56,42 +46,7 @@ public class PhotoService {
         return photoDTOList;
     }
 
-    public Photo getPhotoFromPath(String rootDir, Path path) {
-        // Create a new Photo object
-        Photo photo = new Photo();
-
-        AddPhotoHashFromFile(path, photo);
-
-        try {
-
-            Optional<Photo> existingPhoto = photoRepository.findByHash(photo.getHash());
-            if (existingPhoto.isPresent()) {
-                photo = existingPhoto.get();
-                if (photo.getPath().equals(path)) {
-                    System.out.println("/!\\  photo with hash: " + photo.getHash() + " \n" + "[(existing) " + photo.getPath() + " \n" + "[(new)      " + path + " ]");
-                }
-            } else {
-
-                addPhotoDataFromFile(rootDir, path, photo);
-
-                // Reach xmp if exist
-                addPhotoDataFromXmpSidecar(path, photo);
-
-                photo.setThumbnail(thumbnailService.generateThumbnail(photo));
-
-                photoRepository.save(photo);
-
-                //   photoThumbnailRepository.save(generateThumbnail(photo));
-
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        return photo;
-    }
-
-    @Cacheable(value = "getPhotoDataFromPath", key = "#rootDir")
+    @Cacheable(value = "getPhotoDataFromPath", key = "#path.toString()")
     public PhotoDTO getPhotoDataFromPath(String rootDir, Path path) {
 
         // Create a new Photo object
@@ -237,28 +192,8 @@ public class PhotoService {
         return "Unknown";
     }
 
-    // Helper method to encode an image to Base64
-    private String encodeImageToBase64(BufferedImage image) {
-        try {
-            // Convert BufferedImage to byte array
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ImageIO.write(image, "PNG", byteArrayOutputStream);
-            byte[] imageBytes = byteArrayOutputStream.toByteArray();
-
-            // Encode the byte array to Base64
-            return Base64.getEncoder().encodeToString(imageBytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public PhotoGroup saveAllPhotos(PhotoGroup photos, boolean writeXmp) {
         for (PhotoDTO photo : photos) {
-
-            //PhotoThumbnail photoThumbnail = new PhotoThumbnail();
-            //photoThumbnail.setPhoto(photo);
-            //generateThumbnail(photo);
 
             if (writeXmp) {
                 try {

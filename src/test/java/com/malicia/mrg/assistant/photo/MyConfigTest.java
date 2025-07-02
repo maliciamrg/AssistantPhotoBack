@@ -10,8 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class MyConfigTest {
-//    @MockBean
-//    private CacheService redisTemplate;
+
 
     @MockBean
     private PhotoService photoService;

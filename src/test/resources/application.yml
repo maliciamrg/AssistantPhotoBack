@@ -1,6 +1,34 @@
 spring:
   application:
     name: AssistantPhoto
+  data:
+    redis:
+      host: 192.212.10.200
+      port: 6379
+      #      password: yourpassword  # Optional, if your Redis instance requires authentication
+      timeout: 2000  # Optional timeout in milliseconds
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000  # TTL in milliseconds (e.g., 600000ms = 10 minutes)
+  liquibase:
+    enabled: false
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    contexts: baseline
+    drop-first: false
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
 
 application:
   version: "@project.version@"
@@ -34,25 +62,25 @@ assistant:
     photoMin: 5
   photoshootType:
     - photoshootTypeEnum: all_in
-      photoshootList:
+      photoshootRoot:
         - path: "00-CheckIn"
           description: "Main check-in folder"
         - path: "00-CheckIn-2"
           description: "Main check-in folder 2"
     - photoshootTypeEnum: Assistant_Work
-      photoshootList:
+      photoshootRoot:
         - path: "10-Assistant_work"
           description: "Work folder for the Assistant"
     - photoshootTypeEnum: Rejet
-      photoshootList:
+      photoshootRoot:
         - path: "99-Rejet"
           description: "Rejected items"
     - photoshootTypeEnum: Sauvegarde
-      photoshootList:
+      photoshootRoot:
         - path: "50-Phototheque\\#Sauvegarde 999 j"
           description: "Backup photographs"
     - photoshootTypeEnum: Events
-      photoshootList:
+      photoshootRoot:
         - path: "50-Phototheque\\##Events 10-15 j"
           description: "Events photographs"
       uniteDeJour: 1
@@ -76,7 +104,7 @@ assistant:
         - "@00_WHAT@|@00_WHO@"
       rapprochementNewOk: true
     - photoshootTypeEnum: Holidays
-      photoshootList:
+      photoshootRoot:
         - path: "50-Phototheque\\##Holidays 20-30 sem"
           description: "Holiday photographs"
       uniteDeJour: 7
@@ -100,7 +128,7 @@ assistant:
         - "@00_WHAT@|@00_WHO@"
       rapprochementNewOk: true
     - photoshootTypeEnum: Shooting
-      photoshootList:
+      photoshootRoot:
         - path: "50-Phototheque\\##Shooting 03-05 j"
           description: "Shooting session photographs"
       uniteDeJour: 1

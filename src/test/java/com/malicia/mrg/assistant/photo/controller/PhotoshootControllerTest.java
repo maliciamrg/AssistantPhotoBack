@@ -6,6 +6,7 @@ import com.malicia.mrg.assistant.photo.dto.UpdateRepertoireNameRequestDto;
 import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
 import com.malicia.mrg.assistant.photo.service.TagService;
+import com.malicia.mrg.assistant.photo.service.ThumbnailService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,32 +40,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ImportAutoConfiguration(exclude = {
-        HealthContributorAutoConfiguration.class,
-        HealthEndpointAutoConfiguration.class,
-        RedisAutoConfiguration.class,
-        RedisRepositoriesAutoConfiguration.class
-})
 class PhotoshootControllerTest {
 
 
     @MockBean
-    public ReactiveRedisConnectionFactory reactiveRedisConnectionFactory;
-//    @MockBean
-//    private CacheService redisTemplate;
-    @MockBean
-    private RedisConnectionFactory redisConnectionFactory;
-    @MockBean
-    private ReactiveHealthContributor redisHealthContributor;
-    @MockBean
     private TagService tagService;
+    @MockBean
+    private ThumbnailService thumbnailService;
 
-    @Autowired
-    private RootRepertoire rootRep;
-    @Autowired
-    private PhotoshootService photoshootService;
-    @Autowired
-    private MyConfig myConfig;
     @Autowired
     private ObjectMapper objectMapper;
     @Autowired

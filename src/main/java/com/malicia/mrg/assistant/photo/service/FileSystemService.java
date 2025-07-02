@@ -5,6 +5,7 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Metadata;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.malicia.mrg.assistant.photo.exception.CustomException;
 import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
 
 import javax.imageio.ImageIO;
@@ -50,7 +51,7 @@ public class FileSystemService {
                 }
             });
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CustomException(e);
         }
 
         return matchingFiles;
@@ -107,7 +108,7 @@ public class FileSystemService {
         try {
             objectMapper.writeValue(file, expectedList);  // This writes the JSON to the file
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CustomException(e);
         }
     }
 
@@ -151,11 +152,11 @@ public class FileSystemService {
         return subdirectories;
     }
 
-    public static List<Photoshoot> convertPathsToSeanceRepertoire(String pathToScan, List<Path> listPath) {
+    public static List<Photoshoot> convertPathsToPhotoshoot(String pathToScan, List<Path> listPath) {
         List<Photoshoot> photoshoots = new ArrayList<>();
         Path rootPath = Paths.get(pathToScan);
         for (Path path : listPath) {
-            // Create a new Photo object
+            // Create a new Photoshoot object
             Photoshoot photoshoot = new Photoshoot();
             photoshoot.setName(path.toString().replace(rootPath + File.separator, ""));
             photoshoot.setPath(path.toString());

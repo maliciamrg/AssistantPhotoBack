@@ -13,7 +13,7 @@ public class PhotoshootType implements Serializable {
     private List<Integer> ratioStarMax;
     private List<String> zoneValeurAdmise;
     private boolean rapprochementNewOk;
-    private List<Photoshoot> photoshootList;
+    private List<PhotoshootRoot> photoshootRoot;
 
     public List<Integer> getRatioStarMin() {
         return ratioStarMin;
@@ -72,12 +72,26 @@ public class PhotoshootType implements Serializable {
         this.rapprochementNewOk = rapprochementNewOk;
     }
 
-    public List<Photoshoot> getPhotoshootList() {
-        return photoshootList;
+    public List<PhotoshootRoot> getPhotoshootRoot() {
+        return photoshootRoot;
     }
 
-    public void setPhotoshootList(List<Photoshoot> photoshootList) {
-        this.photoshootList = photoshootList;
+    public void setPhotoshootRoot(List<PhotoshootRoot> photoshootRoot) {
+        this.photoshootRoot = photoshootRoot;
+    }
+
+    @Override
+    public String toString() {
+        return "PhotoshootType{" +
+                "photoshootTypeEnum=" + photoshootTypeEnum +
+                ", uniteDeJour=" + uniteDeJour +
+                ", nbMaxParUniteDeJour=" + nbMaxParUniteDeJour +
+                ", ratioStarMin=" + ratioStarMin +
+                ", ratioStarMax=" + ratioStarMax +
+                ", zoneValeurAdmise=" + zoneValeurAdmise +
+                ", rapprochementNewOk=" + rapprochementNewOk +
+                ", photoshootRoot=" + photoshootRoot +
+                '}';
     }
 }
 

@@ -77,23 +77,23 @@ assistant:
     photoMin: 5
   photoshootType:
     - photoshootTypeEnum: all_in
-      photoshootList:
+      photoshootRoot:
         - path: "00-CheckIn"
           description: "Main check-in folder"
     - photoshootTypeEnum: Assistant_Work
-      photoshootList:
+      photoshootRoot:
         - path: "10-Assistant_work"
           description: "Work folder for the Assistant"
     - photoshootTypeEnum: Rejet
-      photoshootList:
+      photoshootRoot:
         - path: "99-Rejet"
           description: "Rejected items"
     - photoshootTypeEnum: Sauvegarde
-      photoshootList:
+      photoshootRoot:
         - path: "50-Phototheque\\#Sauvegarde 999 j"
           description: "Backup photographs"
     - photoshootTypeEnum: Events
-      photoshootList:
+      photoshootRoot:
         - path: "50-Phototheque\\##Events 10-15 j"
           description: "Events photographs"
       uniteDeJour: 1
@@ -117,7 +117,7 @@ assistant:
         - "@00_WHAT@|@00_WHO@"
       rapprochementNewOk: true
     - photoshootTypeEnum: Holidays
-      photoshootList:
+      photoshootRoot:
         - path: "50-Phototheque\\##Holidays 20-30 sem"
           description: "Holiday photographs"
       uniteDeJour: 7
@@ -141,7 +141,7 @@ assistant:
         - "@00_WHAT@|@00_WHO@"
       rapprochementNewOk: true
     - photoshootTypeEnum: Shooting
-      photoshootList:
+      photoshootRoot:
         - path: "50-Phototheque\\##Shooting 03-05 j"
           description: "Shooting session photographs"
       uniteDeJour: 1

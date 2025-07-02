@@ -5,6 +5,7 @@ import com.malicia.mrg.assistant.photo.dto.UpdateRepertoireNameRequestDto;
 import com.malicia.mrg.assistant.photo.dto.ValidationResult;
 import com.malicia.mrg.assistant.photo.exception.NotFoundException;
 import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
+import com.malicia.mrg.assistant.photo.pojo.PhotoshootType;
 import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,8 @@ public class PhotoshootController {
     @GetMapping("/{photoshootTypeName}/{photoshootName}")
     public ResponseEntity<Photoshoot> getPhotoshoot(@PathVariable String photoshootTypeName, @PathVariable String photoshootName) {
         try {
-            return ResponseEntity.ok().body(photoshootService.getPhotoshoot(photoshootTypeName,photoshootName));
+            PhotoshootType photoshootType = photoshootService.getPhotoshootType(photoshootTypeName);
+            return ResponseEntity.ok().body(photoshootService.getPhotoshoot(photoshootType, photoshootName));
 
         } catch (NotFoundException e) {
             return ResponseEntity.status(404).body(null);
@@ -39,20 +41,24 @@ public class PhotoshootController {
     @GetMapping("/{photoshootTypeName}/{photoshootName}/validate")
     public ResponseEntity<ValidationResult> validatePhotoshootName(@PathVariable String photoshootTypeName, @PathVariable String photoshootName) {
 
-        Photoshoot photoshoot = photoshootService.getPhotoshoot(photoshootTypeName, photoshootName);
+        PhotoshootType photoshootType = photoshootService.getPhotoshootType(photoshootTypeName);
 
-        return ResponseEntity.ok(photoshootService.validatePhotoshoot(photoshootTypeName , photoshoot));
+        Photoshoot photoshoot = photoshootService.getPhotoshoot(photoshootType, photoshootName);
+
+        return ResponseEntity.ok(photoshootService.validatePhotoshoot(photoshootType, photoshoot));
     }
 
     @PutMapping("/{photoshootTypeName}/{photoshootName}/rename")
-    public ResponseEntity<Map<String, Object>> updateRepertoireName(@PathVariable String photoshootTypeName,@PathVariable String photoshootName, @RequestBody UpdateRepertoireNameRequestDto request) {
+    public ResponseEntity<Map<String, Object>> updateRepertoireName(@PathVariable String photoshootTypeName, @PathVariable String photoshootName, @RequestBody UpdateRepertoireNameRequestDto request) {
 
         String photoshootNameNew = request.getPhotoshootNameNew();
 
-        Photoshoot photoshoot = photoshootService.getPhotoshoot(photoshootTypeName, photoshootName);
+        PhotoshootType photoshootType = photoshootService.getPhotoshootType(photoshootTypeName);
+
+        Photoshoot photoshoot = photoshootService.getPhotoshoot(photoshootType, photoshootName);
 
         String[] photoshootNameNewParts = photoshootNameNew.split("_");
-        ValidationResult validationResult = photoshootService.validatePhotoshoot(photoshootTypeName , photoshoot, photoshootNameNewParts);
+        ValidationResult validationResult = photoshootService.validatePhotoshoot(photoshootType, photoshoot, photoshootNameNewParts);
 
         RootRepertoire.moveGroupToDestinationFolder(config.getRootPath() + photoshootNameNew, photoshoot.getGroupOfPhoto(), false, config.getDryRun());
 

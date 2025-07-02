@@ -3,7 +3,6 @@ package com.malicia.mrg.assistant.photo.service;
 import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.entity.PhotoThumbnail;
 import com.malicia.mrg.assistant.photo.repository.PhotoThumbnailRepository;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;

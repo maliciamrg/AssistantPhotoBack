@@ -4,13 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
-import com.malicia.mrg.assistant.photo.service.FileSystemService;
+import com.malicia.mrg.assistant.photo.service.*;
 import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
 import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
 import com.malicia.mrg.assistant.photo.pojo.PhotoshootTypeEnum;
-import com.malicia.mrg.assistant.photo.service.PhotoService;
-import com.malicia.mrg.assistant.photo.service.RootRepertoire;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,23 +26,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 class RootRepertoireTest {
-//    @MockBean
-//    private CacheService redisTemplate;
+
     @Autowired
     private MyConfig mockConfig; // Mocking the MyConfig dependency
 
-    @MockBean
+    @Autowired
+    private PhotoshootService photoshootService; // Mocking the MyConfig dependency
+
+    @Autowired
     private PhotoService photoService;
 
+    @MockBean
+    private ThumbnailService thumbnailService;
 
     // recuperer uniquement les Repertoires AllIn (photo non rafiné a tirer /grouper)
     @Test
-    void getPhotoshootListAllin() {
+    void getAllPhotoshootFromPhotoshootTypeAllIn() {
         //given
         RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
-        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.ALL_IN);
+        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ALL_IN.name()).getPhotoshootRoot());
 
         //then
         System.out.println(allPhotoshoot);
@@ -56,12 +58,12 @@ class RootRepertoireTest {
 
     // recuperer uniquement les photo repertoire EVENTS
     @Test
-    void getAllPhotoRepertoireEvents() {
+    void getAllPhotoshootFromPhotoshootTypeEvents() {
         //given
         RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
-        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.EVENTS);
+        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.EVENTS.name()).getPhotoshootRoot().get(0));
 
         //then
         System.out.println(allPhotoshoot);
@@ -78,7 +80,7 @@ class RootRepertoireTest {
         RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
-        List<Photoshoot> photoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.ALL_IN);
+        List<Photoshoot> photoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ALL_IN.name()).getPhotoshootRoot());
 
         //then
         System.out.println(photoshoot);
@@ -88,31 +90,14 @@ class RootRepertoireTest {
         assertEquals(2, photoshoot.size());
     }
 
-    // recuperer uniquement les photo repertoire AllIn
-    @Test
-    void getAllPhotoRepertoireAllIn() {
-        //given
-        RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
-
-        //when
-        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.ALL_IN);
-
-        //then
-        System.out.println(allPhotoshoot);
-        for (Photoshoot Photoshoot : allPhotoshoot) {
-            System.out.println(Photoshoot.toString());
-        }
-        assertEquals(2, allPhotoshoot.size());
-    }
-
     // recuperer uniquement le Repertoires de travail de assitant
     @Test
-    void getAssistantWorkRepertoire() {
+    void getAllPhotoshootFromPhotoshootTypeASSISTANT_WORK() {
         //given
         RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
-        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.ASSISTANT_WORK);
+        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ASSISTANT_WORK.name()).getPhotoshootRoot());
 
         //then
         System.out.println(allPhotoshoot);
@@ -125,15 +110,15 @@ class RootRepertoireTest {
 
     // recupere un list de photo depuis un repertoire
     @Test
-    void getAllPhotoFromAllIn() {
+    void getAllPhotoFromPhotoshootTypeAllIn() {
         //given
         Path rootTest = Paths.get("src", "test", "resources");
         mockConfig.setRootPath("./" + rootTest + "/");
         RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
-        List<Photoshoot> assistantRepertoire = rootRep.getPhotoshootList(PhotoshootTypeEnum.ALL_IN);
-        PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoire(assistantRepertoire);
+        List<Photoshoot> rootRepPhotoshootList = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ALL_IN.name()).getPhotoshootRoot());
+        PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromListPhotoshoot(rootRepPhotoshootList);
 
         //then
         System.out.println(allPhotoFromSeanceRepertoire);
@@ -145,14 +130,14 @@ class RootRepertoireTest {
 
     // recupere un list de photo depuis un repertoire
     @Test
-    void getAllPhotoFromEventFromPhotoRepertoire() {
+    void getAllPhotoFromPhotoshootTypeEvents_byPhotoshoot() {
         //given
         Path rootTest = Paths.get("src", "test", "resources");
         mockConfig.setRootPath("./" + rootTest + "/");
         RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
-        List<Photoshoot> assistantRepertoire = rootRep.getPhotoshootList(PhotoshootTypeEnum.EVENTS);
+        List<Photoshoot> assistantRepertoire = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.EVENTS.name()).getPhotoshootRoot().get(0));
         PhotoGroup allPhotoFromPhotoRepertoire0 = rootRep.getAllPhotoFromPhotoshoot(assistantRepertoire.get(0));
         PhotoGroup allPhotoFromPhotoRepertoire1 = rootRep.getAllPhotoFromPhotoshoot(assistantRepertoire.get(1));
 
@@ -175,14 +160,14 @@ class RootRepertoireTest {
     // recupere un list de photo depuis le repertoire reel
     @Disabled("Not a real test, use to create Json getAllPhotoFromAllInRealToJsonTEST from real data ")
     @Test
-    void getAllPhotoFromAllInRealToJson() {
+    void getAllPhotoFromPhotoshootTypeAllInToJson() {
         //given
         mockConfig.setRootPath("\\\\192.212.5.111\\80-Photo\\");
         RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
         String jsonDest = mockConfig.getRootPath() + "/getAllPhotoFromAllInRealToJsonTEST-out.json";
 
         //when
-        List<Photoshoot> assistantRepertoire = rootRep.getPhotoshootList(PhotoshootTypeEnum.ALL_IN);
+        List<Photoshoot> assistantRepertoire = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ALL_IN.name()).getPhotoshootRoot().get(0));
         PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoireToJson(assistantRepertoire, jsonDest);
 
         //then
@@ -202,28 +187,28 @@ class RootRepertoireTest {
     // recupere un list de photo depuis un repertoire
     //@Disabled("doesnt work on jenkins")
     @Test
-    void getAllPhotoFromSeance() {
+    void getAllPhotoFromPhotoshootTypeEvents() {
         //given
         Path rootTest = Paths.get("src", "test", "resources");
         mockConfig.setRootPath("./" + rootTest + "/");
         RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
 
         //when
-        List<Photoshoot> assistantRepertoires = rootRep.getPhotoshootList(PhotoshootTypeEnum.EVENTS);
-        List<PhotoDTO> allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoire(assistantRepertoires.get(0));
+        List<Photoshoot> photoshootListEvents = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.EVENTS.name()).getPhotoshootRoot());
+        PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromListPhotoshoot(photoshootListEvents);
 
         //then
-        System.out.println(assistantRepertoires);
+        System.out.println(photoshootListEvents);
         System.out.println(allPhotoFromSeanceRepertoire);
         for (PhotoDTO photo : allPhotoFromSeanceRepertoire) {
             System.out.println(photo);
         }
-        assertEquals(3, allPhotoFromSeanceRepertoire.size());
+        assertEquals(4, allPhotoFromSeanceRepertoire.size());
     }
 
     // Group photo
     @Test
-    void getGroupOfPhotoFromJson() {
+    void getGroupOfPhoto_FromJson() {
         //given
         Path rootTest = Paths.get("src", "test", "resources");
         mockConfig.setRootPath("./" + rootTest + "/");
@@ -262,7 +247,7 @@ class RootRepertoireTest {
     // Move Group photo
     //@Disabled("doesnt work on jenkins")
     @Test
-    void regroupGroupOfPhotoFromJson() {
+    void moveGroupToDestinationFolder_FromJson() {
         //given
         Path rootTest = Paths.get("src", "test", "resources");
         mockConfig.setRootPath("./" + rootTest + "/");
@@ -279,7 +264,7 @@ class RootRepertoireTest {
         }
 
         //when
-        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(PhotoshootTypeEnum.ASSISTANT_WORK);
+        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ASSISTANT_WORK.name()).getPhotoshootRoot().get(0));
         int ret = RootRepertoire.moveGroupToDestinationFolder(mockConfig.getRootPath() + allPhotoshoot.get(0).getPath(), photoGroupFrom, true ,true);
 
         //then

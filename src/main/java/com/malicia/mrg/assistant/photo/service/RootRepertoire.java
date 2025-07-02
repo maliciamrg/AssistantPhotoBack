@@ -1,21 +1,16 @@
 package com.malicia.mrg.assistant.photo.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
 import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
-import com.malicia.mrg.assistant.photo.pojo.PhotoshootType;
-import com.malicia.mrg.assistant.photo.pojo.PhotoshootTypeEnum;
+import com.malicia.mrg.assistant.photo.pojo.PhotoshootRoot;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -70,79 +65,32 @@ public class RootRepertoire {
         }
     }
 
-    public List<Photoshoot> getPhotoshootList(PhotoshootTypeEnum photoshootTypEnum) {
-        List<Photoshoot> expectedList = new ArrayList<>();
+    public List<Photoshoot> getPhotoshootList(PhotoshootRoot photoshootRoot) {
+        String pathToScan = config.getRootPath() + photoshootRoot.getPath();
 
-        for (PhotoshootType photoshootType : config.getPhotoshootType()) {
-            if (photoshootTypEnum.name().equals(photoshootType.getPhotoshootTypeEnum().name())) {
-                for (Photoshoot photoshoot : photoshootType.getPhotoshootList()) {
-
-                    String pathToScan = config.getRootPath() + photoshoot.getPath();
-
-                    try {
-                        List<Path> listPath = FileSystemService.getAllFolder(pathToScan);
-                        expectedList.addAll(FileSystemService.convertPathsToSeanceRepertoire(pathToScan, listPath));
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                }
-            }
+        try {
+            List<Path> listPath = FileSystemService.getAllFolder(pathToScan);
+            return FileSystemService.convertPathsToPhotoshoot(pathToScan, listPath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return expectedList;
     }
 
-    public List<PhotoDTO> getAllPhotoFromSeanceRepertoire(Photoshoot photoshoot) {
-        List<PhotoDTO> photoDTOList = new ArrayList<>();
-
-//        String pathToScan = config.getRootPath() + photoshoot.getPath();
-        String pathToScan = photoshoot.getPath();
-        List<String> includeTypeFile = config.getFileExtensionsToWorkWith();
-
-
-        List<Path> listPath = FileSystemService.getAllFilesFromFolderAndSubFolderWithType(pathToScan, includeTypeFile);
-        photoDTOList = photoService.convertPathsToPhotos(pathToScan, listPath);
-
-
-        return photoDTOList;
-    }
-
-    public PhotoGroup getAllPhotoFromSeanceRepertoire(List<Photoshoot> repertoires) {
+    public PhotoGroup getAllPhotoFromListPhotoshoot(List<Photoshoot> repertoires) {
         PhotoGroup photoGroup = new PhotoGroup();
         for (Photoshoot repertoire : repertoires) {
-            photoGroup.setPhotos(getAllPhotoFromSeanceRepertoire(repertoire));
+            photoGroup.addAll(getAllPhotoFromPhotoshoot(repertoire));
         }
 
         return photoGroup;
     }
 
-    public List<String> getAllPathFromSeanceRepertoire(List<Photoshoot> repertoires) {
-        List<String> expectedList = new ArrayList<>();
-        for (Photoshoot repertoire : repertoires) {
-            expectedList.add(Paths.get(config.getRootPath() + repertoire.getPath()).toString());
-        }
-        return expectedList;
-    }
-
     public PhotoGroup getAllPhotoFromSeanceRepertoireToJson(List<Photoshoot> repertoires, String jsonDest) {
-        PhotoGroup expectedList = getAllPhotoFromSeanceRepertoire(repertoires);
+        PhotoGroup expectedList = getAllPhotoFromListPhotoshoot(repertoires);
 
         FileSystemService.putIntoJsonFile(expectedList, jsonDest);
 
         return expectedList;
-    }
-
-    public List<Photo> getAllPhotoFromJson(String jsonDest) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        File file = new File(jsonDest);
-        List<Photo> allPhotoFromSeanceRepertoireFromFile = new ArrayList<>();
-        try {
-            allPhotoFromSeanceRepertoireFromFile = objectMapper.readValue(file, new TypeReference<List<Photo>>() {
-            });
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return allPhotoFromSeanceRepertoireFromFile;
     }
 
     public List<PhotoGroup> getGroupOfPhotoFrom(List<Photo> allPhotos) {
@@ -231,21 +179,6 @@ public class RootRepertoire {
         }
     }
 
-    public List<Photoshoot> getPhotoshootList(Photoshoot photoshoot) {
-        List<Photoshoot> expectedList = new ArrayList<>();
-
-        String pathToScan = config.getRootPath() + photoshoot.getPath();
-        //String pathToScan = photoshoot.getPath();
-
-        try {
-            List<Path> listPath = FileSystemService.getAllFolder(pathToScan);
-            expectedList = FileSystemService.convertPathsToSeanceRepertoire(pathToScan, listPath);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return expectedList;
-    }
-
     @Cacheable(value = "getAllPhotoFromPhotoshoot", key = "#photoshoot.name")
     public PhotoGroup getAllPhotoFromPhotoshoot(Photoshoot photoshoot) {
         PhotoGroup photoGroup = new PhotoGroup();
@@ -258,6 +191,15 @@ public class RootRepertoire {
 
 
         return photoGroup;
+    }
+
+    public List<Photoshoot> getPhotoshootList(List<PhotoshootRoot> photoshootRootList) {
+        List<Photoshoot> photoshootList = new ArrayList<>();
+        for (PhotoshootRoot photoshootRoot : photoshootRootList) {
+            photoshootList.addAll(getPhotoshootList(photoshootRoot));
+        }
+
+        return photoshootList;
     }
 }
 

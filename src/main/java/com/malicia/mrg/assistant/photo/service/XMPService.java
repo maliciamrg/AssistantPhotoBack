@@ -1,7 +1,10 @@
 package com.malicia.mrg.assistant.photo.service;
 
 
-import com.adobe.internal.xmp.*;
+import com.adobe.internal.xmp.XMPConst;
+import com.adobe.internal.xmp.XMPException;
+import com.adobe.internal.xmp.XMPMeta;
+import com.adobe.internal.xmp.XMPMetaFactory;
 import com.adobe.internal.xmp.impl.XMPMetaImpl;
 import com.adobe.internal.xmp.impl.XMPSerializerHelper;
 import com.adobe.internal.xmp.options.PropertyOptions;
@@ -29,8 +32,7 @@ public class XMPService {
         }
 
         // 2. Mettre à jour uniquement les propriétés modifiées ou nouvelles
-//        if (xmpPhoto.getRating() != null)
-            xmpMeta.setProperty(XMPConst.NS_XMP, "Rating", xmpPhoto.getRating());
+        xmpMeta.setProperty(XMPConst.NS_XMP, "Rating", xmpPhoto.getRating());
 
         if (xmpPhoto.getLabel() != null)
             xmpMeta.setProperty(XMPConst.NS_XMP, "Label", xmpPhoto.getLabel());
@@ -47,8 +49,7 @@ public class XMPService {
         if (xmpPhoto.getDateTimeOriginal() != null)
             xmpMeta.setProperty(XMPConst.NS_EXIFX, "DateTimeOriginal", xmpPhoto.getDateTimeOriginal());
 
-//        if (xmpPhoto.getPick() != null)
-            xmpMeta.setProperty("http://ns.adobe.com/lightroom/1.0/", "Pick", xmpPhoto.getPick());
+        xmpMeta.setProperty("http://ns.adobe.com/lightroom/1.0/", "Pick", xmpPhoto.getPick());
 
         // Mots-clés (dc:subject)
         if (xmpPhoto.getKeywords() != null && xmpPhoto.getKeywords().size() > 0) {

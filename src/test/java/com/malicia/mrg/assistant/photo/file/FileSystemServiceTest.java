@@ -1,23 +1,35 @@
 package com.malicia.mrg.assistant.photo.file;
 
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
+import com.malicia.mrg.assistant.photo.repository.PhotoRepository;
 import com.malicia.mrg.assistant.photo.service.PhotoService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 class FileSystemServiceTest {
 
     @Autowired
     private PhotoService photoService;
+    @MockBean
+    PhotoRepository photoRepository;
+
+    @BeforeEach
+    public void setUp() {
+
+    }
 
     @Test
     void testConvertPathsToPhotos_ok_with_xmp_full() throws IOException {
@@ -43,7 +55,7 @@ class FileSystemServiceTest {
         Assertions.assertEquals(2, result.get(0).getRating());
         Assertions.assertEquals("", result.get(0).getLabel());
         Assertions.assertEquals(0, result.get(0).getPick());
-        Assertions.assertEquals("2025-01-31 22:08:37", result.get(0).getCreatedDate());
+        Assertions.assertEquals("2023-10-27 17:20:48", result.get(0).getDateTaken());
         Assertions.assertEquals(6, result.get(0).getKeywords().size());
         Assertions.assertEquals("Salon", result.get(0).getKeywords().get(1));
         Assertions.assertEquals("Bateau à voile", result.get(0).getKeywords().get(3));
@@ -51,6 +63,10 @@ class FileSystemServiceTest {
 
     @Test
     void testConvertPathsToPhotos_ok_without_xmp() throws IOException {
+        // Mock repository to simulate photo not found
+        Mockito.when(photoRepository.findByHash(Mockito.anyString()))
+                .thenReturn(Optional.empty());
+
         ByteArrayOutputStream outContent = new ByteArrayOutputStream();
         PrintStream originalOut = System.out;
         //redirect sysout

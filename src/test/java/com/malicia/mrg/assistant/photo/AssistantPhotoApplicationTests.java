@@ -8,8 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 
 @SpringBootTest
 class  AssistantPhotoApplicationTests {
-//	@MockBean
-//	private CacheService redisTemplate;
+
 	@MockBean
 	private PhotoService photoService;
 
