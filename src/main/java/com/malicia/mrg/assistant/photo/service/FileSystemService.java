@@ -57,10 +57,18 @@ public class FileSystemService {
         return matchingFiles;
     }
 
-    public static String getNormalizedPath(String pathToScan) {
-        Path pathScan = Paths.get(pathToScan);
-        Path normalizedPath = pathScan.normalize();
-        return normalizedPath.toString();
+    public static String getNormalizedPath(String rawPath) {
+        // Step 1: Replace backslashes with the system separator (especially useful on Linux when user types Windows-style paths)
+        String cleaned = rawPath.replace("\\", File.separator);
+
+        // Step 2: Remove or replace characters illegal in Windows file paths (safe fallback)
+        // You can tweak this if you're 100% Linux
+        cleaned = cleaned.replaceAll("[<>:\"|?*]", "_");
+
+        // Step 3: Normalize the path to remove redundant components like `.` or `..`
+        Path normalized = Paths.get(cleaned).normalize();
+
+        return normalized.toString();
     }
 
     public static String sanitizeFileName(String input) {

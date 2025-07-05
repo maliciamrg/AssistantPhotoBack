@@ -105,7 +105,7 @@ class RootRepertoireTest {
             System.out.println(photoshoot);
         }
         assertEquals(1, allPhotoshoot.size());
-        assertEquals(".\\src\\test\\resources\\10-Assistant_work\\2023_04_08_(00026)", allPhotoshoot.get(0).getPath());
+        assertEquals("src\\test\\resources\\10-Assistant_work\\2023_04_08_(00026)", allPhotoshoot.get(0).getPath());
     }
 
     // recupere un list de photo depuis un repertoire
