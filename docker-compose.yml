@@ -1,9 +1,7 @@
 services:
   backend:
     container_name: assistant_photo_backend_service
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: maliciamrg/assistant_photo_backend:0.0.1-SNAPSHOT
     environment:
       - SPRING_DATA_REDIS_HOST=redis
       - ASSISTANT_ROOTPATH=/Photo/
