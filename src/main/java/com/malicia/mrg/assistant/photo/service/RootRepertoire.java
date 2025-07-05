@@ -66,7 +66,7 @@ public class RootRepertoire {
     }
 
     public List<Photoshoot> getPhotoshootList(PhotoshootRoot photoshootRoot) {
-        String pathToScan = config.getRootPath() + photoshootRoot.getPath();
+        String pathToScan = FileSystemService.getNormalizedPath(config.getRootPath() + photoshootRoot.getPath());
 
         try {
             List<Path> listPath = FileSystemService.getAllFolder(pathToScan);
