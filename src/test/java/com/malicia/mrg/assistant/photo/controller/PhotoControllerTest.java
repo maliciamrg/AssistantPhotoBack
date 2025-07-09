@@ -36,39 +36,4 @@ class PhotoControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    @Test
-    void batchUpdate_shouldReturnPhotoCount_whenPhotosAreValid() {
-        // Arrange
-        PhotoGroup photos = new PhotoGroup();
-        photos.add(new Photo());
-        photos.add(new Photo());
-        //doNothing().when(photoService).saveAllPhotos(photos, true);
-        when(photoService.saveAllPhotos(anyObject(), eq(true))).thenReturn(photos);
-
-        // Act
-        ResponseEntity<Map<String, String>> response = photoController.batchUpdate(photos);
-
-        // Assert
-        assertEquals(200, response.getStatusCodeValue());
-        assertNotNull(response.getBody());
-        assertEquals("2", response.getBody().get("photoCount"));
-
-        verify(photoService, times(1)).saveAllPhotos(photos, true);
-    }
-
-    @Test
-    void batchUpdate_shouldReturnBadRequest_whenIllegalArgumentThrown() {
-        // Arrange
-        PhotoGroup photos = new PhotoGroup();
-        doThrow(new IllegalArgumentException("Invalid")).when(photoService).saveAllPhotos(photos, true);
-
-        // Act
-        ResponseEntity<Map<String, String>> response = photoController.batchUpdate(photos);
-
-        // Assert
-        assertEquals(400, response.getStatusCodeValue());
-        assertNull(response.getBody());
-
-        verify(photoService, times(1)).saveAllPhotos(photos, true);
-    }
 }

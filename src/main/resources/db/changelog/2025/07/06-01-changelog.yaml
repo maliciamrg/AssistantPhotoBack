@@ -1,0 +1,265 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1751806001469-1
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_photo_exif
+                  name: id
+                  type: UUID
+              - column:
+                  name: exif_date
+                  type: VARCHAR(255)
+              - column:
+                  name: date_time_original
+                  type: VARCHAR(255)
+              - column:
+                  name: make
+                  type: VARCHAR(255)
+              - column:
+                  name: model
+                  type: VARCHAR(255)
+              - column:
+                  name: iso
+                  type: VARCHAR(255)
+              - column:
+                  name: focal_length
+                  type: VARCHAR(255)
+              - column:
+                  name: aperture
+                  type: VARCHAR(255)
+              - column:
+                  name: exposure_time
+                  type: VARCHAR(255)
+              - column:
+                  name: orientation
+                  type: VARCHAR(255)
+              - column:
+                  name: photo_id
+                  type: UUID
+            tableName: photo_exif
+  - changeSet:
+      id: 1751806001469-2
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_photo_filesystem
+                  name: id
+                  type: UUID
+              - column:
+                  name: root_dir
+                  type: VARCHAR(255)
+              - column:
+                  name: path
+                  type: VARCHAR(255)
+              - column:
+                  name: relative_to_path
+                  type: VARCHAR(255)
+              - column:
+                  name: filename
+                  type: VARCHAR(255)
+              - column:
+                  name: extension
+                  type: VARCHAR(255)
+              - column:
+                  name: created_date
+                  type: VARCHAR(255)
+              - column:
+                  name: photo_id
+                  type: UUID
+            tableName: photo_filesystem
+  - changeSet:
+      id: 1751806001469-3
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                  name: photo_id
+                  type: UUID
+              - column:
+                  name: keyword
+                  type: VARCHAR(255)
+            tableName: photo_keywords
+  - changeSet:
+      id: 1751806001469-4
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_photo_metadata
+                  name: id
+                  type: UUID
+              - column:
+                  constraints:
+                    nullable: false
+                  name: rating
+                  type: INT
+              - column:
+                  name: label
+                  type: VARCHAR(255)
+              - column:
+                  name: create_date
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: pick
+                  type: INT
+              - column:
+                  name: photo_id
+                  type: UUID
+            tableName: photo_metadata
+  - changeSet:
+      id: 1751806001469-5
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_photo_thumbnail
+                  name: id
+                  type: UUID
+              - column:
+                  name: data
+                  type: bytea
+              - column:
+                  constraints:
+                    nullable: false
+                  name: photo_id
+                  type: UUID
+            tableName: photo_thumbnail
+  - changeSet:
+      id: 1751806001469-6
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_photos
+                  name: id
+                  type: UUID
+              - column:
+                  name: hash
+                  type: VARCHAR(255)
+            tableName: photos
+  - changeSet:
+      id: 1751806001469-7
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: photo_id
+            constraintName: uc_photo_exif_photo
+            tableName: photo_exif
+  - changeSet:
+      id: 1751806001469-8
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: photo_id
+            constraintName: uc_photo_filesystem_photo
+            tableName: photo_filesystem
+  - changeSet:
+      id: 1751806001469-9
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: photo_id
+            constraintName: uc_photo_metadata_photo
+            tableName: photo_metadata
+  - changeSet:
+      id: 1751806001469-10
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addUniqueConstraint:
+            columnNames: photo_id
+            constraintName: uc_photo_thumbnail_photo
+            tableName: photo_thumbnail
+  - changeSet:
+      id: 1751806001469-11
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: photo_id
+            baseTableName: photo_exif
+            constraintName: FK_PHOTO_EXIF_ON_PHOTO
+            referencedColumnNames: id
+            referencedTableName: photos
+  - changeSet:
+      id: 1751806001469-12
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: photo_id
+            baseTableName: photo_filesystem
+            constraintName: FK_PHOTO_FILESYSTEM_ON_PHOTO
+            referencedColumnNames: id
+            referencedTableName: photos
+  - changeSet:
+      id: 1751806001469-13
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: photo_id
+            baseTableName: photo_metadata
+            constraintName: FK_PHOTO_METADATA_ON_PHOTO
+            referencedColumnNames: id
+            referencedTableName: photos
+  - changeSet:
+      id: 1751806001469-14
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: photo_id
+            baseTableName: photo_thumbnail
+            constraintName: FK_PHOTO_THUMBNAIL_ON_PHOTO
+            referencedColumnNames: id
+            referencedTableName: photos
+  - changeSet:
+      id: 1751806001469-15
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: photo_id
+            baseTableName: photo_keywords
+            constraintName: fk_photo_keywords_on_xmp_metadata
+            referencedColumnNames: id
+            referencedTableName: photo_metadata
+

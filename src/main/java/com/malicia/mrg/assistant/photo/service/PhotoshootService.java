@@ -48,7 +48,7 @@ public class PhotoshootService {
 
     }
 
-    @Cacheable(value = "getPhotoshootList")
+    @Cacheable(value = "getPhotoshootList", key ="#photoshootType.photoshootTypeEnum.name()")
     public List<Photoshoot> getPhotoshootList(PhotoshootType photoshootType) {
         List<Photoshoot> photoshootArrayList = new ArrayList<>();
 
@@ -239,7 +239,7 @@ public class PhotoshootService {
         return true;
     }
 
-    @Cacheable(value = "getPhotoshootType")
+    @Cacheable(value = "getPhotoshootType",key = "#photoshootTypeName")
     public PhotoshootType getPhotoshootType(String photoshootTypeName) {
         Optional<PhotoshootType> photoshootType = config.getPhotoshootType().stream().filter(seance -> photoshootTypeName.equals(seance.getPhotoshootTypeEnum().name())).findFirst();
 

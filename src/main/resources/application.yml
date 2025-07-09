@@ -37,7 +37,8 @@ application:
   ipWan: '192.212.5.200'
   build_date: "@git.build.time@"
   commit_id: "@git.commit.id.abbrev@"
-
+  redis:
+    prefix: "photoassistant::"
 server:
   port: 8099
 springdoc:

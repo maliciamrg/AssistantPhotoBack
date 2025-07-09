@@ -1,13 +1,13 @@
 package com.malicia.mrg.assistant.photo.service;
 
 import com.adobe.internal.xmp.XMPException;
-import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
 import com.malicia.mrg.assistant.photo.MyConfig;
+import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
+import com.malicia.mrg.assistant.photo.entity.PhotoMetadata;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +24,7 @@ class XMPServiceTest {
     @Test
     void testReadMetadata() throws IOException, XMPException {
 
-        XMPPhoto result = XMPService.readMetadata(mockConfig.getRootPath() + "20250522-_DSC5845.xmp");
+        PhotoMetadata result = XMPService.readMetadata(mockConfig.getRootPath() + "20250522-_DSC5845.xmp");
         Assertions.assertEquals(-1, result.getPick());
         Assertions.assertEquals("Blue", result.getLabel());
         Assertions.assertEquals(4, result.getKeywords().size());
@@ -43,10 +43,10 @@ class XMPServiceTest {
         Files.copy(new File(sourceXmpPath).toPath(), new File(testXmpPath).toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         // 3. Créer un DTO avec des valeurs modifiées
-        XMPPhoto dto = new XMPPhoto();
+        PhotoDTO dto = new PhotoDTO();
         dto.setRating(5); // Changer la note
         dto.setLabel("Green"); // Nouveau label
-        dto.setCreateDate("2025-06-01T18:30:00"); // Date différente
+        dto.setCreatedDate("2025-06-01T18:30:00"); // Date différente
         dto.setPick(1); // Nouveau flag
         dto.setKeywords(List.of("nature", "wildlife", "sunset")); // Remplace les mots-clés
 
@@ -54,13 +54,13 @@ class XMPServiceTest {
         XMPService.storeMetadata(dto, testXmpPath);
 
         // 5. Lire à nouveau pour vérifier les valeurs modifiées
-        XMPPhoto result = XMPService.readMetadata(testXmpPath);
+        PhotoMetadata result = XMPService.readMetadata(testXmpPath);
 
         Assertions.assertEquals(5, result.getRating());
         Assertions.assertEquals("Green", result.getLabel());
         Assertions.assertEquals("2025-06-01T18:30:00", result.getCreateDate());
         Assertions.assertEquals(1, result.getPick());
-        Assertions.assertTrue(List.of("nature", "wildlife", "sunset").equals(result.getKeywords()));
+        Assertions.assertEquals(List.of("nature", "wildlife", "sunset"), result.getKeywords());
 
     }
 }

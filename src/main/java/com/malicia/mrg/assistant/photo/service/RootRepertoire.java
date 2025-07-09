@@ -98,8 +98,8 @@ public class RootRepertoire {
 
         // Sort photos based on exifDate (ascending), using fake LocalDateTime for invalid dates
         allPhotos.sort((p1, p2) -> {
-            LocalDateTime p1Date = parseDate(p1.getExifDate());
-            LocalDateTime p2Date = parseDate(p2.getExifDate());
+            LocalDateTime p1Date = parseDate(p1.getExif().getDateTimeOriginal());
+            LocalDateTime p2Date = parseDate(p2.getExif().getDateTimeOriginal());
             return p1Date.compareTo(p2Date);
         });
 
@@ -107,13 +107,13 @@ public class RootRepertoire {
         PhotoGroup nullExifGroup = new PhotoGroup(); // Separate group for photos with null or invalid exifDate
 
         for (Photo photo : allPhotos) {
-            if (photo.getExifDate() == null || photo.getExifDate().equals("Unknown")) {
+            if (photo.getExif().getDateTimeOriginal() == null || photo.getExif().getDateTimeOriginal().equals("Unknown")) {
                 nullExifGroup.add(photo); // Add to separate group for null or invalid exifDate
                 continue; // Skip the rest of the loop for invalid exifDate photos
             }
 
             boolean addedToGroup = false;
-            LocalDateTime photoExifDate = parseDate(photo.getExifDate());
+            LocalDateTime photoExifDate = parseDate(photo.getExif().getDateTimeOriginal());
 
             // Check if the photo can be added to the current group
             for (PhotoDTO groupPhoto : currentGroup) {

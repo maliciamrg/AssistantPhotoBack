@@ -28,7 +28,20 @@ public class PhotoGroup implements Iterable<PhotoDTO>, Serializable {
     }
 
     public void add(Photo photo) {
-        photos.add(new PhotoDTO(photo.getId(),photo.getHash(),photo.getPath(),photo.getRelativeToPath(),photo.getFilename(),photo.getExtension(),photo.getCreatedDate(),photo.getExifDate(),photo.getDateTaken(),photo.getRating(),photo.getLabel(),photo.getPick(),photo.getKeywords()));
+        photos.add(new PhotoDTO(photo.getId(),
+                photo.getHash(),
+                photo.getFileSystem().getPath(),
+                photo.getFileSystem().getRelativeToPath(),
+                photo.getFileSystem().getFilename(),
+                photo.getFileSystem().getExtension(),
+                photo.getFileSystem().getCreatedDate(),
+                photo.getExif().getDateTimeOriginal(),
+                photo.getPhotoMetadata().getCreateDate(),
+                photo.getPhotoMetadata().getRating(),
+                photo.getPhotoMetadata().getLabel(),
+                photo.getPhotoMetadata().getPick(),
+                new ArrayList<>(photo.getPhotoMetadata().getKeywords())
+        ));
     }
 
     public void add(PhotoDTO photoDTO) {

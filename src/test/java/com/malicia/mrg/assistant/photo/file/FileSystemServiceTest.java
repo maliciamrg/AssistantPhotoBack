@@ -38,9 +38,9 @@ class FileSystemServiceTest {
         List<PhotoDTO> result = photoService.convertPathsToPhotos(pathToScan, List.of(Path.of(pathToScan+"/"+photo1)));
         Assertions.assertEquals(1, result.size());
         Assertions.assertEquals(1, result.get(0).getRating());
-        Assertions.assertEquals("", result.get(0).getLabel());
+        Assertions.assertEquals(null, result.get(0).getLabel());
         Assertions.assertEquals(0, result.get(0).getPick());
-        Assertions.assertEquals("1992-12-01T00:00:00", result.get(0).getCreatedDate());
+        Assertions.assertEquals("1992-12-01T00:00:00", result.get(0).getCreateDate());
         Assertions.assertEquals(5, result.get(0).getKeywords().size());
         Assertions.assertEquals("Salon", result.get(0).getKeywords().get(1));
         Assertions.assertEquals("Bateau à voile", result.get(0).getKeywords().get(3));
@@ -53,16 +53,16 @@ class FileSystemServiceTest {
         List<PhotoDTO> result = photoService.convertPathsToPhotos(pathToScan, List.of(Path.of(pathToScan+"/"+photo1)));
         Assertions.assertEquals(1, result.size());
         Assertions.assertEquals(2, result.get(0).getRating());
-        Assertions.assertEquals("", result.get(0).getLabel());
+        Assertions.assertEquals(null, result.get(0).getLabel());
         Assertions.assertEquals(0, result.get(0).getPick());
-        Assertions.assertEquals("2023-10-27 17:20:48", result.get(0).getDateTaken());
+        Assertions.assertEquals("2023-10-27 17:20:48", result.get(0).getExifDate());
         Assertions.assertEquals(6, result.get(0).getKeywords().size());
         Assertions.assertEquals("Salon", result.get(0).getKeywords().get(1));
         Assertions.assertEquals("Bateau à voile", result.get(0).getKeywords().get(3));
     }
 
     @Test
-    void testConvertPathsToPhotos_ok_without_xmp() throws IOException {
+    void testConvertPathsToPhotos_ok_without_xmp() {
         // Mock repository to simulate photo not found
         Mockito.when(photoRepository.findByHash(Mockito.anyString()))
                 .thenReturn(Optional.empty());
@@ -77,7 +77,7 @@ class FileSystemServiceTest {
         List<PhotoDTO> result = photoService.convertPathsToPhotos(pathToScan, List.of(Path.of(pathToScan+"/"+photo1)));
         Assertions.assertEquals(1, result.size());
         Assertions.assertEquals(0, result.get(0).getRating());
-        Assertions.assertEquals("", result.get(0).getLabel());
+        Assertions.assertEquals(null, result.get(0).getLabel());
         Assertions.assertEquals(0, result.get(0).getPick());
         Assertions.assertEquals("2024-11-24 22:01:54", result.get(0).getCreatedDate());
         Assertions.assertEquals(0, result.get(0).getKeywords().size());

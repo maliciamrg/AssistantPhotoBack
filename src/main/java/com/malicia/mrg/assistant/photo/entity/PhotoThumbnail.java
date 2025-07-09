@@ -3,11 +3,21 @@ package com.malicia.mrg.assistant.photo.entity;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.UUID;
 
 @Entity
 @Table(name = "photo_thumbnail")
 public class PhotoThumbnail implements Serializable {
+    @Override
+    public String toString() {
+        return "PhotoThumbnail{" +
+                "id=" + id +
+                ", data=" + Arrays.toString(data) +
+                ", photo=" + photo +
+                '}';
+    }
+
     private static final long serialVersionUID = 1L;
 
     @Id

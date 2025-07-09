@@ -18,7 +18,7 @@ public class PhotoDTO implements Serializable {
     private String extension;
     private String createdDate;
     private String exifDate;
-    private String dateTaken;
+    private String createDate;
     private int rating;
     private String label;
     private int pick;
@@ -32,7 +32,7 @@ public class PhotoDTO implements Serializable {
                     String extension,
                     String createdDate,
                     String exifDate,
-                    String dateTaken,
+                    String createDate,
                     int rating,
                     String label,
                     int pick,
@@ -45,7 +45,7 @@ public class PhotoDTO implements Serializable {
         this.extension = extension;
         this.createdDate = createdDate;
         this.exifDate = exifDate;
-        this.dateTaken = dateTaken;
+        this.createDate = createDate;
         this.rating = rating;
         this.label = label;
         this.pick = pick;
@@ -116,12 +116,12 @@ public class PhotoDTO implements Serializable {
         this.exifDate = exifDate;
     }
 
-    public String getDateTaken() {
-        return dateTaken;
+    public String getCreateDate() {
+        return createDate;
     }
 
-    public void setDateTaken(String dateTaken) {
-        this.dateTaken = dateTaken;
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
     }
 
     public int getRating() {

@@ -32,6 +32,8 @@ spring:
 
 application:
   version: "@project.version@"
+  redis:
+    prefix: "test::"
 
 assistant:
   dryRun: true

@@ -9,16 +9,19 @@ import com.adobe.internal.xmp.impl.XMPMetaImpl;
 import com.adobe.internal.xmp.impl.XMPSerializerHelper;
 import com.adobe.internal.xmp.options.PropertyOptions;
 import com.adobe.internal.xmp.properties.XMPProperty;
-import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
+import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
+import com.malicia.mrg.assistant.photo.dto.PhotoMetadataDTO;
+import com.malicia.mrg.assistant.photo.entity.PhotoMetadata;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class XMPService {
 
-    public static void storeMetadata(XMPPhoto xmpPhoto, String xmpPath) throws IOException, XMPException {
+    public static void storeMetadata(PhotoDTO xmpPhoto, String xmpPath) throws IOException, XMPException {
         File xmpFile = new File(xmpPath);
         XMPMeta xmpMeta;
 
@@ -37,17 +40,17 @@ public class XMPService {
         if (xmpPhoto.getLabel() != null)
             xmpMeta.setProperty(XMPConst.NS_XMP, "Label", xmpPhoto.getLabel());
 
-        if (xmpPhoto.getCreateDate() != null)
-            xmpMeta.setProperty(XMPConst.NS_XMP, "CreateDate", xmpPhoto.getCreateDate());
+        if (xmpPhoto.getCreatedDate() != null)
+            xmpMeta.setProperty(XMPConst.NS_XMP, "CreateDate", xmpPhoto.getCreatedDate());
 
-        if (xmpPhoto.getMake() != null)
-            xmpMeta.setProperty(XMPConst.NS_TIFF, "Make", xmpPhoto.getMake());
+//        if (xmpPhoto.getMake() != null)
+//            xmpMeta.setProperty(XMPConst.NS_TIFF, "Make", xmpPhoto.getMake());
 
-        if (xmpPhoto.getModel() != null)
-            xmpMeta.setProperty(XMPConst.NS_TIFF, "Model", xmpPhoto.getModel());
+//        if (xmpPhoto.getModel() != null)
+//            xmpMeta.setProperty(XMPConst.NS_TIFF, "Model", xmpPhoto.getModel());
 
-        if (xmpPhoto.getDateTimeOriginal() != null)
-            xmpMeta.setProperty(XMPConst.NS_EXIFX, "DateTimeOriginal", xmpPhoto.getDateTimeOriginal());
+//        if (xmpPhoto.getDateTimeOriginal() != null)
+//            xmpMeta.setProperty(XMPConst.NS_EXIFX, "DateTimeOriginal", xmpPhoto.getDateTimeOriginal());
 
         xmpMeta.setProperty("http://ns.adobe.com/lightroom/1.0/", "Pick", xmpPhoto.getPick());
 
@@ -65,13 +68,13 @@ public class XMPService {
         }
     }
 
-    public static XMPPhoto readMetadata(String xmpPath) throws IOException, XMPException {
-        XMPPhoto xmpPhoto = new XMPPhoto();
+    public static PhotoMetadata readMetadata(String xmpPath) throws IOException, XMPException {
+        PhotoMetadata photoMetadata = new PhotoMetadata();
         File xmpFile = new File(xmpPath);
 
         if (!xmpFile.exists()) {
             System.out.println("XMP sidecar file does not exist.");
-            return xmpPhoto;
+            return photoMetadata;
         }
 
         try (InputStream inputStream = new FileInputStream(xmpFile)) {
@@ -79,61 +82,61 @@ public class XMPService {
 
             // XMP Core
             if (xmpMeta.doesPropertyExist(XMPConst.NS_XMP, "CreateDate")) {
-                xmpPhoto.setCreateDate(xmpMeta.getPropertyString(XMPConst.NS_XMP, "CreateDate"));
+                photoMetadata.setCreateDate(xmpMeta.getPropertyString(XMPConst.NS_XMP, "CreateDate"));
             }
 
             if (xmpMeta.doesPropertyExist(XMPConst.NS_XMP, "Rating")) {
                 String ratingStr = xmpMeta.getPropertyString(XMPConst.NS_XMP, "Rating");
-                xmpPhoto.setRating(ratingStr != null ? Integer.parseInt(ratingStr) : 0);
+                photoMetadata.setRating(ratingStr != null ? Integer.parseInt(ratingStr) : 0);
             } else {
-                xmpPhoto.setRating(0);
+                photoMetadata.setRating(0);
             }
 
             if (xmpMeta.doesPropertyExist(XMPConst.NS_XMP, "Label")) {
-                xmpPhoto.setLabel(xmpMeta.getPropertyString(XMPConst.NS_XMP, "Label"));
+                photoMetadata.setLabel(xmpMeta.getPropertyString(XMPConst.NS_XMP, "Label"));
             }
 
             // TIFF
-            if (xmpMeta.doesPropertyExist(XMPConst.NS_TIFF, "Make")) {
-                xmpPhoto.setMake(xmpMeta.getPropertyString(XMPConst.NS_TIFF, "Make"));
-            }
+//            if (xmpMeta.doesPropertyExist(XMPConst.NS_TIFF, "Make")) {
+//                photoMetadata.setMake(xmpMeta.getPropertyString(XMPConst.NS_TIFF, "Make"));
+//            }
 
-            if (xmpMeta.doesPropertyExist(XMPConst.NS_TIFF, "Model")) {
-                xmpPhoto.setModel(xmpMeta.getPropertyString(XMPConst.NS_TIFF, "Model"));
-            }
+//            if (xmpMeta.doesPropertyExist(XMPConst.NS_TIFF, "Model")) {
+//                photoMetadata.setModel(xmpMeta.getPropertyString(XMPConst.NS_TIFF, "Model"));
+//            }
 
             // EXIF
-            if (xmpMeta.doesPropertyExist(XMPConst.NS_EXIFX, "DateTimeOriginal")) {
-                xmpPhoto.setDateTimeOriginal(xmpMeta.getPropertyString(XMPConst.NS_EXIFX, "DateTimeOriginal"));
-            }
+//            if (xmpMeta.doesPropertyExist(XMPConst.NS_EXIFX, "DateTimeOriginal")) {
+//                photoMetadata.setDateTimeOriginal(xmpMeta.getPropertyString(XMPConst.NS_EXIFX, "DateTimeOriginal"));
+//            }
 
             // Keywords (dc:subject array)
             if (xmpMeta.doesPropertyExist(XMPConst.NS_DC, "subject")) {
                 int keywordCount = xmpMeta.countArrayItems(XMPConst.NS_DC, "subject");
-                String[] tmpKeyWord = new String[keywordCount];
+                List<String> tmpKeyWord = new ArrayList<>();
                 for (int i = 1; i <= keywordCount; i++) {
                     XMPProperty tag = xmpMeta.getArrayItem(XMPConst.NS_DC, "subject", i);
                     if (tag != null) {
-                        tmpKeyWord[i - 1] = tag.getValue();
+                        tmpKeyWord.add(tag.getValue());
                     }
                 }
-                xmpPhoto.setKeywords(List.of(tmpKeyWord));
+                photoMetadata.setKeywords(tmpKeyWord);
             }
 
             // Lightroom Pick flag
             final String LIGHTROOM_NS = "http://ns.adobe.com/lightroom/1.0/";
             if (xmpMeta.doesPropertyExist(LIGHTROOM_NS, "Pick")) {
                 String pickStr = xmpMeta.getPropertyString(LIGHTROOM_NS, "Pick");
-                xmpPhoto.setPick(pickStr != null ? Integer.parseInt(pickStr) : 0);
+                photoMetadata.setPick(pickStr != null ? Integer.parseInt(pickStr) : 0);
             } else {
-                xmpPhoto.setPick(0);
+                photoMetadata.setPick(0);
             }
         } catch (XMPException | NumberFormatException e) {
             System.err.println("Error reading or parsing XMP metadata: " + e.getMessage());
             // Optionally, rethrow or log as needed
         }
 
-        return xmpPhoto;
+        return photoMetadata;
     }
 
 }

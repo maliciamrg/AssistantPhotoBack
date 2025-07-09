@@ -96,7 +96,7 @@ public class FileSystemService {
     }
 
     // Helper method to get file creation date
-    public static String getFileCreatedDate(Path path) throws IOException {
+    public static String getFileCreatedDate(Path path) {
         try {
             FileTime fileTime = (FileTime) Files.getAttribute(path, "creationTime");
             Date date = new Date(fileTime.toMillis());

@@ -1,10 +1,8 @@
 package com.malicia.mrg.assistant.photo.entity;
 
-
 import jakarta.persistence.*;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -14,30 +12,45 @@ public class Photo implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue
-    private UUID id;  // Will use UUID.randomUUID() or Hibernate strategy
+    private UUID id;
+
     private String hash;
-    private String path;
 
-    private String relativeToPath;
-    private String filename;
-    private String extension;
-    private String createdDate;
-    private String exifDate;
-    private String dateTaken;
-    private int rating;
-    private String label;
-    private int pick;
+    @OneToOne(mappedBy = "photo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private PhotoFileSystem fileSystem;
 
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "photo_keywords", joinColumns = @JoinColumn(name = "photo_id"))
-    @Column(name = "keyword")
-    private List<String> keywords;
-
-    @OneToOne(mappedBy = "photo", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToOne(mappedBy = "photo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private PhotoExifData exif;
+    @OneToOne(mappedBy = "photo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private PhotoMetadata photoMetadata;
+    @OneToOne(mappedBy = "photo", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private PhotoThumbnail thumbnail;
 
     public Photo() {
+    }
+
+    public PhotoMetadata getPhotoMetadata() {
+        return photoMetadata;
+    }
+
+    public void setPhotoMetadata(PhotoMetadata photoMetadata) {
+        this.photoMetadata = photoMetadata;
+    }
+
+    public PhotoFileSystem getFileSystem() {
+        return fileSystem;
+    }
+
+    public void setFileSystem(PhotoFileSystem fileSystem) {
+        this.fileSystem = fileSystem;
+    }
+
+    public PhotoExifData getExif() {
+        return exif;
+    }
+
+    public void setExif(PhotoExifData exif) {
+        this.exif = exif;
     }
 
     public PhotoThumbnail getThumbnail() {
@@ -56,14 +69,6 @@ public class Photo implements Serializable {
         this.id = id;
     }
 
-    public List<String> getKeywords() {
-        return keywords;
-    }
-
-    public void setKeywords(List<String> keywords) {
-        this.keywords = keywords;
-    }
-
     public String getHash() {
         return hash;
     }
@@ -72,101 +77,15 @@ public class Photo implements Serializable {
         this.hash = hash;
     }
 
-    public int getRating() {
-        return rating;
-    }
-
-    public void setRating(int rating) {
-        this.rating = rating;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    public int getPick() {
-        return pick;
-    }
-
-    public void setPick(int pick) {
-        this.pick = pick;
-    }
-
-    public String getDateTaken() {
-        return dateTaken;
-    }
-
-    public void setDateTaken(String dateTaken) {
-        this.dateTaken = dateTaken;
-    }
-
-    // Getters and setters
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public String getExtension() {
-        return extension;
-    }
-
-    public void setExtension(String extension) {
-        this.extension = extension;
-    }
-
-    public String getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(String createdDate) {
-        this.createdDate = createdDate;
-        if (dateTaken == null || dateTaken.compareTo(T_09_15_00_Z) == 0) {
-            this.dateTaken = createdDate;
-        }
-    }
-
-    public String getExifDate() {
-        return exifDate;
-    }
-
-    public void setExifDate(String exifDate) {
-        this.exifDate = exifDate;
-        this.dateTaken = exifDate;
-    }
-
     @Override
     public String toString() {
         return "Photo{" +
-                "path='" + path + '\'' +
-                ", relativeToPath='" + relativeToPath + '\'' +
-                ", filename='" + filename + '\'' +
-                ", extension='" + extension + '\'' +
-                ", createdDate='" + createdDate + '\'' +
-                ", exifDate='" + exifDate + '\'' +
+                "id=" + id +
+                ", hash='" + hash + '\'' +
+                ", fileSystem=" + fileSystem +
+                ", exif=" + exif +
+                ", photoMetadata=" + photoMetadata +
+         //       ", thumbnail=" + thumbnail +
                 '}';
     }
-
-    public String getRelativeToPath() {
-        return relativeToPath;
-    }
-
-    public void setRelativeToPath(String relativeToPath) {
-        this.relativeToPath = relativeToPath;
-    }
-
 }

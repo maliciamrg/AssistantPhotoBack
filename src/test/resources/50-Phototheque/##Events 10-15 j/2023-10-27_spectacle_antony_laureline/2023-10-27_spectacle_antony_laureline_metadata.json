@@ -8,17 +8,3 @@
   "nbDay" : 1,
   "nbStar" : [ 1, 1, 1, 0, 0, 0 ],
   "nbLabel" : {
-    "" : 3
-  },
-  "nbTag" : {
-    "Salon" : 2,
-    "Bateau à voile" : 2,
-    "tresor" : 1,
-    "Duplicate" : 2,
-    "zone2" : 1,
-    "ImportArgentique" : 2,
-    "Import_Argentique_Bf_evolution" : 1
-  },
-  "photoshootName" : "2023-10-27_spectacle_antony_laureline",
-  "photoshootNameParts" : [ "2023-10-27", "spectacle", "antony", "laureline" ]
-}

@@ -3,12 +3,17 @@ package com.malicia.mrg.assistant.photo.service;
 import com.adobe.internal.xmp.XMPException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
-import com.malicia.mrg.assistant.photo.dto.PhotoMapper;
+import com.malicia.mrg.assistant.photo.dto.PhotoMetadataDTO;
 import com.malicia.mrg.assistant.photo.entity.Photo;
+import com.malicia.mrg.assistant.photo.entity.PhotoExifData;
+import com.malicia.mrg.assistant.photo.entity.PhotoFileSystem;
+import com.malicia.mrg.assistant.photo.entity.PhotoMetadata;
+import com.malicia.mrg.assistant.photo.mapper.PhotoMapper;
 import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
-import com.malicia.mrg.assistant.photo.pojo.XMPPhoto;
 import com.malicia.mrg.assistant.photo.repository.PhotoRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +23,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import static com.drew.metadata.exif.ExifDirectoryBase.TAG_DATETIME;
+import java.util.UUID;
 
 @Service
 public class PhotoService {
@@ -37,17 +41,19 @@ public class PhotoService {
 
         for (Path path : paths) {
 
+            System.out.println("PhotoDTO photo = getPhotoDataFromPath(rootDir, path);");
             PhotoDTO photo = getPhotoDataFromPath(rootDir, path);
-
+            System.out.println("photoDTOList.add(photo)");
             photoDTOList.add(photo);
 
         }
-
+        System.out.println("return photoDTOList");
         return photoDTOList;
     }
 
     @Cacheable(value = "getPhotoDataFromPath", key = "#path.toString()")
     public PhotoDTO getPhotoDataFromPath(String rootDir, Path path) {
+        System.out.println("getPhotoDataFromPath");
 
         // Create a new Photo object
         Photo photo = new Photo();
@@ -57,21 +63,25 @@ public class PhotoService {
         try {
             Optional<Photo> existingPhoto = photoRepository.findByHash(photo.getHash());
             if (existingPhoto.isPresent()) {
+                System.out.println("existingPhoto.isPresent()");
+
                 photo = existingPhoto.get();
-                if (photo.getPath().equals(path)) {
-                    System.out.println("/!\\  photo with hash: " + photo.getHash() + " \n" + "[(existing) " + photo.getPath() + " \n" + "[(new)      " + path + " ]");
+                if (!photo.getFileSystem().getPath().equals(path)) {
+                    System.out.println("/!\\  photo with hash: " + photo.getHash() + " \n" + "[(existing) " + photo.getFileSystem().getPath() + " \n" + "[(new)      " + path + " ]");
                 }
             } else {
 
-                addPhotoDataFromFile(rootDir, path, photo);
+                photo.setFileSystem(getFileSystemDataOfPhoto(rootDir, path));
+
+                // Reach exif if exist
+                photo.setExif(getExifDataOfPhoto(path));
 
                 // Reach xmp if exist
-
-                addPhotoDataFromXmpSidecar(path, photo);
-
+                photo.setPhotoMetadata(getXmpSidecarDataOfPhoto(path));
 
                 photo.setThumbnail(thumbnailService.generateThumbnail(photo));
 
+                System.out.println("photoRepository.save(photo)");
                 photoRepository.save(photo);
 
                 //   photoThumbnailRepository.save(generateThumbnail(photo));
@@ -80,23 +90,25 @@ public class PhotoService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return PhotoMapper.toDto(photo);
+        System.out.println("PhotoMapper.toDTO(photo)");
+        return PhotoMapper.toDTO(photo);
     }
 
-    private void addPhotoDataFromFile(String rootDir, Path path, Photo photo) {
-        photo.setPath(path.toString());
-        photo.setRelativeToPath(FileSystemService.getNormalizedPath(path.toString()).replace(FileSystemService.getNormalizedPath(rootDir), ""));
+    private PhotoFileSystem getFileSystemDataOfPhoto(String rootDir, Path path) {
+        PhotoFileSystem photoFileSystemDTO = new PhotoFileSystem();
+
+        photoFileSystemDTO.setRootDir(rootDir);
+        photoFileSystemDTO.setPath(path.toString());
+        photoFileSystemDTO.setRelativeToPath(FileSystemService.getNormalizedPath(path.toString()).replace(FileSystemService.getNormalizedPath(rootDir), ""));
 
         // Extract filename and extension
         String filename = path.getFileName().toString();
         String extension = FileSystemService.getFileExtension(filename);
-        photo.setFilename(filename);
-        photo.setExtension(extension);
+        photoFileSystemDTO.setFilename(filename);
+        photoFileSystemDTO.setExtension(extension);
+        photoFileSystemDTO.setCreatedDate(FileSystemService.getFileCreatedDate(path));
 
-        // Try to extract EXIF date (only if the file is an image)
-        if (extension.equalsIgnoreCase("ARW") || extension.equalsIgnoreCase("jpg") || extension.equalsIgnoreCase("jpeg") || extension.equalsIgnoreCase("png")) {
-            photo.setExifDate(getExifDate(path));
-        }
+        return photoFileSystemDTO;
 
     }
 
@@ -117,99 +129,95 @@ public class PhotoService {
         return sb.toString();
     }
 
-    private void addPhotoDataFromXmpSidecar(Path path, Photo photo) throws IOException {
-        photo.setRating(0);
-        photo.setPick(0);
-        photo.setLabel("");
-        photo.setKeywords(List.of(new String[0]));
-        XMPPhoto xmpPhoto = new XMPPhoto();
+    private PhotoMetadata getXmpSidecarDataOfPhoto(Path path) throws IOException {
+        PhotoMetadata photoMetadata = new PhotoMetadata();
+
+        photoMetadata.setCreateDate("");
+        photoMetadata.setRating(0);
+        photoMetadata.setPick(0);
+        photoMetadata.setLabel("");
+        photoMetadata.setKeywords(new ArrayList<>());
         try {
-            xmpPhoto = XMPService.readMetadata(path + ".xmp");
-
-            Integer rating = xmpPhoto.getRating();
-            if (rating != null) {
-                photo.setRating(rating);
-            }
-
-            Integer pick = xmpPhoto.getPick();
-            if (pick != null) {
-                photo.setPick(pick);
-            }
-
-            List<String> keywords = xmpPhoto.getKeywords();
-            if (keywords != null) {
-                photo.setKeywords(keywords);
-            }
-
-            String label = xmpPhoto.getLabel();
-            if (label != null) {
-                photo.setLabel(label);
-            }
+            photoMetadata = XMPService.readMetadata(path + ".xmp");
         } catch (XMPException e) {
             throw new RuntimeException(e);
         }
 
-
-        // Get file creation date (from filesystem)
-        photo.setCreatedDate(FileSystemService.getFileCreatedDate(path));
-        if (xmpPhoto.getCreateDate() != null) {
-            if (xmpPhoto.getCreateDate().compareTo("null") != 0) {
-                photo.setCreatedDate(xmpPhoto.getCreateDate());
-            }
-        }
-
-        // set file tags
-        photo.setKeywords(List.of(new String[0]));
-        if (xmpPhoto.getKeywords() != null) {
-            if (xmpPhoto.getKeywords().size() > 0) {
-                photo.setKeywords(xmpPhoto.getKeywords());
-            }
-        }
+        return photoMetadata;
     }
 
-    // Helper method to get EXIF date from an image file
-    private String getExifDate(Path path) {
+    private PhotoExifData getExifDataOfPhoto(Path path) {
+        PhotoExifData dto = new PhotoExifData();
+
         try {
-            // Read EXIF data if the file is an image
             Metadata metadata = FileSystemService.getMetadata(path);
 
-            // Get the EXIF directory
-            ExifIFD0Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+            // Exif SubIFD (most date/time + ISO + exposure info)
+            ExifSubIFDDirectory subIFD = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+            ExifIFD0Directory ifd0 = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 
-            if (directory != null) {
-                // Access EXIF DateTimeOriginal tag directly (tag ID 0x9003)
-                String exifDate = directory.getString(TAG_DATETIME);
-                exifDate = exifDate.replaceFirst("^(\\d{4}):(\\d{2}):(\\d{2})", "$1-$2-$3");
-
-                if (exifDate != null) {
-                    return exifDate; // Return the EXIF datetime
+            if (subIFD != null) {
+                String dateTime = subIFD.getString(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+                if (dateTime != null) {
+                    dateTime = dateTime.replaceFirst("^(\\d{4}):(\\d{2}):(\\d{2})", "$1-$2-$3");
+                    dto.setDateTimeOriginal(dateTime);
                 }
+
+                dto.setIso(subIFD.getString(ExifSubIFDDirectory.TAG_ISO_EQUIVALENT));
+                dto.setFocalLength(subIFD.getString(ExifSubIFDDirectory.TAG_FOCAL_LENGTH));
+                dto.setAperture(subIFD.getString(ExifSubIFDDirectory.TAG_FNUMBER));
+                dto.setExposureTime(subIFD.getString(ExifSubIFDDirectory.TAG_EXPOSURE_TIME));
             }
+
+            if (ifd0 != null) {
+                dto.setMake(ifd0.getString(ExifIFD0Directory.TAG_MAKE));
+                dto.setModel(ifd0.getString(ExifIFD0Directory.TAG_MODEL));
+                dto.setOrientation(ifd0.getString(ExifIFD0Directory.TAG_ORIENTATION));
+            }
+
         } catch (Exception e) {
-            // If no EXIF data or error, return "Unknown"
             e.printStackTrace();
         }
-        return "Unknown";
+
+        return dto;
     }
 
-    public PhotoGroup saveAllPhotos(PhotoGroup photos, boolean writeXmp) {
-        for (PhotoDTO photo : photos) {
+    public boolean deletePhoto(UUID id) {
+        return false;
+    }
 
-            if (writeXmp) {
-                try {
-                    XMPPhoto xmpPhoto = new XMPPhoto();
-                    xmpPhoto.setRating(photo.getRating());
-                    xmpPhoto.setPick(photo.getPick());
-                    xmpPhoto.setCreateDate(photo.getCreatedDate());
-                    xmpPhoto.setKeywords(photo.getKeywords());
-                    XMPService.storeMetadata(xmpPhoto, photo.getPath() + ".xmp");
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (XMPException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+    public Optional<Photo> updatePhoto(UUID id, Photo photo) {
+        return null;
+    }
+
+    public Photo savePhoto(Photo photo) {
+        return null;
+    }
+
+    public Optional<Photo> getPhotoById(UUID id) {
+        return null;
+    }
+
+    public List<Photo> getAllPhotos() {
+        return null;
+    }
+
+    public void updatePhotoMetadata(UUID photoId, PhotoMetadataDTO metadataDTO) {
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new EntityNotFoundException("Photo not found with id: " + photoId));
+
+        PhotoMetadata metadata = photo.getPhotoMetadata();
+        if (metadata == null) {
+            metadata = new PhotoMetadata();
         }
-        return photos;
+
+        metadata.setRating(metadataDTO.getRating());
+        metadata.setPick(metadataDTO.getPick());
+        metadata.setLabel(metadataDTO.getLabel());
+        metadata.setKeywords(metadataDTO.getKeywords() != null ? new ArrayList<>(metadataDTO.getKeywords()) : new ArrayList<>());
+
+        photo.setPhotoMetadata(metadata);
+        photoRepository.save(photo);
     }
+
 }

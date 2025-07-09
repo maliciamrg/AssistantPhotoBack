@@ -37,7 +37,7 @@ public class ThumbnailService {
         try {
 
             // Load the image file
-            BufferedImage originalImage = FileSystemService.getBufferedImage(photo.getPath());
+            BufferedImage originalImage = FileSystemService.getBufferedImage(photo.getFileSystem().getPath());
 
             if (originalImage != null) {
                 // Set the dimensions for the thumbnail

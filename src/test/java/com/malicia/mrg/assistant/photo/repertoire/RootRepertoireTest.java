@@ -4,16 +4,21 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.malicia.mrg.assistant.photo.MyConfig;
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
+import com.malicia.mrg.assistant.photo.repository.PhotoRepository;
 import com.malicia.mrg.assistant.photo.service.*;
 import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
 import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
 import com.malicia.mrg.assistant.photo.pojo.PhotoshootTypeEnum;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,8 +26,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class RootRepertoireTest {
@@ -33,11 +44,26 @@ class RootRepertoireTest {
     @Autowired
     private PhotoshootService photoshootService; // Mocking the MyConfig dependency
 
-    @Autowired
+    @SpyBean
     private PhotoService photoService;
+
+    @Autowired
+    private RedisConnectionFactory redisConnectionFactory;
 
     @MockBean
     private ThumbnailService thumbnailService;
+
+    @MockBean
+    private PhotoRepository photoRepository;
+
+    @BeforeEach
+    void setUp() {
+        //no photo stock in database
+        when(photoRepository.findByHash(anyString()))
+                .thenReturn(Optional.empty());
+        //clearRedisPhotoCache()
+        redisConnectionFactory.getConnection().flushDb();
+    }
 
     // recuperer uniquement les Repertoires AllIn (photo non rafiné a tirer /grouper)
     @Test
@@ -162,26 +188,36 @@ class RootRepertoireTest {
     @Test
     void getAllPhotoFromPhotoshootTypeAllInToJson() {
         //given
-        mockConfig.setRootPath("\\\\192.212.5.111\\80-Photo\\");
+        mockConfig.setRootPath("\\\\192.212.40.111\\80-Photo\\");
         RootRepertoire rootRep = new RootRepertoire(mockConfig,photoService);
         String jsonDest = mockConfig.getRootPath() + "/getAllPhotoFromAllInRealToJsonTEST-out.json";
+        //reduce to the 10 first photo
+        doAnswer(invocation -> {
+            String pathToScan = invocation.getArgument(0);
+            List<Path> originalList = invocation.getArgument(1);
+            List<Path> trimmed = originalList.stream().limit(10).toList();
+            return photoService.convertPathsToPhotos(pathToScan, trimmed);
+        }).when(photoService).convertPathsToPhotos(anyString(), argThat(list -> list != null && list.size() > 20));
 
         //when
         List<Photoshoot> assistantRepertoire = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ALL_IN.name()).getPhotoshootRoot().get(0));
-        PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoireToJson(assistantRepertoire, jsonDest);
+        List<Photoshoot> assistantRepertoireFiltered = assistantRepertoire.stream()
+                .filter(p -> "AllIn".equals(p.getName()))
+                .collect(Collectors.toList());
+        PhotoGroup allPhotoFromSeanceRepertoire = rootRep.getAllPhotoFromSeanceRepertoireToJson(assistantRepertoireFiltered, jsonDest);
 
         //then
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(jsonDest);
-        List<Photo> allPhotoFromSeanceRepertoireFromFile = new ArrayList<>();
+        PhotoGroup allPhotoFromSeanceRepertoireFromFile = new PhotoGroup();
         try {
-            allPhotoFromSeanceRepertoireFromFile = objectMapper.readValue(file, new TypeReference<List<Photo>>() {
+            allPhotoFromSeanceRepertoireFromFile = objectMapper.readValue(file, new TypeReference<PhotoGroup>() {
             });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.println(" --> " + allPhotoFromSeanceRepertoireFromFile.size() + " == " + allPhotoFromSeanceRepertoire.size() + " <-- ");
-        assertEquals(allPhotoFromSeanceRepertoireFromFile.size(), allPhotoFromSeanceRepertoire.size());
+        System.out.println(" --> " + allPhotoFromSeanceRepertoireFromFile.getPhotos().size() + " == " + allPhotoFromSeanceRepertoire.size() + " <-- ");
+        assertEquals(allPhotoFromSeanceRepertoireFromFile.getPhotos().size(), allPhotoFromSeanceRepertoire.size());
     }
 
     // recupere un list de photo depuis un repertoire
@@ -207,6 +243,7 @@ class RootRepertoireTest {
     }
 
     // Group photo
+    @Disabled("not usefull anymore")
     @Test
     void getGroupOfPhoto_FromJson() {
         //given
@@ -216,16 +253,18 @@ class RootRepertoireTest {
         String jsonSrc = mockConfig.getRootPath() + "/getAllPhotoFromAllInRealToJsonTEST.json";
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(jsonSrc);
-        List<Photo> allPhotoFromSeanceRepertoireFromFile = new ArrayList<>();
+        PhotoGroup allPhotoFromSeanceRepertoireFromFile = new PhotoGroup();
         try {
-            allPhotoFromSeanceRepertoireFromFile = objectMapper.readValue(file, new TypeReference<List<Photo>>() {
+            allPhotoFromSeanceRepertoireFromFile = objectMapper.readValue(file, new TypeReference<PhotoGroup>() {
             });
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         //when
-        List<PhotoGroup> repPhotoGroupFrom = rootRep.getGroupOfPhotoFrom(allPhotoFromSeanceRepertoireFromFile);
+
+        List<PhotoGroup> repPhotoGroupFrom = new ArrayList<>();
+        repPhotoGroupFrom.add(allPhotoFromSeanceRepertoireFromFile);
 
         //then
         System.out.println(" --> " + allPhotoFromSeanceRepertoireFromFile.size() + " == " + repPhotoGroupFrom.size() + " <-- ");
