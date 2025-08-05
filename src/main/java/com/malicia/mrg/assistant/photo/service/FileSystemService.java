@@ -63,7 +63,7 @@ public class FileSystemService {
 
         // Step 2: Remove or replace characters illegal in Windows file paths (safe fallback)
         // You can tweak this if you're 100% Linux
-        cleaned = cleaned.replaceAll("[<>:\"|?*]", "_");
+        cleaned = cleaned.replaceAll("(?<!^[a-zA-Z]):|[<>\\\"|?*]", "_");
 
         // Step 3: Normalize the path to remove redundant components like `.` or `..`
         Path normalized = Paths.get(cleaned).normalize();

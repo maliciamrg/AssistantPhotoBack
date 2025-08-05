@@ -46,7 +46,7 @@ public class PhotoshootMetaDataAccumulator {
             nbStar[rating]++;
         }
 
-        nbLabel.merge(label, 1, Integer::sum);
+        if (label != null) {nbLabel.merge(label, 1, Integer::sum);}
         for (String tag : tags) {
             nbTag.merge(tag, 1, Integer::sum);
         }

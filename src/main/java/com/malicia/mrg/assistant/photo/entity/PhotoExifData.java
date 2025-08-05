@@ -1,6 +1,8 @@
 package com.malicia.mrg.assistant.photo.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
@@ -15,6 +17,15 @@ public class PhotoExifData {
     private String dateTimeOriginal;
     private String make;
     private String model;
+    private String iso;
+    private String focalLength;
+    private String aperture;
+    private String exposureTime;
+    private String orientation;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "photo_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Photo photo;
 
     @Override
     public String toString() {
@@ -28,18 +39,17 @@ public class PhotoExifData {
                 ", aperture='" + aperture + '\'' +
                 ", exposureTime='" + exposureTime + '\'' +
                 ", orientation='" + orientation + '\'' +
-                ", photo=" + photo +
+                ", photoId=" + (photo != null ? photo.getId() : null) +
                 '}';
     }
 
-    private String iso;
-    private String focalLength;
-    private String aperture;
-    private String exposureTime;
-    private String orientation;
-    @OneToOne
-    @JoinColumn(name = "photo_id")
-    private Photo photo;
+    public Photo getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Photo photo) {
+        this.photo = photo;
+    }
 
     public String getDateTimeOriginal() {
         return dateTimeOriginal;

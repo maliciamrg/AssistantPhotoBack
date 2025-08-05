@@ -85,7 +85,7 @@ public class Photo implements Serializable {
                 ", fileSystem=" + fileSystem +
                 ", exif=" + exif +
                 ", photoMetadata=" + photoMetadata +
-         //       ", thumbnail=" + thumbnail +
+                //       ", thumbnail=" + thumbnail +
                 '}';
     }
 }

@@ -1,6 +1,12 @@
 package com.malicia.mrg.assistant.photo.dto;
 
+import com.malicia.mrg.assistant.photo.entity.Photo;
+import com.malicia.mrg.assistant.photo.entity.PhotoExifData;
+import com.malicia.mrg.assistant.photo.entity.PhotoFileSystem;
+import com.malicia.mrg.assistant.photo.entity.PhotoMetadata;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,6 +56,31 @@ public class PhotoDTO implements Serializable {
         this.label = label;
         this.pick = pick;
         this.keywords = keywords;
+    }
+
+    public PhotoDTO(Photo updatedPhoto) {
+        this.id = updatedPhoto.getId();
+        this.hash = updatedPhoto.getHash();
+        PhotoFileSystem fileSystem = updatedPhoto.getFileSystem();
+        if (fileSystem != null) {
+            this.path = fileSystem.getPath();
+            this.relativeToPath = fileSystem.getRelativeToPath();
+            this.filename = fileSystem.getFilename();
+            this.extension = fileSystem.getExtension();
+            this.createdDate = fileSystem.getCreatedDate();
+        }
+        PhotoExifData exif = updatedPhoto.getExif();
+        if (exif != null) {
+            this.exifDate = exif.getDateTimeOriginal().toString();
+        }
+        PhotoMetadata photoMetadata = updatedPhoto.getPhotoMetadata();
+        if (photoMetadata != null) {
+            this.createDate = photoMetadata.getCreateDate();
+            this.rating = photoMetadata.getRating();
+            this.label = photoMetadata.getLabel();
+            this.pick = photoMetadata.getPick();
+            this.keywords = new ArrayList<>(photoMetadata.getKeywords());
+        }
     }
 
     public UUID getId() {

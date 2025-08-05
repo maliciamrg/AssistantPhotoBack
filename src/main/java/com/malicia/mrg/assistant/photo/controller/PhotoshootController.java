@@ -8,6 +8,9 @@ import com.malicia.mrg.assistant.photo.pojo.Photoshoot;
 import com.malicia.mrg.assistant.photo.pojo.PhotoshootType;
 import com.malicia.mrg.assistant.photo.service.PhotoshootService;
 import com.malicia.mrg.assistant.photo.service.RootRepertoire;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +32,24 @@ public class PhotoshootController {
     // 3. Liste des photos d'une Photoshoot
     @GetMapping("/{photoshootTypeName}/{photoshootName}")
     public ResponseEntity<Photoshoot> getPhotoshoot(@PathVariable String photoshootTypeName, @PathVariable String photoshootName) {
+        try {
+            PhotoshootType photoshootType = photoshootService.getPhotoshootType(photoshootTypeName);
+            return ResponseEntity.ok().body(photoshootService.getPhotoshoot(photoshootType, photoshootName));
+
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(404).body(null);
+        }
+    }
+
+    // 3. Liste des photos d'une Photoshoot
+    @Caching(evict = {
+            @CacheEvict(value = "getAllPhotoFromPhotoshoot", key = "#photoshootName"),
+            @CacheEvict(value = "getPhotoshootType", key = "#photoshootTypeName"),
+            @CacheEvict(value = "getPhotoshootList", key ="#photoshootTypeName")
+
+    })
+    @GetMapping("/{photoshootTypeName}/{photoshootName}/nocache")
+    public ResponseEntity<Photoshoot> getPhotoshootNocache(@PathVariable String photoshootTypeName, @PathVariable String photoshootName) {
         try {
             PhotoshootType photoshootType = photoshootService.getPhotoshootType(photoshootTypeName);
             return ResponseEntity.ok().body(photoshootService.getPhotoshoot(photoshootType, photoshootName));
@@ -71,4 +92,5 @@ public class PhotoshootController {
 
         return ResponseEntity.ok(response);
     }
+
 }

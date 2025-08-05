@@ -6,14 +6,13 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 import com.malicia.mrg.assistant.photo.dto.PhotoMetadataDTO;
-import com.malicia.mrg.assistant.photo.entity.Photo;
-import com.malicia.mrg.assistant.photo.entity.PhotoExifData;
-import com.malicia.mrg.assistant.photo.entity.PhotoFileSystem;
-import com.malicia.mrg.assistant.photo.entity.PhotoMetadata;
+import com.malicia.mrg.assistant.photo.entity.*;
 import com.malicia.mrg.assistant.photo.mapper.PhotoMapper;
-import com.malicia.mrg.assistant.photo.pojo.PhotoGroup;
 import com.malicia.mrg.assistant.photo.repository.PhotoRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +50,7 @@ public class PhotoService {
         return photoDTOList;
     }
 
-    @Cacheable(value = "getPhotoDataFromPath", key = "#path.toString()")
+//    @Cacheable(value = "getPhotoDataFromPath", key = "#path.toString()")
     public PhotoDTO getPhotoDataFromPath(String rootDir, Path path) {
         System.out.println("getPhotoDataFromPath");
 
@@ -64,32 +63,54 @@ public class PhotoService {
             Optional<Photo> existingPhoto = photoRepository.findByHash(photo.getHash());
             if (existingPhoto.isPresent()) {
                 System.out.println("existingPhoto.isPresent()");
-
                 photo = existingPhoto.get();
-                if (!photo.getFileSystem().getPath().equals(path)) {
-                    System.out.println("/!\\  photo with hash: " + photo.getHash() + " \n" + "[(existing) " + photo.getFileSystem().getPath() + " \n" + "[(new)      " + path + " ]");
+                if (photo.getFileSystem() == null) {
+                    System.out.println("/!\\  FileSystem null");
+                } else {
+                    if (!photo.getFileSystem().getPath().equals(path)) {
+                        System.out.println("/!\\  photo with hash: " + photo.getHash() + " \n" + "[(existing) " + photo.getFileSystem().getPath() + " \n" + "[(new)      " + path + " ]");
+                    }
                 }
-            } else {
-
-                photo.setFileSystem(getFileSystemDataOfPhoto(rootDir, path));
-
-                // Reach exif if exist
-                photo.setExif(getExifDataOfPhoto(path));
-
-                // Reach xmp if exist
-                photo.setPhotoMetadata(getXmpSidecarDataOfPhoto(path));
-
-                photo.setThumbnail(thumbnailService.generateThumbnail(photo));
-
-                System.out.println("photoRepository.save(photo)");
-                photoRepository.save(photo);
-
-                //   photoThumbnailRepository.save(generateThumbnail(photo));
-
             }
+
+
+            if (photo.getFileSystem() == null) {
+                System.out.println("calculate getFileSystem");
+                PhotoFileSystem fileSystemDataOfPhoto = getFileSystemDataOfPhoto(rootDir, path);
+                fileSystemDataOfPhoto.setPhoto(photo);
+                photo.setFileSystem(fileSystemDataOfPhoto);
+            }
+
+            if (photo.getExif() == null) {
+                System.out.println("calculate getExif");
+                PhotoExifData exifDataOfPhoto = getExifDataOfPhoto(path);
+                exifDataOfPhoto.setPhoto(photo);
+                photo.setExif(exifDataOfPhoto);
+            }
+
+            if (photo.getPhotoMetadata() == null) {
+                System.out.println("calculate getPhotoMetadata");
+                PhotoMetadata xmpSidecarDataOfPhoto = getXmpSidecarDataOfPhoto(path);
+                xmpSidecarDataOfPhoto.setPhoto(photo);
+                photo.setPhotoMetadata(xmpSidecarDataOfPhoto);
+            }
+
+            if (photo.getThumbnail() == null) {
+                System.out.println("calculate getThumbnail");
+                PhotoThumbnail photoThumbnail = thumbnailService.generateThumbnail(photo);
+                photoThumbnail.setPhoto(photo);
+                photo.setThumbnail(photoThumbnail);
+            }
+
+            System.out.println("photoRepository.save(photo)");
+            photoRepository.save(photo);
+
+            //   photoThumbnailRepository.save(generateThumbnail(photo));
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
         System.out.println("PhotoMapper.toDTO(photo)");
         return PhotoMapper.toDTO(photo);
     }
@@ -202,7 +223,8 @@ public class PhotoService {
         return null;
     }
 
-    public void updatePhotoMetadata(UUID photoId, PhotoMetadataDTO metadataDTO) {
+    @CacheEvict(value = "getAllPhotoFromPhotoshoot", allEntries = true)
+    public Photo updatePhotoMetadata(UUID photoId, PhotoMetadataDTO metadataDTO) {
         Photo photo = photoRepository.findById(photoId)
                 .orElseThrow(() -> new EntityNotFoundException("Photo not found with id: " + photoId));
 
@@ -211,13 +233,48 @@ public class PhotoService {
             metadata = new PhotoMetadata();
         }
 
+
         metadata.setRating(metadataDTO.getRating());
         metadata.setPick(metadataDTO.getPick());
         metadata.setLabel(metadataDTO.getLabel());
         metadata.setKeywords(metadataDTO.getKeywords() != null ? new ArrayList<>(metadataDTO.getKeywords()) : new ArrayList<>());
-
+        metadata.setPhoto(photo);
         photo.setPhotoMetadata(metadata);
         photoRepository.save(photo);
+        return  photo;
     }
 
+    @CacheEvict(value = "getAllPhotoFromPhotoshoot", allEntries = true)
+    public Photo updatePhotoStar(UUID photoId, @Min(0) @Max(5) Integer nbStar) {
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new EntityNotFoundException("Photo not found with id: " + photoId));
+
+        PhotoMetadata metadata = photo.getPhotoMetadata();
+        if (metadata == null) {
+            metadata = new PhotoMetadata();
+        }
+
+        metadata.setRating(nbStar);
+        metadata.setPhoto(photo);
+        photo.setPhotoMetadata(metadata);
+        photoRepository.save(photo);
+        return  photo;
+    }
+
+    @CacheEvict(value = "getAllPhotoFromPhotoshoot", allEntries = true)
+    public Photo updatePhotoPick(UUID photoId, @Min(-1) @Max(1) Integer valuePick) {
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new EntityNotFoundException("Photo not found with id: " + photoId));
+
+        PhotoMetadata metadata = photo.getPhotoMetadata();
+        if (metadata == null) {
+            metadata = new PhotoMetadata();
+        }
+
+        metadata.setPick(valuePick);
+        metadata.setPhoto(photo);
+        photo.setPhotoMetadata(metadata);
+        photoRepository.save(photo);
+        return  photo;
+    }
 }

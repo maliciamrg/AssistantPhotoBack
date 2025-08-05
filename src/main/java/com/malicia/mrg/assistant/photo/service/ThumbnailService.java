@@ -32,7 +32,6 @@ public class ThumbnailService {
 
     public PhotoThumbnail generateThumbnail(Photo photo) {
         PhotoThumbnail photoThumbnail = new PhotoThumbnail();
-        photoThumbnail.setPhoto(photo);
 
         try {
 

@@ -1,0 +1,75 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1751806001469-11
+      author: cleme
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: photo_exif
+            constraintName: FK_PHOTO_EXIF_ON_PHOTO
+        - addForeignKeyConstraint:
+            baseTableName: photo_exif
+            baseColumnNames: photo_id
+            constraintName: FK_PHOTO_EXIF_ON_PHOTO
+            referencedTableName: photos
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 1751806001469-12
+      author: cleme
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: photo_filesystem
+            constraintName: FK_PHOTO_FILESYSTEM_ON_PHOTO
+        - addForeignKeyConstraint:
+            baseTableName: photo_filesystem
+            baseColumnNames: photo_id
+            constraintName: FK_PHOTO_FILESYSTEM_ON_PHOTO
+            referencedTableName: photos
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 1751806001469-13
+      author: cleme
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: photo_metadata
+            constraintName: FK_PHOTO_METADATA_ON_PHOTO
+        - addForeignKeyConstraint:
+            baseTableName: photo_metadata
+            baseColumnNames: photo_id
+            constraintName: FK_PHOTO_METADATA_ON_PHOTO
+            referencedTableName: photos
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 1751806001469-14
+      author: cleme
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: photo_thumbnail
+            constraintName: FK_PHOTO_THUMBNAIL_ON_PHOTO
+        - addForeignKeyConstraint:
+            baseTableName: photo_thumbnail
+            baseColumnNames: photo_id
+            constraintName: FK_PHOTO_THUMBNAIL_ON_PHOTO
+            referencedTableName: photos
+            referencedColumnNames: id
+            onDelete: CASCADE
+
+  - changeSet:
+      id: 1751806001469-15
+      author: cleme
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: photo_keywords
+            constraintName: fk_photo_keywords_on_xmp_metadata
+        - addForeignKeyConstraint:
+            baseTableName: photo_keywords
+            baseColumnNames: photo_id
+            constraintName: fk_photo_keywords_on_xmp_metadata
+            referencedTableName: photo_metadata
+            referencedColumnNames: id
+            onDelete: CASCADE

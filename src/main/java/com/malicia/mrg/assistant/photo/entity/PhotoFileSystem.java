@@ -1,6 +1,8 @@
 package com.malicia.mrg.assistant.photo.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.UUID;
 
@@ -17,8 +19,9 @@ public class PhotoFileSystem {
     private String filename;
     private String extension;
     private String createdDate;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "photo_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Photo photo;
 
     public String getRootDir() {
@@ -69,6 +72,14 @@ public class PhotoFileSystem {
         this.createdDate = createdDate;
     }
 
+    public Photo getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Photo photo) {
+        this.photo = photo;
+    }
+
     @Override
     public String toString() {
         return "PhotoFileSystem{" +
@@ -79,7 +90,7 @@ public class PhotoFileSystem {
                 ", filename='" + filename + '\'' +
                 ", extension='" + extension + '\'' +
                 ", createdDate='" + createdDate + '\'' +
-                ", photo=" + photo +
+                ", photoId=" + (photo != null ? photo.getId() : null) +
                 '}';
     }
 

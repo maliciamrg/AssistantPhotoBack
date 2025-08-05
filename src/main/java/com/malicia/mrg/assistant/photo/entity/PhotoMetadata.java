@@ -1,6 +1,8 @@
 package com.malicia.mrg.assistant.photo.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,6 +19,14 @@ public class PhotoMetadata {
     private String label;
     private String createDate;
     private int pick;
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "photo_keywords", joinColumns = @JoinColumn(name = "photo_id"))
+    @Column(name = "keyword")
+    private List<String> keywords;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "photo_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Photo photo;
 
     @Override
     public String toString() {
@@ -27,19 +37,9 @@ public class PhotoMetadata {
                 ", createDate='" + createDate + '\'' +
                 ", pick=" + pick +
                 ", keywords=" + keywords +
-                ", photo=" + photo +
+                ", photoId=" + (photo != null ? photo.getId() : null) +
                 '}';
     }
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "photo_keywords", joinColumns = @JoinColumn(name = "photo_id"))
-    @Column(name = "keyword")
-    private List<String> keywords;
-
-    @OneToOne
-    @JoinColumn(name = "photo_id")
-    private Photo photo;
-
 
     public int getPick() {
         return pick;
@@ -73,12 +73,20 @@ public class PhotoMetadata {
         this.createDate = createDate;
     }
 
-    public <E> void setKeywords(List<String> keywords) {
-        this.keywords = keywords;
+    public Photo getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Photo photo) {
+        this.photo = photo;
     }
 
     public List<String> getKeywords() {
         return keywords;
+    }
+
+    public <E> void setKeywords(List<String> keywords) {
+        this.keywords = keywords;
     }
 
     // Getters/setters
