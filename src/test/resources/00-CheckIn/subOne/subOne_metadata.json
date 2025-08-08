@@ -1,0 +1,16 @@
+{
+  "nbPhotoTotal" : 7,
+  "nbNotSelectedPhoto" : 7,
+  "nbSelectedPhoto" : 0,
+  "nbRejectedPhoto" : 0,
+  "lowerDate" : "2008-07-31",
+  "upperDate" : "2024-07-30",
+  "nbDay" : 5844,
+  "nbStar" : [ 7, 0, 0, 0, 0, 0 ],
+  "nbLabel" : {
+    "" : 7
+  },
+  "nbTag" : { },
+  "photoshootName" : "subOne",
+  "photoshootNameParts" : [ "subOne" ]
+}
