@@ -1,14 +1,18 @@
 package com.malicia.mrg.assistant.photo.pojo;
 
+import com.malicia.mrg.assistant.photo.dto.ValidationResult;
+
 import java.io.Serializable;
 
 public class Photoshoot implements Serializable {
     private static final long serialVersionUID = 1L;
+    private ValidationResult validationResult;
     private String name;
     private String path;  // Path or description of the repertoire
     private String description; // Optional description for the repertoire
     private PhotoGroup photoGroup;
     private PhotoshootMetaData metaDataFromPhotoshoot;
+    private String photoshootRoot;
 
     // Constructor
     public Photoshoot(String path, String description) {
@@ -63,5 +67,21 @@ public class Photoshoot implements Serializable {
 
     public void setMetaDataFromPhotoshoot(PhotoshootMetaData metaDataFromPhotoshoot) {
         this.metaDataFromPhotoshoot = metaDataFromPhotoshoot;
+    }
+
+    public ValidationResult getValidationResult() {
+        return validationResult;
+    }
+
+    public void setValidationResult(ValidationResult validationResult) {
+        this.validationResult = validationResult;
+    }
+
+    public void setPhotoshootRoot(String photoshootRoot) {
+        this.photoshootRoot = photoshootRoot;
+    }
+
+    public String getPhotoshootRoot() {
+        return photoshootRoot;
     }
 }

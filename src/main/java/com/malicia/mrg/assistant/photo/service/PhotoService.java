@@ -12,8 +12,9 @@ import com.malicia.mrg.assistant.photo.repository.PhotoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,32 +28,93 @@ import java.util.UUID;
 @Service
 public class PhotoService {
 
+    private static final Logger logger = LoggerFactory.getLogger(PhotoService.class);
     private final PhotoRepository photoRepository;
     private final ThumbnailService thumbnailService;
+
 
     public PhotoService(PhotoRepository photoRepository, ThumbnailService thumbnailService) {
         this.photoRepository = photoRepository;
         this.thumbnailService = thumbnailService;
     }
 
-    public List<PhotoDTO> convertPathsToPhotos(String rootDir, List<Path> paths) {
-        List<PhotoDTO> photoDTOList = new ArrayList<>();
-
-        for (Path path : paths) {
-
-            System.out.println("PhotoDTO photo = getPhotoDataFromPath(rootDir, path);");
-            PhotoDTO photo = getPhotoDataFromPath(rootDir, path);
-            System.out.println("photoDTOList.add(photo)");
-            photoDTOList.add(photo);
-
-        }
-        System.out.println("return photoDTOList");
-        return photoDTOList;
+    public boolean deletePhoto(UUID id) {
+        return false;
     }
 
-//    @Cacheable(value = "getPhotoDataFromPath", key = "#path.toString()")
+    public Optional<Photo> updatePhoto(UUID id, Photo photo) {
+        return null;
+    }
+
+    public Photo savePhoto(Photo photo) {
+        return null;
+    }
+
+    public Optional<Photo> getPhotoById(UUID id) {
+        return null;
+    }
+
+    public List<Photo> getAllPhotos() {
+        return null;
+    }
+
+    @CacheEvict(value = "getAllPhotoFromPhotoshoot", allEntries = true)
+    public Photo updatePhotoMetadata(UUID photoId, PhotoMetadataDTO metadataDTO) {
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new EntityNotFoundException("Photo not found with id: " + photoId));
+
+        PhotoMetadata metadata = photo.getPhotoMetadata();
+        if (metadata == null) {
+            metadata = new PhotoMetadata();
+        }
+
+
+        metadata.setRating(metadataDTO.getRating());
+        metadata.setPick(metadataDTO.getPick());
+        metadata.setLabel(metadataDTO.getLabel());
+        metadata.setKeywords(metadataDTO.getKeywords() != null ? new ArrayList<>(metadataDTO.getKeywords()) : new ArrayList<>());
+        metadata.setPhoto(photo);
+        photo.setPhotoMetadata(metadata);
+        photoRepository.save(photo);
+        return photo;
+    }
+
+    @CacheEvict(value = "getAllPhotoFromPhotoshoot", allEntries = true)
+    public Photo updatePhotoStar(UUID photoId, @Min(0) @Max(5) Integer nbStar) {
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new EntityNotFoundException("Photo not found with id: " + photoId));
+
+        PhotoMetadata metadata = photo.getPhotoMetadata();
+        if (metadata == null) {
+            metadata = new PhotoMetadata();
+        }
+
+        metadata.setRating(nbStar);
+        metadata.setPhoto(photo);
+        photo.setPhotoMetadata(metadata);
+        photoRepository.save(photo);
+        return photo;
+    }
+
+    @CacheEvict(value = "getAllPhotoFromPhotoshoot", allEntries = true)
+    public Photo updatePhotoPick(UUID photoId, @Min(-1) @Max(1) Integer valuePick) {
+        Photo photo = photoRepository.findById(photoId)
+                .orElseThrow(() -> new EntityNotFoundException("Photo not found with id: " + photoId));
+
+        PhotoMetadata metadata = photo.getPhotoMetadata();
+        if (metadata == null) {
+            metadata = new PhotoMetadata();
+        }
+
+        metadata.setPick(valuePick);
+        metadata.setPhoto(photo);
+        photo.setPhotoMetadata(metadata);
+        photoRepository.save(photo);
+        return photo;
+    }
+
     public PhotoDTO getPhotoDataFromPath(String rootDir, Path path) {
-        System.out.println("getPhotoDataFromPath");
+        logger.debug("getPhotoDataFromPath");
 
         // Create a new Photo object
         Photo photo = new Photo();
@@ -62,56 +124,52 @@ public class PhotoService {
         try {
             Optional<Photo> existingPhoto = photoRepository.findByHash(photo.getHash());
             if (existingPhoto.isPresent()) {
-                System.out.println("existingPhoto.isPresent()");
-                photo = existingPhoto.get();
-                if (photo.getFileSystem() == null) {
-                    System.out.println("/!\\  FileSystem null");
+                Photo photoRetrieve = existingPhoto.get();
+                if (photoRetrieve.getFileSystem() != null && photoRetrieve.getFileSystem().getPath().toString().compareTo(path.toString())!=0) {
+                    logger.info("Deleting existing photo hash: {} \n[(old) {} ]\n[(new) {} ]\n", photoRetrieve.getHash(), photoRetrieve.getFileSystem().getPath() ,path );
+                    photoRepository.cleanupPhotoData(photoRetrieve.getId());
+//                    photoRepository.delete(photo);
                 } else {
-                    if (!photo.getFileSystem().getPath().equals(path)) {
-                        System.out.println("/!\\  photo with hash: " + photo.getHash() + " \n" + "[(existing) " + photo.getFileSystem().getPath() + " \n" + "[(new)      " + path + " ]");
-                    }
+                    photo = photoRetrieve;
                 }
             }
 
-
             if (photo.getFileSystem() == null) {
-                System.out.println("calculate getFileSystem");
+                logger.debug("calculate getFileSystem");
                 PhotoFileSystem fileSystemDataOfPhoto = getFileSystemDataOfPhoto(rootDir, path);
                 fileSystemDataOfPhoto.setPhoto(photo);
                 photo.setFileSystem(fileSystemDataOfPhoto);
             }
 
             if (photo.getExif() == null) {
-                System.out.println("calculate getExif");
+                logger.debug("calculate getExif");
                 PhotoExifData exifDataOfPhoto = getExifDataOfPhoto(path);
                 exifDataOfPhoto.setPhoto(photo);
                 photo.setExif(exifDataOfPhoto);
             }
 
             if (photo.getPhotoMetadata() == null) {
-                System.out.println("calculate getPhotoMetadata");
+                logger.debug("calculate getPhotoMetadata");
                 PhotoMetadata xmpSidecarDataOfPhoto = getXmpSidecarDataOfPhoto(path);
                 xmpSidecarDataOfPhoto.setPhoto(photo);
                 photo.setPhotoMetadata(xmpSidecarDataOfPhoto);
             }
 
             if (photo.getThumbnail() == null) {
-                System.out.println("calculate getThumbnail");
+                logger.debug("calculate getThumbnail");
                 PhotoThumbnail photoThumbnail = thumbnailService.generateThumbnail(photo);
                 photoThumbnail.setPhoto(photo);
                 photo.setThumbnail(photoThumbnail);
             }
 
-            System.out.println("photoRepository.save(photo)");
+            logger.debug("photoRepository.save(photo)");
             photoRepository.save(photo);
-
-            //   photoThumbnailRepository.save(generateThumbnail(photo));
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        System.out.println("PhotoMapper.toDTO(photo)");
+        logger.debug("PhotoMapper.toDTO(photo)");
         return PhotoMapper.toDTO(photo);
     }
 
@@ -201,80 +259,5 @@ public class PhotoService {
         }
 
         return dto;
-    }
-
-    public boolean deletePhoto(UUID id) {
-        return false;
-    }
-
-    public Optional<Photo> updatePhoto(UUID id, Photo photo) {
-        return null;
-    }
-
-    public Photo savePhoto(Photo photo) {
-        return null;
-    }
-
-    public Optional<Photo> getPhotoById(UUID id) {
-        return null;
-    }
-
-    public List<Photo> getAllPhotos() {
-        return null;
-    }
-
-    @CacheEvict(value = "getAllPhotoFromPhotoshoot", allEntries = true)
-    public Photo updatePhotoMetadata(UUID photoId, PhotoMetadataDTO metadataDTO) {
-        Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new EntityNotFoundException("Photo not found with id: " + photoId));
-
-        PhotoMetadata metadata = photo.getPhotoMetadata();
-        if (metadata == null) {
-            metadata = new PhotoMetadata();
-        }
-
-
-        metadata.setRating(metadataDTO.getRating());
-        metadata.setPick(metadataDTO.getPick());
-        metadata.setLabel(metadataDTO.getLabel());
-        metadata.setKeywords(metadataDTO.getKeywords() != null ? new ArrayList<>(metadataDTO.getKeywords()) : new ArrayList<>());
-        metadata.setPhoto(photo);
-        photo.setPhotoMetadata(metadata);
-        photoRepository.save(photo);
-        return  photo;
-    }
-
-    @CacheEvict(value = "getAllPhotoFromPhotoshoot", allEntries = true)
-    public Photo updatePhotoStar(UUID photoId, @Min(0) @Max(5) Integer nbStar) {
-        Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new EntityNotFoundException("Photo not found with id: " + photoId));
-
-        PhotoMetadata metadata = photo.getPhotoMetadata();
-        if (metadata == null) {
-            metadata = new PhotoMetadata();
-        }
-
-        metadata.setRating(nbStar);
-        metadata.setPhoto(photo);
-        photo.setPhotoMetadata(metadata);
-        photoRepository.save(photo);
-        return  photo;
-    }
-
-    @CacheEvict(value = "getAllPhotoFromPhotoshoot", allEntries = true)
-    public Photo updatePhotoPick(UUID photoId, @Min(-1) @Max(1) Integer valuePick) {
-        Photo photo = photoRepository.findById(photoId)
-                .orElseThrow(() -> new EntityNotFoundException("Photo not found with id: " + photoId));
-
-        PhotoMetadata metadata = photo.getPhotoMetadata();
-        if (metadata == null) {
-            metadata = new PhotoMetadata();
-        }
-
-        metadata.setPick(valuePick);
-        metadata.setPhoto(photo);
-        photo.setPhotoMetadata(metadata);
-        photoRepository.save(photo);
-        return  photo;
     }
 }

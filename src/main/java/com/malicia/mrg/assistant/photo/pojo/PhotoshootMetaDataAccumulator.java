@@ -2,6 +2,10 @@ package com.malicia.mrg.assistant.photo.pojo;
 
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +14,9 @@ public class PhotoshootMetaDataAccumulator {
     private final int[] nbStar = new int[6];
     private final Map<String, Integer> nbLabel = new HashMap<>();
     private final Map<String, Integer> nbTag = new HashMap<>();
-    private String lowerDate = "9999-99-99";
-    private String upperDate = "0000-00-00";
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private Date lowerDate = new Date(Long.MAX_VALUE);
+    private Date upperDate = new Date(0L);
     private int nbRejectedPhoto = 0;
     private int nbNotSelectedPhoto = 0;
     private int nbSelectedPhoto = 0;
@@ -46,7 +51,9 @@ public class PhotoshootMetaDataAccumulator {
             nbStar[rating]++;
         }
 
-        if (label != null) {nbLabel.merge(label, 1, Integer::sum);}
+        if (label != null) {
+            nbLabel.merge(label, 1, Integer::sum);
+        }
         for (String tag : tags) {
             nbTag.merge(tag, 1, Integer::sum);
         }
@@ -55,18 +62,28 @@ public class PhotoshootMetaDataAccumulator {
     }
 
     private void updateDateBounds(String exifDate) {
-        if (exifDate != null && exifDate.length() >= 10) {
-            String date = exifDate.substring(0, 10);
-            if (date.compareTo(lowerDate) < 0) lowerDate = date;
-            if (date.compareTo(upperDate) > 0) upperDate = date;
+        if(exifDate == null) return;
+        try {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date parsedDate = formatter.parse(exifDate);
+
+            if (lowerDate == null || parsedDate.before(lowerDate)) {
+                lowerDate = parsedDate;
+            }
+            if (upperDate == null || parsedDate.after(upperDate)) {
+                upperDate = parsedDate;
+            }
+        } catch (ParseException e) {
+            System.err.println("Invalid exifDate: " + exifDate);
         }
     }
 
-    public String getLowerDate() {
+
+    public Date getLowerDate() {
         return lowerDate;
     }
 
-    public String getUpperDate() {
+    public Date getUpperDate() {
         return upperDate;
     }
 

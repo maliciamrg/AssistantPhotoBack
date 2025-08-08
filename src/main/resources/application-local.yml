@@ -1,6 +1,6 @@
 assistant:
   rootPath: Y:\
-
+  dryRun: false
 management:
   health:
     redis:
@@ -8,9 +8,13 @@ management:
 
 logging:
   level:
-    org.springdoc: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-    org.springframework.data.redis: DEBUG
-    org.springframework.cache: DEBUG
-    org.springframework.data.redis.cache.RedisCache: TRACE
+#    org.springdoc: DEBUG
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#    org.springframework.data.redis: DEBUG
+#    org.springframework.cache: DEBUG
+#    org.springframework.data.redis.cache.RedisCache: TRACE
+    com.malicia.mrg.assistant.photo: debug
+    root: info
+
+

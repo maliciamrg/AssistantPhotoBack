@@ -2,11 +2,15 @@ package com.malicia.mrg.assistant.photo.mapper;
 
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 import com.malicia.mrg.assistant.photo.entity.Photo;
+import com.malicia.mrg.assistant.photo.service.ThumbnailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class PhotoMapper {
+    private static final Logger logger = LoggerFactory.getLogger(PhotoMapper.class);
 
     // Convert from DTO to Entity
     public static Photo toEntity(PhotoDTO dto) {
@@ -30,26 +34,10 @@ public class PhotoMapper {
     }
 
     // Convert from Entity to DTO
-    public static PhotoDTO toDTO(Photo entity) {
-        if (entity == null) return null;
-        System.out.println("photo: \n" + entity.toString());
+    public static PhotoDTO toDTO(Photo photo) {
+        if (photo == null) return null;
+        logger.debug("photo: \n" + photo.toString());
 
-        return new PhotoDTO(
-                entity.getId(),
-                entity.getHash(),
-                entity.getFileSystem().getPath(),
-                entity.getFileSystem().getRelativeToPath(),
-                entity.getFileSystem().getFilename(),
-                entity.getFileSystem().getExtension(),
-                entity.getFileSystem().getCreatedDate(),
-                entity.getExif().getDateTimeOriginal(),
-                entity.getPhotoMetadata().getCreateDate(),
-                entity.getPhotoMetadata().getRating(),
-                entity.getPhotoMetadata().getLabel(),
-                entity.getPhotoMetadata().getPick(),
-                entity.getPhotoMetadata() != null && entity.getPhotoMetadata().getKeywords() != null
-                        ? new ArrayList<>(entity.getPhotoMetadata().getKeywords())
-                        : Collections.emptyList()
-        );
+        return new PhotoDTO(photo);
     }
 }

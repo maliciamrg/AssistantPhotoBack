@@ -1,5 +1,6 @@
 package com.malicia.mrg.assistant.photo.pojo;
 
+import java.util.Date;
 import java.util.Map;
 
 public class PhotoshootMetaData {
@@ -7,8 +8,8 @@ public class PhotoshootMetaData {
     private int nbNotSelectedPhoto;
     private int nbSelectedPhoto;
     private int nbRejectedPhoto;
-    private String lowerDate;
-    private String upperDate;
+    private Date lowerDate;
+    private Date upperDate;
     private long nbDay;
     private int[] nbStar;
     private Map<String, Integer> nbLabel;
@@ -48,19 +49,19 @@ public class PhotoshootMetaData {
         this.nbRejectedPhoto = nbRejectedPhoto;
     }
 
-    public String getLowerDate() {
+    public Date getLowerDate() {
         return lowerDate;
     }
 
-    public void setLowerDate(String lowerDate) {
+    public void setLowerDate(Date lowerDate) {
         this.lowerDate = lowerDate;
     }
 
-    public String getUpperDate() {
+    public Date getUpperDate() {
         return upperDate;
     }
 
-    public void setUpperDate(String upperDate) {
+    public void setUpperDate(Date upperDate) {
         this.upperDate = upperDate;
     }
 

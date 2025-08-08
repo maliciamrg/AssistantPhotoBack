@@ -1,8 +1,11 @@
 package com.malicia.mrg.assistant.photo.service;
 
+import com.malicia.mrg.assistant.photo.controller.PhotoshootController;
 import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.entity.PhotoThumbnail;
 import com.malicia.mrg.assistant.photo.repository.PhotoThumbnailRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -16,6 +19,7 @@ import java.util.UUID;
 @Service
 public class ThumbnailService {
     private final PhotoThumbnailRepository photoThumbnailRepository;
+    private static final Logger logger = LoggerFactory.getLogger(ThumbnailService.class);
 
     public ThumbnailService(PhotoThumbnailRepository photoThumbnailRepository) {
         this.photoThumbnailRepository = photoThumbnailRepository;
@@ -52,14 +56,14 @@ public class ThumbnailService {
 
                 // Convert BufferedImage to byte array
                 byte[] thumbnailBytes = imageToByteArray(bufferedThumbnail, "PNG");
-                System.out.println("Thumbnail size: " + thumbnailBytes.length);
-                System.out.println("First byte: " + thumbnailBytes[0]);
+                logger.debug("Thumbnail size: " + thumbnailBytes.length);
+                logger.debug("First byte: " + thumbnailBytes[0]);
                 photoThumbnail.setData(thumbnailBytes);
 
             }
 
         } catch (IOException e) {
-            System.out.println("Error reading the image file: " + e.getMessage());
+            logger.debug("Error reading the image file: " + e.getMessage());
         }
         return photoThumbnail;
     }

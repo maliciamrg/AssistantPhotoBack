@@ -13,12 +13,10 @@ import java.util.UUID;
 public class PhotoDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public PhotoDTO() {
-    }
-
     private UUID id;
     private String hash;
     private String path;
+    private String rootDir;
     private String relativeToPath;
     private String filename;
     private String extension;
@@ -30,40 +28,13 @@ public class PhotoDTO implements Serializable {
     private int pick;
     private List<String> keywords;
 
-    public PhotoDTO(UUID id,
-                    String hash,
-                    String path,
-                    String relativeToPath,
-                    String filename,
-                    String extension,
-                    String createdDate,
-                    String exifDate,
-                    String createDate,
-                    int rating,
-                    String label,
-                    int pick,
-                    List<String> keywords) {
-        this.id = id;
-        this.hash = hash;
-        this.path = path;
-        this.relativeToPath = relativeToPath;
-        this.filename = filename;
-        this.extension = extension;
-        this.createdDate = createdDate;
-        this.exifDate = exifDate;
-        this.createDate = createDate;
-        this.rating = rating;
-        this.label = label;
-        this.pick = pick;
-        this.keywords = keywords;
-    }
-
     public PhotoDTO(Photo updatedPhoto) {
         this.id = updatedPhoto.getId();
         this.hash = updatedPhoto.getHash();
         PhotoFileSystem fileSystem = updatedPhoto.getFileSystem();
         if (fileSystem != null) {
             this.path = fileSystem.getPath();
+            this.rootDir = fileSystem.getRootDir();
             this.relativeToPath = fileSystem.getRelativeToPath();
             this.filename = fileSystem.getFilename();
             this.extension = fileSystem.getExtension();
@@ -71,7 +42,7 @@ public class PhotoDTO implements Serializable {
         }
         PhotoExifData exif = updatedPhoto.getExif();
         if (exif != null) {
-            this.exifDate = exif.getDateTimeOriginal().toString();
+            this.exifDate = exif.getDateTimeOriginal();
         }
         PhotoMetadata photoMetadata = updatedPhoto.getPhotoMetadata();
         if (photoMetadata != null) {
@@ -79,9 +50,13 @@ public class PhotoDTO implements Serializable {
             this.rating = photoMetadata.getRating();
             this.label = photoMetadata.getLabel();
             this.pick = photoMetadata.getPick();
-            this.keywords = new ArrayList<>(photoMetadata.getKeywords());
+            this.keywords = photoMetadata.getKeywords() != null
+                    ? new ArrayList<>(photoMetadata.getKeywords())
+                    : new ArrayList<>();
         }
     }
+
+    public PhotoDTO() {}
 
     public UUID getId() {
         return id;
@@ -185,5 +160,13 @@ public class PhotoDTO implements Serializable {
 
     public void setKeywords(List<String> keywords) {
         this.keywords = keywords;
+    }
+
+    public String getRootDir() {
+        return rootDir;
+    }
+
+    public void setRootDir(String rootDir) {
+        this.rootDir = rootDir;
     }
 }

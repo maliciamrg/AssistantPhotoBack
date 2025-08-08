@@ -19,43 +19,51 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class FileSystemService {
 
     private FileSystemService() {
     }
 
-    public static List<Path> getAllFilesFromFolderAndSubFolderWithType(String rootDir, List<String> authorizedExtensions) {
+    public static List<Path> getAllFilesFromFolderWithType(String rootDir, List<String> authorizedExtensions, boolean includeSubdirectories) {
         Path rootPath = Paths.get(rootDir);
         List<Path> matchingFiles = new ArrayList<>();
 
-        // Walk through the directory tree
         try {
-            Files.walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    // Check if the file has an authorized extension
-                    String fileName = file.getFileName().toString();
-                    String extension = getFileExtension(fileName);
-
-                    if (authorizedExtensions.contains(extension)) {
-                        matchingFiles.add(file);
+            if (includeSubdirectories) {
+                try (Stream<Path> paths = Files.walk(rootPath)) {
+                    paths
+                            .filter(Files::isRegularFile)
+                            .filter(path -> hasAuthorizedExtension(path, authorizedExtensions))
+                            .forEach(matchingFiles::add);
+                }
+            } else {
+                // Only scan top-level directory (non-recursive)
+                try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
+                    for (Path path : stream) {
+                        if (Files.isRegularFile(path) && hasAuthorizedExtension(path, authorizedExtensions)) {
+                            matchingFiles.add(path);
+                        }
                     }
-                    return FileVisitResult.CONTINUE;
                 }
-
-                @Override
-                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                    // Handle errors, such as permissions, here if needed
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+            }
         } catch (IOException e) {
             throw new CustomException(e);
         }
 
         return matchingFiles;
     }
+
+    private static boolean hasAuthorizedExtension(Path file, List<String> authorizedExtensions) {
+        String fileName = file.getFileName().toString();
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex == -1 || dotIndex == fileName.length() - 1) return false;
+
+        String extension = fileName.substring(dotIndex + 1).toLowerCase();
+        return authorizedExtensions.contains(extension);
+    }
+
 
     public static String getNormalizedPath(String rawPath) {
         // Step 1: Replace backslashes with the system separator (especially useful on Linux when user types Windows-style paths)
@@ -122,29 +130,47 @@ public class FileSystemService {
 
     public static boolean moveFileWithTimestamp(String sourcePathStr, String destinationPathStr, boolean dryRun) throws IOException {
         Path sourcePath = Paths.get(sourcePathStr);
+        Path sourcePathXmp = Paths.get(sourcePathStr + ".xmp");
         Path destinationPath = Paths.get(destinationPathStr);
+        Path destinationPathXmp = Paths.get(destinationPathStr + ".xmp");
 
         // Check if source file exists
         if (!Files.exists(sourcePath)) {
             throw new IOException("Source file does not exist: " + sourcePathStr);
         }
 
-        if (!dryRun) {
+        if (dryRun) {
+            System.out.println("Dry run mode:");
+            System.out.println("Source path: " + sourcePath.toString());
+            if (Files.exists(sourcePathXmp)) {
+                System.out.println("Source XMP path: " + sourcePathXmp.toString());
+            }
+            System.out.println("Destination path: " + destinationPath.toString());
+
+        }else{
             // Ensure the destination directory exists
             Files.createDirectories(destinationPath.getParent());
 
-            // Move the file
-            Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
-
-            // Retrieve the last modified time of the source file
-            BasicFileAttributes attrs = Files.readAttributes(sourcePath, BasicFileAttributes.class);
-            FileTime lastModifiedTime = attrs.lastModifiedTime();
-
-            // Set the last modified time of the destination file to match the source file
-            Files.setLastModifiedTime(destinationPath, lastModifiedTime);
+            moveFileAction(sourcePath, destinationPath);
+            // Check if xmp file exists
+            if (Files.exists(sourcePathXmp)) {
+                moveFileAction(sourcePathXmp, destinationPathXmp);
+            }
         }
 
         return true;
+    }
+
+    private static void moveFileAction(Path sourcePath, Path destinationPath) throws IOException {
+        // Retrieve the last modified time of the source file
+        BasicFileAttributes attrs = Files.readAttributes(sourcePath, BasicFileAttributes.class);
+        FileTime lastModifiedTime = attrs.lastModifiedTime();
+
+        // Move the file
+        Files.move(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Set the last modified time of the destination file to match the source file
+        Files.setLastModifiedTime(destinationPath, lastModifiedTime);
     }
 
     public static List<Path> getAllFolder(String pathToScan) throws IOException {
@@ -168,6 +194,7 @@ public class FileSystemService {
             Photoshoot photoshoot = new Photoshoot();
             photoshoot.setName(path.toString().replace(rootPath + File.separator, ""));
             photoshoot.setPath(path.toString());
+            photoshoot.setPhotoshootRoot(pathToScan + File.separator);
 
             photoshoots.add(photoshoot);
         }
@@ -187,6 +214,31 @@ public class FileSystemService {
     public static Metadata getMetadata(Path path) throws ImageProcessingException, IOException {
         File file = path.toFile();
         return ImageMetadataReader.readMetadata(file);
+    }
+
+    public static void moveDirectory(String sourcePathStr, String destinationPathStr, boolean dryRun) throws IOException {
+        Path sourcePath = Paths.get(sourcePathStr);
+        Path destinationPath = Paths.get(destinationPathStr);
+
+        if (!Files.exists(sourcePath) || !Files.isDirectory(sourcePath)) {
+            throw new IOException("Source directory does not exist or is not a directory: " + sourcePathStr);
+        }
+
+        if (Files.exists(destinationPath)) {
+            throw new IOException("Destination already exists; cannot proceed: " + destinationPathStr);
+        }
+
+        if (dryRun) {
+            System.out.println("Dry run mode - Planned move from: " + sourcePath + " to " + destinationPath);
+            Files.walk(sourcePath).forEach(path -> {
+                Path relative = sourcePath.relativize(path);
+                Path target = destinationPath.resolve(relative);
+                System.out.println("Would move: " + path + " -> " + target);
+            });
+        } else {
+            // Move the entire directory (sourcePath becomes destinationPath)
+            Files.move(sourcePath, destinationPath, StandardCopyOption.ATOMIC_MOVE);
+        }
     }
 }
 

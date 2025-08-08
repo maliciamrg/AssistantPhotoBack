@@ -19,4 +19,9 @@ public class PhotoCleanupService {
     public void cleanupOrphanedPhotoData() {
         photoRepository.cleanupOrphanedPhotoData();
     }
+
+    public void cleanupAllPhotoData() {
+        photoRepository.cleanupAllPhotoData();
+    }
+
 }

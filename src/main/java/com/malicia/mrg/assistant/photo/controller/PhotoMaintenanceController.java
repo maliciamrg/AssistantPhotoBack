@@ -37,4 +37,12 @@ public class PhotoMaintenanceController {
                 "message", "Orphaned photo-related records cleaned up"
         ));
     }
+
+    @DeleteMapping("/photos/purgeAll")
+    public ResponseEntity<Map<String, Object>> deleteAllPhotoData() {
+        photoCleanupService.cleanupAllPhotoData();
+        return ResponseEntity.ok(Map.of(
+                "message", "Purge all records"
+        ));
+    }
 }

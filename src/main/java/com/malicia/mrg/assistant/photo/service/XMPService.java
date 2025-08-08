@@ -12,6 +12,8 @@ import com.adobe.internal.xmp.properties.XMPProperty;
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 import com.malicia.mrg.assistant.photo.dto.PhotoMetadataDTO;
 import com.malicia.mrg.assistant.photo.entity.PhotoMetadata;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -20,6 +22,7 @@ import java.util.List;
 
 @Service
 public class XMPService {
+    private static final Logger logger = LoggerFactory.getLogger(XMPService.class);
 
     public static void storeMetadata(PhotoDTO xmpPhoto, String xmpPath) throws IOException, XMPException {
         File xmpFile = new File(xmpPath);
@@ -33,6 +36,11 @@ public class XMPService {
         } else {
             xmpMeta = XMPMetaFactory.create();
         }
+
+        XMPMetaFactory.getSchemaRegistry().registerNamespace(
+                "http://ns.adobe.com/lightroom/1.0/",
+                "lr"
+        );
 
         // 2. Mettre à jour uniquement les propriétés modifiées ou nouvelles
         xmpMeta.setProperty(XMPConst.NS_XMP, "Rating", xmpPhoto.getRating());
@@ -73,7 +81,7 @@ public class XMPService {
         File xmpFile = new File(xmpPath);
 
         if (!xmpFile.exists()) {
-            System.out.println("XMP sidecar file does not exist.");
+            logger.debug("XMP sidecar file does not exist.");
             return photoMetadata;
         }
 

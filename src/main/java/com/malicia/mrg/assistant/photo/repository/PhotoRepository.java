@@ -43,4 +43,27 @@ public interface PhotoRepository extends JpaRepository<Photo, UUID> {
 """, nativeQuery = true)
     void cleanupOrphanedPhotoData();
 
+    @Modifying
+    @Transactional
+    @Query(value = """
+    DELETE FROM photo_exif ;
+    DELETE FROM photo_thumbnail ;
+    DELETE FROM photo_metadata ;
+    DELETE FROM photo_filesystem ;
+    DELETE FROM photo_keywords ;
+    DELETE FROM photos ;
+""", nativeQuery = true)
+    void cleanupAllPhotoData();
+
+    @Modifying
+    @Transactional
+    @Query(value = """
+    DELETE FROM photo_exif where photo_id = :id;
+    DELETE FROM photo_thumbnail where photo_id = :id;
+    DELETE FROM photo_metadata where photo_id = :id;
+    DELETE FROM photo_filesystem where photo_id = :id;
+    DELETE FROM photo_keywords where photo_id = :id;
+    DELETE FROM photos where id = :id;
+""", nativeQuery = true)
+    void cleanupPhotoData(UUID id);
 }
