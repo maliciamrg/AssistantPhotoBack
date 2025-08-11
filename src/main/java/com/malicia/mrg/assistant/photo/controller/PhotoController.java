@@ -8,12 +8,19 @@ import com.malicia.mrg.assistant.photo.service.PhotoService;
 import com.malicia.mrg.assistant.photo.service.XMPService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -36,9 +43,9 @@ public class PhotoController {
     // GET photo by ID
     @GetMapping("/{id}")
     public ResponseEntity<Photo> getPhotoById(@PathVariable UUID id) {
-        return photoService.getPhotoById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<Photo> photo = photoService.getPhotoById(id);
+        if (photo == null || !photo.isPresent()) { return ResponseEntity.notFound().build(); }
+        return ResponseEntity.ok(photo.get());
     }
 
 //    // POST create photo
@@ -56,21 +63,30 @@ public class PhotoController {
 //                .orElse(ResponseEntity.notFound().build());
 //    }
 //
-//    // DELETE photo
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deletePhoto(@PathVariable UUID id) {
-//        if (photoService.deletePhoto(id)) {
-//            return ResponseEntity.noContent().build();
-//        }
-//        return ResponseEntity.notFound().build();
-//    }
+    // DELETE photo
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePhoto(@PathVariable UUID id) {
+        if (photoService.deletePhoto(id)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 
     @PutMapping("/{id}/metadata")
     public ResponseEntity<PhotoDTO> updatePhotoMetadata(@PathVariable UUID id, @RequestBody PhotoMetadataDTO metadataDTO) {
         Photo updatedPhoto = photoService.updatePhotoMetadata(id, metadataDTO);
         return getPhotoDTOResponseEntity(updatedPhoto);
     }
-
+    @GetMapping("/{id}/videostream")
+    public ResponseEntity<Resource> getVideo(@PathVariable UUID id) throws IOException {
+        Optional<Photo> photo = photoService.getPhotoById(id);
+        if (photo == null || !photo.isPresent()) { return ResponseEntity.notFound().build(); }
+        Path videoPath = Paths.get(photo.get().getFileSystem().getPath());
+        Resource resource = new UrlResource(videoPath.toUri());
+        return ResponseEntity.ok()
+                .contentType(MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM))
+                .body(resource);
+    }
     @PutMapping("/{id}/star/{nbStar}")
     public ResponseEntity<PhotoDTO> updatePhotoStar(@PathVariable UUID id, @PathVariable @Min(0) @Max(5)  Integer nbStar) {
         Photo updatedPhoto = photoService.updatePhotoStar(id, nbStar);

@@ -12,18 +12,21 @@ import com.malicia.mrg.assistant.photo.repository.PhotoRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import org.mp4parser.IsoFile;
+import org.mp4parser.boxes.iso14496.part12.MovieHeaderBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class PhotoService {
@@ -38,8 +41,13 @@ public class PhotoService {
         this.thumbnailService = thumbnailService;
     }
 
-    public boolean deletePhoto(UUID id) {
-        return false;
+    public boolean deletePhoto(UUID photoId) {
+        if (photoRepository.existsById(photoId)) {
+            photoRepository.deleteById(photoId);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public Optional<Photo> updatePhoto(UUID id, Photo photo) {
@@ -50,8 +58,8 @@ public class PhotoService {
         return null;
     }
 
-    public Optional<Photo> getPhotoById(UUID id) {
-        return null;
+    public Optional<Photo> getPhotoById(UUID photoId) {
+        return photoRepository.findById(photoId);
     }
 
     public List<Photo> getAllPhotos() {
@@ -143,7 +151,12 @@ public class PhotoService {
 
             if (photo.getExif() == null) {
                 logger.debug("calculate getExif");
-                PhotoExifData exifDataOfPhoto = getExifDataOfPhoto(path);
+                PhotoExifData exifDataOfPhoto = new PhotoExifData();
+                if (isVideo(path)) {
+                    exifDataOfPhoto = getDataOfVideo(path);
+                }else{
+                    exifDataOfPhoto = getExifDataOfPhoto(path);
+                }
                 exifDataOfPhoto.setPhoto(photo);
                 photo.setExif(exifDataOfPhoto);
             }
@@ -157,7 +170,10 @@ public class PhotoService {
 
             if (photo.getThumbnail() == null) {
                 logger.debug("calculate getThumbnail");
-                PhotoThumbnail photoThumbnail = thumbnailService.generateThumbnail(photo);
+                PhotoThumbnail photoThumbnail = new PhotoThumbnail();
+                if (!isVideo(path)) {
+                    photoThumbnail = thumbnailService.generateThumbnail(photo);
+                }
                 photoThumbnail.setPhoto(photo);
                 photo.setThumbnail(photoThumbnail);
             }
@@ -193,9 +209,45 @@ public class PhotoService {
 
     private void AddPhotoHashFromFile(Path path, Photo photo) {
         try {
-            photo.setHash(generateImageHash(path));
+            photo.setHash(isVideo(path)?generateVideoHash(path):generateImageHash(path));
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private boolean isVideo(Path path) {
+        if (path.toString().toLowerCase().endsWith("mp4")) {return true;}
+        return false;
+    }
+
+    private String generateVideoHash(Path path) throws IOException {
+        String salt = "YourSaltHere123";
+        try {
+            if (!Files.exists(path) || !Files.isRegularFile(path)) {
+                throw new IllegalArgumentException("Invalid file path: " + path);
+            }
+
+            String fileName = path.getFileName().toString();
+            long fileSize = Files.size(path);
+            long lastModified = Files.getLastModifiedTime(path).toMillis();
+
+            // Combine metadata and salt
+            String data = fileName + "|" + fileSize + "|" + lastModified + "|" + salt;
+
+            // Generate SHA-256 hash
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(data.getBytes(StandardCharsets.UTF_8));
+
+            // Convert hash to hex string
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                hexString.append(String.format("%02x", b));
+            }
+
+            return hexString.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 not supported", e);
         }
     }
 
@@ -223,6 +275,23 @@ public class PhotoService {
         }
 
         return photoMetadata;
+    }
+
+
+    private PhotoExifData getDataOfVideo(Path videoPath) {
+        PhotoExifData dto = new PhotoExifData();
+
+        try {
+            IsoFile isoFile = new IsoFile(videoPath.toString());
+            MovieHeaderBox movieHeaderBox = isoFile.getMovieBox().getMovieHeaderBox();
+            Date creation = movieHeaderBox.getCreationTime();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            dto.setDateTimeOriginal(sdf.format(creation));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return dto;
     }
 
     private PhotoExifData getExifDataOfPhoto(Path path) {

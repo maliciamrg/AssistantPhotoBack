@@ -1,47 +1,30 @@
 package com.malicia.mrg.assistant.photo;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.malicia.mrg.assistant.photo.exception.CustomException;
 import com.malicia.mrg.assistant.photo.pojo.PhotoshootType;
-import com.malicia.mrg.assistant.photo.pojo.TagNode;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 @Component
 @ConfigurationProperties(prefix = "assistant")
 public class MyConfig {
-
-    public List<TagNode> tagsList;
     private boolean dryRun;
     private String name;
     private String rootPath;
+    private String tagFileName;
     private List<String> fileExtensionsToWorkWith;
     private GroupPhoto groupPhoto;
     private List<PhotoshootType> photoshootType;
-
     public MyConfig() {
-        try {
-            setTagsList();
-        } catch (Exception e) {
-            throw new CustomException(e);
-        }
     }
 
-    public List<TagNode> getTagsList() {
-        return tagsList;
+    public String getTagFileName() {
+        return tagFileName;
     }
 
-    public void setTagsList(List<TagNode> tagsList) {
-        this.tagsList = tagsList;
-    }
-
-    public void setTagsList() {
-        this.tagsList = loadTagsFromJson();
+    public void setTagFileName(String tagFileName) {
+        this.tagFileName = tagFileName;
     }
 
     // Getters and Setters
@@ -92,16 +75,6 @@ public class MyConfig {
 
     public void setDryRun(boolean dryRun) {
         this.dryRun = dryRun;
-    }
-
-    private List<TagNode> loadTagsFromJson() {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("lightroom_tags_grouped.json");
-        try {
-            return new ObjectMapper().readValue(is, new TypeReference<List<TagNode>>() {
-            });
-        } catch (IOException e) {
-            throw new CustomException(e);
-        }
     }
 
     public static class GroupPhoto {

@@ -16,6 +16,10 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -106,9 +110,12 @@ public class FileSystemService {
     // Helper method to get file creation date
     public static String getFileCreatedDate(Path path) {
         try {
-            FileTime fileTime = (FileTime) Files.getAttribute(path, "creationTime");
-            Date date = new Date(fileTime.toMillis());
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+            BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+            Instant creationTime = attrs.creationTime().toInstant();
+            ZonedDateTime zdt = ZonedDateTime.ofInstant(creationTime, ZoneId.systemDefault());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            return zdt.format(formatter);
         } catch (IOException e) {
             return "Unknown"; // If creation date can't be fetched
         }

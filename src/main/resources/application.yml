@@ -50,6 +50,7 @@ my:
     version: "1.0"
 
 assistant:
+  tagFileName: "AssistantPhoto_Tag.json"
   dryRun: true
   name: assistant
   rootPath: ./src/test/resources/

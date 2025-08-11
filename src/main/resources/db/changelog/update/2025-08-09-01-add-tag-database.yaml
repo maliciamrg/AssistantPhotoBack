@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1754691488541-1
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_tagnode
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: parent_id
+                  type: BIGINT
+            tableName: tag_node
+  - changeSet:
+      id: 1754691488541-2
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: parent_id
+            baseTableName: tag_node
+            constraintName: FK_TAGNODE_ON_PARENT
+            referencedColumnNames: id
+            referencedTableName: tag_node
+

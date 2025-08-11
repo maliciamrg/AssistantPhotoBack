@@ -1,7 +1,8 @@
 package com.malicia.mrg.assistant.photo.controller;
 
+import com.malicia.mrg.assistant.photo.dto.TagNodeDto;
+import com.malicia.mrg.assistant.photo.entity.TagNode;
 import com.malicia.mrg.assistant.photo.exception.NotFoundException;
-import com.malicia.mrg.assistant.photo.pojo.TagNode;
 import com.malicia.mrg.assistant.photo.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ public class TagControllerTest {
         when(tagService.getRootTags()).thenReturn(tags);
 
         // Act
-        List<TagNode> result = tagController.getTags();
+        List<TagNodeDto> result = tagController.getTags();
 
         // Assert
         assertEquals(tags, result);
@@ -50,7 +51,7 @@ public class TagControllerTest {
         when(tagService.getTagById(id)).thenReturn(node);
 
         // Act
-        TagNode result = tagController.getTagById(id);
+        TagNodeDto result = tagController.getTagById(id);
 
         // Assert
         assertEquals(node, result);
@@ -74,7 +75,7 @@ public class TagControllerTest {
         when(tagService.getTagByName(name)).thenReturn(node);
 
         // Act
-        TagNode result = tagController.getTagByName(name);
+        TagNodeDto result = tagController.getTagByName(name);
 
         // Assert
         assertEquals(node, result);

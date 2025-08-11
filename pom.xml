@@ -89,6 +89,11 @@
 			<artifactId>metadata-extractor</artifactId>
 			<version>2.16.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.mp4parser</groupId>
+			<artifactId>isoparser</artifactId>
+			<version>1.9.56</version>
+		</dependency>
 
 		<!-- Actuator -->
 		<dependency>
