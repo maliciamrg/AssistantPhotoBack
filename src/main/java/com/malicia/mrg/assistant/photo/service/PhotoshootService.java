@@ -174,6 +174,7 @@ public class PhotoshootService {
 
         validationResult.setValid(isValid);
         validationResult.setMessage(isValid ? "valid" : message.toString());
+        validationResult.setCurrentFields(List.of(parts));
         validationResult.setValidFields(validFields);
         return validationResult;
     }
