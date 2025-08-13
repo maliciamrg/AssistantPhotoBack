@@ -29,10 +29,10 @@ public class TagController {
         return ResponseEntity.status(HttpStatus.CREATED).body(new TagNodeDto(created));
     }
 
-    // UPDATE a tag by ID
-    @PutMapping("/{id}/rename")
-    public ResponseEntity<Void> updateTag(@PathVariable Long id, @RequestBody String name) {
-        int ret = tagService.updateTagName(id, name);
+    // UPDATE a tag name by ID
+    @PutMapping("/{id}/rename/{newname}")
+    public ResponseEntity<Void> updateTag(@PathVariable Long id, @PathVariable String newname) {
+        int ret = tagService.updateTagName(id, newname);
         return (ret !=0 ? ResponseEntity.ok().build() :ResponseEntity.badRequest().build());
     }
 
