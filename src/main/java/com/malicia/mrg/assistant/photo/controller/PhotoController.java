@@ -77,6 +77,7 @@ public class PhotoController {
         Photo updatedPhoto = photoService.updatePhotoMetadata(id, metadataDTO);
         return getPhotoDTOResponseEntity(updatedPhoto);
     }
+
     @GetMapping("/{id}/videostream")
     public ResponseEntity<Resource> getVideo(@PathVariable UUID id) throws IOException {
         Optional<Photo> photo = photoService.getPhotoById(id);

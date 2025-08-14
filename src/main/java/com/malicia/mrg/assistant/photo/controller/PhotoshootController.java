@@ -70,6 +70,7 @@ public class PhotoshootController implements ApplicationListener<ApplicationEven
         logger.debug("@GetMapping(\"/{photoshootTypeName}/{photoshootName}/nocache\")");
         try {
             PhotoshootType photoshootType = photoshootService.getPhotoshootType(photoshootTypeName);
+            photoshootService.cleanupPhotoData(photoshootName);
             return ResponseEntity.ok().body(photoshootService.getPhotoshoot(photoshootType, photoshootName));
 
         } catch (NotFoundException e) {

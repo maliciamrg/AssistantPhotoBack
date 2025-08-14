@@ -7,9 +7,11 @@ import org.springframework.stereotype.Service;
 public class PhotoCleanupService {
 
     private final PhotoRepository photoRepository;
+    private final PhotoService photoService;
 
-    public PhotoCleanupService(PhotoRepository photoRepository) {
+    public PhotoCleanupService(PhotoRepository photoRepository, PhotoService photoService) {
         this.photoRepository = photoRepository;
+        this.photoService = photoService;
     }
 
     public int deletePhotosWithDuplicateHash() {
@@ -24,4 +26,7 @@ public class PhotoCleanupService {
         photoRepository.cleanupAllPhotoData();
     }
 
+    public void cleanupAllPhotoData(String photoshootName) {
+        photoService.removeAllPhotoData(photoshootName);
+    }
 }

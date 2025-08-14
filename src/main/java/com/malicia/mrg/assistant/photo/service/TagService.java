@@ -8,15 +8,18 @@ import com.malicia.mrg.assistant.photo.dto.TagNodeDto;
 import com.malicia.mrg.assistant.photo.entity.TagNode;
 import com.malicia.mrg.assistant.photo.exception.CustomException;
 import com.malicia.mrg.assistant.photo.repository.TagNodeRepository;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Normalizer;
 import java.util.*;
 
 @Service
@@ -28,13 +31,9 @@ public class TagService {
     public TagService(TagNodeRepository tagNodeRepository, MyConfig myConfig) throws Exception {
         this.tagNodeRepository = tagNodeRepository;
         this.myConfig = myConfig;
-        setTagsList();
     }
 
-    public void setTagsList() {
-        loadFlatJsonToDb();
-    }
-    
+    @PostConstruct
     public void loadFlatJsonToDb() {
         Path inputPath = Paths.get(myConfig.getRootPath(), myConfig.getTagFileName());
 
@@ -73,32 +72,6 @@ public class TagService {
 
             } catch (IOException e) {
                 throw new RuntimeException("Failed to load JSON", e);
-            }
-        }
-    }
-    
-    private void loadTagsFromJson() {
-        Path inputPath = Paths.get(myConfig.getRootPath(), myConfig.getTagFileName());
-
-        if (Files.exists(inputPath)) {
-            try (InputStream is = Files.newInputStream(inputPath)) {
-                List<TagNode> tagNodeList = new ObjectMapper().readValue(is, new TypeReference<List<TagNode>>() {
-                });
-
-                saveTagsRecursively(tagNodeList, null);
-            } catch (IOException e) {
-                throw new CustomException("Failed to load tags from JSON: " + inputPath);
-            }
-        }
-    }
-
-    private void saveTagsRecursively(List<TagNode> tagNodes, TagNode parent) {
-        for (TagNode tag : tagNodes) {
-            tag.setParent(parent);
-            tagNodeRepository.save(tag);
-
-            if (tag.getChildren() != null && !tag.getChildren().isEmpty()) {
-                saveTagsRecursively(tag.getChildren(), tag);
             }
         }
     }
@@ -155,7 +128,7 @@ public class TagService {
     public TagNode createTag(TagNodeDto dto) {
         TagNode tag = new TagNode();
         tag.setId(dto.getId());
-        tag.setName(dto.getName());
+        tag.setName(normalizeTagName(dto.getName()));
 
         if (dto.getParentId() != null) {
             TagNode parent = tagNodeRepository.findById(dto.getParentId())
@@ -170,7 +143,7 @@ public class TagService {
         TagNode tag = tagNodeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tag not found"));
 
-        tag.setName(dto.getName());
+        tag.setName(normalizeTagName(dto.getName()));
 
         if (dto.getParentId() != null) {
             TagNode parent = tagNodeRepository.findById(dto.getParentId())
@@ -191,7 +164,7 @@ public class TagService {
     }
 
     public int updateTagName(Long id, String name) {
-        return tagNodeRepository.updateTagNameById(id, name);
+        return tagNodeRepository.updateTagNameById(id, normalizeTagName(name));
     }
 
     public Long getNextFreeTagId() {
@@ -208,5 +181,43 @@ public class TagService {
         }
 
         return nextId;
+    }
+
+    @Transactional
+    public void normalizeAllTagNames() {
+        List<TagNode> tags = tagNodeRepository.findAll();
+
+        for (TagNode tag : tags) {
+            String original = tag.getName();
+            String cleaned = normalizeTagName(original);
+
+            if (!cleaned.equals(original)) {
+                tag.setName(cleaned);
+            }
+        }
+
+        tagNodeRepository.saveAll(tags);
+    }
+
+    public String normalizeTagName(String input) {
+        if (input == null) return null;
+
+        // Remove leading/trailing spaces
+        String result = input.trim();
+
+        // Convert to lowercase
+        result = result.toLowerCase();
+
+        // Remove accents
+        result = Normalizer.normalize(result, Normalizer.Form.NFD);
+        result = result.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+
+        // Replace spaces with underscores
+        result = result.replace(" ", "_");
+
+        // Replace - with underscores
+        result = result.replace("-", "_");
+
+        return result;
     }
 }

@@ -1,6 +1,10 @@
 package com.malicia.mrg.assistant.photo.service;
 
-import com.malicia.mrg.assistant.photo.controller.PhotoshootController;
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifThumbnailDirectory;
 import com.malicia.mrg.assistant.photo.entity.Photo;
 import com.malicia.mrg.assistant.photo.entity.PhotoThumbnail;
 import com.malicia.mrg.assistant.photo.repository.PhotoThumbnailRepository;
@@ -12,14 +16,16 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class ThumbnailService {
-    private final PhotoThumbnailRepository photoThumbnailRepository;
     private static final Logger logger = LoggerFactory.getLogger(ThumbnailService.class);
+    private final PhotoThumbnailRepository photoThumbnailRepository;
 
     public ThumbnailService(PhotoThumbnailRepository photoThumbnailRepository) {
         this.photoThumbnailRepository = photoThumbnailRepository;
@@ -67,6 +73,40 @@ public class ThumbnailService {
         }
         return photoThumbnail;
     }
+
+    public PhotoThumbnail DngThumbnailExtractor(Photo photo) {
+        PhotoThumbnail photoThumbnail = new PhotoThumbnail();
+        File dngFile = new File(photo.getFileSystem().getPath());
+
+        try {
+            Metadata metadata = ImageMetadataReader.readMetadata(dngFile);
+            ExifThumbnailDirectory thumbnailDirectory = metadata.getFirstDirectoryOfType(ExifThumbnailDirectory.class);
+
+            if (thumbnailDirectory != null &&
+                    thumbnailDirectory.containsTag(ExifThumbnailDirectory.TAG_THUMBNAIL_OFFSET) &&
+                    thumbnailDirectory.containsTag(ExifThumbnailDirectory.TAG_THUMBNAIL_LENGTH)) {
+
+                int offset = thumbnailDirectory.getInt(ExifThumbnailDirectory.TAG_THUMBNAIL_OFFSET);
+                int length = thumbnailDirectory.getInt(ExifThumbnailDirectory.TAG_THUMBNAIL_LENGTH);
+
+                byte[] thumbnailBytes = new byte[length];
+
+                try (RandomAccessFile raf = new RandomAccessFile(dngFile, "r")) {
+                    raf.seek(offset);
+                    raf.readFully(thumbnailBytes);
+                    photoThumbnail.setData(thumbnailBytes);
+                }
+            } else {
+                logger.debug("Thumbnail offset or length tag not found in the DNG file.");
+            }
+
+        } catch (IOException | ImageProcessingException | MetadataException e) {
+            logger.debug("Error processing DNG file: " + e.getMessage(), e);
+        }
+
+        return photoThumbnail;
+    }
+
 
     // Utility method to convert a BufferedImage to a byte array
     private byte[] imageToByteArray(BufferedImage image, String format) throws IOException {

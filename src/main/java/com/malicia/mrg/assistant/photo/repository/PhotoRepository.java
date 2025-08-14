@@ -6,7 +6,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,52 +20,102 @@ public interface PhotoRepository extends JpaRepository<Photo, UUID> {
     @Modifying
     @Transactional
     @Query(value = """
-        DELETE FROM photos
-        WHERE id IN (
-            SELECT id FROM (
-                SELECT id FROM photos
-                WHERE hash IN (
-                    SELECT hash FROM photos
-                    GROUP BY hash
-                    HAVING COUNT(*) > 1
+                DELETE FROM photos
+                WHERE id IN (
+                    SELECT id FROM (
+                        SELECT id FROM photos
+                        WHERE hash IN (
+                            SELECT hash FROM photos
+                            GROUP BY hash
+                            HAVING COUNT(*) > 1
+                        )
+                    ) AS subquery
                 )
-            ) AS subquery
-        )
-    """, nativeQuery = true)
+            """, nativeQuery = true)
     int deletePhotosWithDuplicateHash();
 
     @Modifying
-    @Transactional
-    @Query(value = """
-    DELETE FROM photo_exif WHERE photo_id IS NULL OR photo_id NOT IN (SELECT id FROM photos);
-    DELETE FROM photo_thumbnail WHERE photo_id IS NULL OR photo_id NOT IN (SELECT id FROM photos);
-    DELETE FROM photo_metadata WHERE photo_id IS NULL OR photo_id NOT IN (SELECT id FROM photos);
-    DELETE FROM photo_filesystem WHERE photo_id IS NULL OR photo_id NOT IN (SELECT id FROM photos);
-    DELETE FROM photo_keywords WHERE photo_id IS NULL OR photo_id NOT IN (SELECT id FROM photos);
-""", nativeQuery = true)
-    void cleanupOrphanedPhotoData();
+    @Query("DELETE FROM PhotoExifData exif WHERE exif.photo IS NULL")
+    void deleteOrphanedExif();
 
     @Modifying
-    @Transactional
-    @Query(value = """
-    DELETE FROM photo_exif ;
-    DELETE FROM photo_thumbnail ;
-    DELETE FROM photo_metadata ;
-    DELETE FROM photo_filesystem ;
-    DELETE FROM photo_keywords ;
-    DELETE FROM photos ;
-""", nativeQuery = true)
-    void cleanupAllPhotoData();
+    @Query("DELETE FROM PhotoThumbnail thumb WHERE thumb.photo.id IS NULL")
+    void deleteOrphanedThumbnails();
 
     @Modifying
+    @Query("DELETE FROM PhotoMetadata meta WHERE meta.photo.id IS NULL")
+    void deleteOrphanedMetadata();
+
+    @Modifying
+    @Query("DELETE FROM PhotoFileSystem fs WHERE fs.photo.id IS NULL")
+    void deleteOrphanedFilesystem();
+
     @Transactional
-    @Query(value = """
-    DELETE FROM photo_exif where photo_id = :id;
-    DELETE FROM photo_thumbnail where photo_id = :id;
-    DELETE FROM photo_metadata where photo_id = :id;
-    DELETE FROM photo_filesystem where photo_id = :id;
-    DELETE FROM photo_keywords where photo_id = :id;
-    DELETE FROM photos where id = :id;
-""", nativeQuery = true)
-    void cleanupPhotoData(UUID id);
+    default void cleanupOrphanedPhotoData() {
+        deleteOrphanedExif();
+        deleteOrphanedThumbnails();
+        deleteOrphanedMetadata();
+        deleteOrphanedFilesystem();
+    }
+
+    @Modifying
+    @Query("DELETE FROM PhotoExifData")
+    void deleteAllExif();
+
+    @Modifying
+    @Query("DELETE FROM PhotoThumbnail ")
+    void deleteAllThumbnails();
+
+    @Modifying
+    @Query("DELETE FROM PhotoMetadata")
+    void deleteAllMetadata();
+
+    @Modifying
+    @Query("DELETE FROM PhotoFileSystem ")
+    void deleteAllFilesystem();
+
+    @Modifying
+    @Query("DELETE FROM Photo")
+    void deleteAllPhotos();
+
+    @Transactional
+    default void cleanupAllPhotoData() {
+        deleteAllExif();
+        deleteAllThumbnails();
+        deleteAllMetadata();
+        deleteAllFilesystem();
+        deleteAllPhotos();
+    }
+
+    @Modifying
+    @Query("DELETE FROM PhotoExifData WHERE photo.id = :id")
+    void deleteExif(@Param("id") UUID id);
+
+    @Modifying
+    @Query("DELETE FROM PhotoThumbnail WHERE photo.id = :id")
+    void deleteThumbnail(@Param("id") UUID id);
+
+    @Modifying
+    @Query("DELETE FROM PhotoMetadata WHERE photo.id = :id")
+    void deleteMetadata(@Param("id") UUID id);
+
+    @Modifying
+    @Query("DELETE FROM PhotoFileSystem WHERE photo.id = :id")
+    void deleteFilesystem(@Param("id") UUID id);
+
+    @Modifying
+    @Query("DELETE FROM Photo p WHERE p.id = :id")
+    void deletePhoto(@Param("id") UUID id);
+
+    @Transactional
+    default void cleanupPhotoData(UUID id) {
+        deleteExif(id);
+        deleteThumbnail(id);
+        deleteMetadata(id);
+        deleteFilesystem(id);
+        deletePhoto(id);
+    }
+
+    @Query("SELECT pf.photo.id FROM PhotoFileSystem pf WHERE pf.path LIKE %:pathPattern%")
+    List<UUID> findPhotoIdsByPathPattern(@Param("pathPattern") String pathPattern);
 }

@@ -182,22 +182,29 @@ public class PhotoshootService {
     private List<List<String>> formatValidFields(String expectedDate, List<List<String>> expectedValues) {
         List<List<String>> correctedExpectedValues = new ArrayList<>();
 
-        for (int i = 0; i < expectedValues.size(); i++) { //first value is id of list
+        for (List<String> expected : expectedValues) {
+
+            String id = expected.remove(0);;//first value is id of list
 
             String specialExpectedValues = "";
-
-            List<String> expected = new ArrayList<>(expectedValues.get(i));
-            expected.remove(0);
             if (expected.get(0).startsWith("£") && expected.get(0).endsWith("£")) {
                 specialExpectedValues = expected.get(0).substring(1, expected.get(0).length() - 1);
             }
 
             switch (specialExpectedValues) {
                 case "DATE":
-                    correctedExpectedValues.add(List.of(expectedValues.get(i).get(0),expectedDate));
+                    correctedExpectedValues.add(List.of(id,expectedDate));
                     break;
                 default:
-                    correctedExpectedValues.add(expectedValues.get(i));
+                    // Sort the rest of the list alphabetically
+                    expected.sort(String::compareToIgnoreCase);
+
+                    // Add ID back to the front
+                    List<String> sortedWithId = new ArrayList<>();
+                    sortedWithId.add(id);
+                    sortedWithId.addAll(expected);
+
+                    correctedExpectedValues.add(sortedWithId);
                     break;
             }
         }
@@ -311,5 +318,9 @@ public class PhotoshootService {
 
     public List<PhotoshootType> getPhotoshootType() {
         return config.getPhotoshootType();
+    }
+
+    public void cleanupPhotoData(String photoshootName) {
+        photoService.removeAllPhotoData(photoshootName);
     }
 }

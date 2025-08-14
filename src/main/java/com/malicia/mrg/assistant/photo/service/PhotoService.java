@@ -172,7 +172,11 @@ public class PhotoService {
                 logger.debug("calculate getThumbnail");
                 PhotoThumbnail photoThumbnail = new PhotoThumbnail();
                 if (!isVideo(path)) {
-                    photoThumbnail = thumbnailService.generateThumbnail(photo);
+                    if (!isDng(path)) {
+                        photoThumbnail = thumbnailService.generateThumbnail(photo);
+                    } else {
+                        photoThumbnail = thumbnailService.DngThumbnailExtractor(photo);
+                    }
                 }
                 photoThumbnail.setPhoto(photo);
                 photo.setThumbnail(photoThumbnail);
@@ -217,6 +221,11 @@ public class PhotoService {
 
     private boolean isVideo(Path path) {
         if (path.toString().toLowerCase().endsWith("mp4")) {return true;}
+        return false;
+    }
+
+    private boolean isDng(Path path) {
+        if (path.toString().toLowerCase().endsWith("dng")) {return true;}
         return false;
     }
 
@@ -328,5 +337,12 @@ public class PhotoService {
         }
 
         return dto;
+    }
+
+    public void removeAllPhotoData(String photoshootName) {
+        List<UUID> photoIds = photoRepository.findPhotoIdsByPathPattern(photoshootName);
+        for (UUID id : photoIds) {
+            photoRepository.cleanupPhotoData(id);
+        }
     }
 }
