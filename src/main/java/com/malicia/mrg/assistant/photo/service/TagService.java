@@ -213,10 +213,10 @@ public class TagService {
         result = result.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
 
         // Replace spaces with underscores
-        result = result.replace(" ", "_");
+        result = result.replace(" ", "-");
 
         // Replace - with underscores
-        result = result.replace("-", "_");
+        result = result.replace("_", "-");
 
         return result;
     }
