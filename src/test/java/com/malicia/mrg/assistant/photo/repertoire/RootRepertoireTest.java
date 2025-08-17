@@ -66,22 +66,22 @@ class RootRepertoireTest {
         redisConnectionFactory.getConnection().flushDb();
     }
 
-    // recuperer uniquement les Repertoires AllIn (photo non rafiné a tirer /grouper)
-    @Test
-    void getAllPhotoshootFromPhotoshootTypeAllIn() {
-        //given
-        RootRepertoire rootRep = new RootRepertoire(mockConfig, photoService);
-
-        //when
-        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ALL_IN.name()).getPhotoshootRoot());
-
-        //then
-        logger.debug(allPhotoshoot.toString());
-        for (Photoshoot photoshoot : allPhotoshoot) {
-            logger.debug(String.valueOf(photoshoot));
-        }
-        assertEquals(2, allPhotoshoot.size());
-    }
+//    // recuperer uniquement les Repertoires AllIn (photo non rafiné a tirer /grouper)
+//    @Test
+//    void getAllPhotoshootFromPhotoshootTypeAllIn() {
+//        //given
+//        RootRepertoire rootRep = new RootRepertoire(mockConfig, photoService);
+//
+//        //when
+//        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ALL_IN.name()).getPhotoshootRoot());
+//
+//        //then
+//        logger.debug(allPhotoshoot.toString());
+//        for (Photoshoot photoshoot : allPhotoshoot) {
+//            logger.debug(String.valueOf(photoshoot));
+//        }
+//        assertEquals(2, allPhotoshoot.size());
+//    }
 
     // recuperer uniquement les photo repertoire EVENTS
     @Test
@@ -100,40 +100,40 @@ class RootRepertoireTest {
         assertEquals(2, allPhotoshoot.size());
     }
 
-    // recuperer uniquement les photo repertoire AllIn du Photoshoot
-    @Test
-    void getAllPhotoRepertoireAllInFromSeanceRepertoire() {
-        //given
-        RootRepertoire rootRep = new RootRepertoire(mockConfig, photoService);
+//    // recuperer uniquement les photo repertoire AllIn du Photoshoot
+//    @Test
+//    void getAllPhotoRepertoireAllInFromSeanceRepertoire() {
+//        //given
+//        RootRepertoire rootRep = new RootRepertoire(mockConfig, photoService);
+//
+//        //when
+//        List<Photoshoot> photoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ALL_IN.name()).getPhotoshootRoot());
+//
+//        //then
+//        logger.debug(photoshoot.toString());
+//        for (Photoshoot Photoshoot : photoshoot) {
+//            logger.debug(Photoshoot.toString());
+//        }
+//        assertEquals(2, photoshoot.size());
+//    }
 
-        //when
-        List<Photoshoot> photoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ALL_IN.name()).getPhotoshootRoot());
-
-        //then
-        logger.debug(photoshoot.toString());
-        for (Photoshoot Photoshoot : photoshoot) {
-            logger.debug(Photoshoot.toString());
-        }
-        assertEquals(2, photoshoot.size());
-    }
-
-    // recuperer uniquement le Repertoires de travail de assitant
-    @Test
-    void getAllPhotoshootFromPhotoshootTypeASSISTANT_WORK() {
-        //given
-        RootRepertoire rootRep = new RootRepertoire(mockConfig, photoService);
-
-        //when
-        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ASSISTANT_WORK.name()).getPhotoshootRoot());
-
-        //then
-        logger.debug(allPhotoshoot.toString());
-        for (Photoshoot photoshoot : allPhotoshoot) {
-            logger.debug(String.valueOf(photoshoot));
-        }
-        assertEquals(1, allPhotoshoot.size());
-        assertEquals("src\\test\\resources\\10-Assistant_work\\2023_04_08_(00026)", allPhotoshoot.get(0).getPath());
-    }
+//    // recuperer uniquement le Repertoires de travail de assitant
+//    @Test
+//    void getAllPhotoshootFromPhotoshootTypeASSISTANT_WORK() {
+//        //given
+//        RootRepertoire rootRep = new RootRepertoire(mockConfig, photoService);
+//
+//        //when
+//        List<Photoshoot> allPhotoshoot = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.ASSISTANT_WORK.name()).getPhotoshootRoot());
+//
+//        //then
+//        logger.debug(allPhotoshoot.toString());
+//        for (Photoshoot photoshoot : allPhotoshoot) {
+//            logger.debug(String.valueOf(photoshoot));
+//        }
+//        assertEquals(1, allPhotoshoot.size());
+//        assertEquals("src\\test\\resources\\10-Assistant_work\\2023_04_08_(00026)", allPhotoshoot.get(0).getPath());
+//    }
 
 //    // recupere un list de photo depuis un repertoire
 //    @Test
@@ -165,8 +165,8 @@ class RootRepertoireTest {
 
         //when
         List<Photoshoot> assistantRepertoire = rootRep.getPhotoshootList(photoshootService.getPhotoshootType(PhotoshootTypeEnum.EVENTS.name()).getPhotoshootRoot().get(0));
-        PhotoGroup allPhotoFromPhotoRepertoire0 = photoshootService.getAllPhotoFromPhotoshoot(assistantRepertoire.get(0));
-        PhotoGroup allPhotoFromPhotoRepertoire1 = photoshootService.getAllPhotoFromPhotoshoot(assistantRepertoire.get(1));
+        PhotoGroup allPhotoFromPhotoRepertoire0 = photoshootService.getAllPhotoFromPhotoshoot(assistantRepertoire.get(0),null);
+        PhotoGroup allPhotoFromPhotoRepertoire1 = photoshootService.getAllPhotoFromPhotoshoot(assistantRepertoire.get(1),null);
 
         //then
         logger.debug(String.valueOf(allPhotoFromPhotoRepertoire0));

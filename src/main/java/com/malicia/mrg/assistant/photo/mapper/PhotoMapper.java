@@ -36,7 +36,7 @@ public class PhotoMapper {
     // Convert from Entity to DTO
     public static PhotoDTO toDTO(Photo photo) {
         if (photo == null) return null;
-        logger.debug("photo: \n" + photo.toString());
+        logger.trace("photo: \n" + photo.toString());
 
         return new PhotoDTO(photo);
     }

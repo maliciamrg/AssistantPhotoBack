@@ -49,11 +49,11 @@ public class PhotoEmitterService {
         for (Path path : paths) {
             photoEmitterExecutor.submit(() -> {
                 String threadName = Thread.currentThread().getName();
-                logger.info("[{}] Start emitting photo for path: {}", threadName, path);
+                logger.debug("[{}] Start emitting photo for path: {}", threadName, path);
                 try {
                     PhotoDTO photo = photoService.getPhotoDataFromPath(rootDir, path);
                     publisher.publishEvent(new PhotoEvent(this, sessionId, photo));
-                    logger.info("[{}] PhotoEvent published for: {}", threadName, photo.getId());
+                    logger.trace("[{}] PhotoEvent published for: {}", threadName, photo.getId());
                     Thread.sleep(50);
                 } catch (Exception e) {
                     logger.error("[{}] Error processing path {}: {}", threadName, path, e.getMessage(), e);

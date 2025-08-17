@@ -122,7 +122,7 @@ public class PhotoService {
     }
 
     public PhotoDTO getPhotoDataFromPath(String rootDir, Path path) {
-        logger.debug("getPhotoDataFromPath");
+        logger.trace("getPhotoDataFromPath");
 
         // Create a new Photo object
         Photo photo = new Photo();
@@ -182,14 +182,14 @@ public class PhotoService {
                 photo.setThumbnail(photoThumbnail);
             }
 
-            logger.debug("photoRepository.save(photo)");
+            logger.trace("photoRepository.save(photo)");
             photoRepository.save(photo);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-        logger.debug("PhotoMapper.toDTO(photo)");
+        logger.trace("PhotoMapper.toDTO(photo)");
         return PhotoMapper.toDTO(photo);
     }
 

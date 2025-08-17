@@ -84,4 +84,8 @@ public class Photoshoot implements Serializable {
     public String getPhotoshootRoot() {
         return photoshootRoot;
     }
+
+    public int compareToIgnoreCase(Photoshoot photoshoot) {
+        return name.toLowerCase().compareTo(photoshoot.name.toLowerCase());
+    }
 }

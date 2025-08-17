@@ -23,27 +23,41 @@ public class PhotoProcessorService {
     public PhotoProcessorService(PhotoEmitterService photoEmitterService) {
         this.photoEmitterService = photoEmitterService;
     }
+//
+//    public List<PhotoDTO> startProcessing(UUID sessionId, String rootDir, List<Path> paths) {
+//        photoBuffers.put(sessionId, new ArrayList<>());
+//        CompletableFuture<List<PhotoDTO>> future = new CompletableFuture<>();
+//        photoFutures.put(sessionId, future);
+//
+//        // Trigger threaded processing
+//        photoEmitterService.startEmittingPhotos(sessionId, rootDir ,paths);
+//
+//        try {
+//            // Wait until the thread completes and done event is fired
+//            return future.get(180, TimeUnit.SECONDS);
+//        } catch (Exception e) {
+//            throw new RuntimeException("Photo processing timeout or error", e);
+//        } finally {
+//            // Clean up
+//            photoBuffers.remove(sessionId);
+//            photoFutures.remove(sessionId);
+//        }
+//    }
 
-    public List<PhotoDTO> startProcessing(UUID sessionId, String rootDir, List<Path> paths) {
+    public CompletableFuture<List<PhotoDTO>> startProcessingAsync(UUID sessionId, String rootDir, List<Path> paths) {
         photoBuffers.put(sessionId, new ArrayList<>());
         CompletableFuture<List<PhotoDTO>> future = new CompletableFuture<>();
         photoFutures.put(sessionId, future);
 
-        // Trigger threaded processing
-        photoEmitterService.startEmittingPhotos(sessionId, rootDir ,paths);
+        photoEmitterService.startEmittingPhotos(sessionId, rootDir, paths);
 
-        try {
-            // Wait until the thread completes and done event is fired
-            return future.get(180, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            throw new RuntimeException("Photo processing timeout or error", e);
-        } finally {
-            // Clean up
+        future.whenComplete((r, e) -> {
             photoBuffers.remove(sessionId);
             photoFutures.remove(sessionId);
-        }
-    }
+        });
 
+        return future;
+    }
     @EventListener
     public void onPhotoEvent(PhotoEvent event) {
         photoBuffers.computeIfAbsent(event.getSessionId(), id -> new ArrayList<>())

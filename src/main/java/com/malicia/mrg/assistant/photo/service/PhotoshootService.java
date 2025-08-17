@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -46,15 +48,20 @@ public class PhotoshootService {
 //
 //    }
 
-    @Cacheable(value = "getPhotoshootList", key = "#photoshootType.photoshootTypeEnum.name()")
+//    @Cacheable(value = "getPhotoshootList", key = "#photoshootType.photoshootTypeEnum.name()")
     public List<Photoshoot> getPhotoshootList(PhotoshootType photoshootType) {
         List<Photoshoot> photoshootArrayList = new ArrayList<>();
 
         for (PhotoshootRoot photoshootRoot : photoshootType.getPhotoshootRoot()) {
-
             photoshootArrayList.addAll(rootRepertoire.getPhotoshootList(photoshootRoot));
-
         }
+
+        for (Photoshoot photoshoot : photoshootArrayList) {
+            PhotoshootMetaData metaDataFromPhotoshoot = readMetaDataFromFile(photoshoot.getPath(), photoshoot.getName());
+            photoshoot.setMetaDataFromPhotoshoot(metaDataFromPhotoshoot);
+            photoshoot.setValidationResult(validatePhotoshoot(photoshootType, photoshoot));
+        }
+
         return photoshootArrayList;
     }
 
@@ -64,7 +71,7 @@ public class PhotoshootService {
         rep.setPhotoshootNameParts(photoshootNameParts);
         rep.setLowerDate(acc.getLowerDate());
         rep.setUpperDate(acc.getUpperDate());
-        rep.setNbDay(TimeUnit.DAYS.convert(acc.getUpperDate().getTime() - acc.getLowerDate().getTime(), TimeUnit.MILLISECONDS)+1);
+        rep.setNbDay(TimeUnit.DAYS.convert(acc.getUpperDate().getTime() - acc.getLowerDate().getTime(), TimeUnit.MILLISECONDS) + 1);
         rep.setNbPhotoTotal(acc.getNbPhotoTotal());
         rep.setNbNotSelectedPhoto(acc.getNbNotSelectedPhoto());
         rep.setNbSelectedPhoto(acc.getNbSelectedPhoto());
@@ -85,13 +92,31 @@ public class PhotoshootService {
         }
     }
 
+    private PhotoshootMetaData readMetaDataFromFile(String path, String name) {
+        ObjectMapper mapper = new ObjectMapper();
+        File file = new File(path + File.separator + name + "_metadata.json");
+        if (file.exists()) {
+            try {
+                return mapper.readValue(file, PhotoshootMetaData.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+        return null;
+    }
+
     public Photoshoot getPhotoshoot(PhotoshootType photoshootType, String photoshootName) {
         return getPhotoshoot(photoshootType, photoshootName, null);
     }
 
     public Photoshoot getPhotoshoot(PhotoshootType photoshootType, String photoshootName, UUID sessionId) {
-        logger.debug("getPhotoshoot");
-        List<Photoshoot> photoshootList = getPhotoshootList(photoshootType);
+        logger.trace("getPhotoshoot");
+
+        List<Photoshoot> photoshootList = new ArrayList<>();
+        for (PhotoshootRoot photoshootRoot : photoshootType.getPhotoshootRoot()) {
+            photoshootList.addAll(rootRepertoire.getPhotoshootList(photoshootRoot));
+        }
 
         for (Photoshoot photoshoot : photoshootList) {
             if (photoshoot.getName().equals(photoshootName)) {
@@ -105,9 +130,9 @@ public class PhotoshootService {
 
     }
 
-    public PhotoGroup getAllPhotoFromPhotoshoot(Photoshoot photoshoot) {
-        return getAllPhotoFromPhotoshoot(photoshoot, null);
-    }
+//    public PhotoGroup getAllPhotoFromPhotoshoot(Photoshoot photoshoot) {
+//        return getAllPhotoFromPhotoshoot(photoshoot, null);
+//    }
 
     @Cacheable(value = "getAllPhotoFromPhotoshoot", key = "#photoshoot.name")
     public PhotoGroup getAllPhotoFromPhotoshoot(Photoshoot photoshoot, UUID sessionId) {
@@ -117,8 +142,16 @@ public class PhotoshootService {
         if (sessionId == null) {
             sessionId = UUID.randomUUID();
         }
-        List<PhotoDTO> photos = photoProcessorService.startProcessing(sessionId, pathToScan, rootRepertoire.getPathList(pathToScan));
-        photoGroup.setPhotos(photos);
+//        List<PhotoDTO> photos = photoProcessorService.startProcessing(sessionId, pathToScan, rootRepertoire.getPathList(pathToScan));
+        CompletableFuture<List<PhotoDTO>> photos = photoProcessorService.startProcessingAsync(sessionId, pathToScan, rootRepertoire.getPathList(pathToScan));
+
+        try {
+            photoGroup.setPhotos(photos.get());
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
 
 
         return photoGroup;
@@ -158,18 +191,25 @@ public class PhotoshootService {
         boolean isValid = true;
         StringBuilder message = new StringBuilder();
 
-        List<List<String>> validFields = formatValidFields(dateFormat.format(metaData.getLowerDate()) , getPhotoshootTypeZoneValeurAdmise(photoshootType));
+        List<List<String>> validFields = new ArrayList<>();
+        if (metaData != null) {
 
-        if (!validatePhotoshootName(parts, validFields , message)) {
-            isValid = false;
-        }
+            validFields = formatValidFields(dateFormat.format(metaData.getLowerDate()), getPhotoshootTypeZoneValeurAdmise(photoshootType));
 
-        if (!validatePhotoCount(metaData, photoshootType, message)) {
-            isValid = false;
-        }
+            if (!validatePhotoshootName(parts, validFields, message)) {
+                isValid = false;
+            }
 
-        if (!validateStarRatios(metaData, photoshootType, message)) {
+            if (!validatePhotoCount(metaData, photoshootType, message)) {
+                isValid = false;
+            }
+
+            if (!validateStarRatios(metaData, photoshootType, message)) {
+                isValid = false;
+            }
+        } else {
             isValid = false;
+            message.append("metaData empty \n");
         }
 
         validationResult.setValid(isValid);
@@ -184,7 +224,8 @@ public class PhotoshootService {
 
         for (List<String> expected : expectedValues) {
 
-            String id = expected.remove(0);;//first value is id of list
+            String id = expected.remove(0);
+            //first value is id of list
 
             String specialExpectedValues = "";
             if (expected.get(0).startsWith("£") && expected.get(0).endsWith("£")) {
@@ -193,7 +234,7 @@ public class PhotoshootService {
 
             switch (specialExpectedValues) {
                 case "DATE":
-                    correctedExpectedValues.add(List.of(id,expectedDate));
+                    correctedExpectedValues.add(List.of(id, expectedDate));
                     break;
                 default:
                     // Sort the rest of the list alphabetically
@@ -236,10 +277,11 @@ public class PhotoshootService {
 
         }
 
-        if (!valid) { message.insert(0, str);}
+        if (!valid) {
+            message.insert(0, str);
+        }
         return valid;
     }
-
 
 
     private boolean validateStarRatios(PhotoshootMetaData metaData, PhotoshootType photoshootType, StringBuilder message) {

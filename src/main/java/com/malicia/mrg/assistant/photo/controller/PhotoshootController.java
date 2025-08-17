@@ -119,7 +119,7 @@ public class PhotoshootController implements ApplicationListener<ApplicationEven
 
     @GetMapping(value = "/{photoshootTypeName}/{photoshootName}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamPhotoshoot(@PathVariable String photoshootTypeName, @PathVariable String photoshootName) {
-        logger.debug("@GetMapping(value = \"/{photoshootTypeName}/{photoshootName}/stream\"");
+        logger.info("@GetMapping(value = \"/{photoshootTypeName}/{photoshootName}/stream\"");
         UUID sessionId = UUID.randomUUID();
 
         SseEmitter emitter = new SseEmitter(0L); // No timeout
@@ -128,8 +128,11 @@ public class PhotoshootController implements ApplicationListener<ApplicationEven
         emitter.onError((e) -> emitters.remove(sessionId));
         emitters.put(sessionId, emitter);
 
+        logger.debug("{} emitters , now {}",emitters.size(), sessionId);
+
+        PhotoshootType photoshootType = photoshootService.getPhotoshootType(photoshootTypeName);
+
         new Thread(() -> {
-            PhotoshootType photoshootType = photoshootService.getPhotoshootType(photoshootTypeName);
             Photoshoot photoshoot = photoshootService.getPhotoshoot(photoshootType, photoshootName, sessionId);
 
             try {

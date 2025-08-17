@@ -213,13 +213,13 @@ public class RootRepertoire {
         return listPath;
     }
 
-    public List<Photoshoot> getPhotoshootList(List<PhotoshootRoot> photoshootRootList) {
-        List<Photoshoot> photoshootList = new ArrayList<>();
-        for (PhotoshootRoot photoshootRoot : photoshootRootList) {
-            photoshootList.addAll(getPhotoshootList(photoshootRoot));
-        }
-
-        return photoshootList;
-    }
+//    public List<Photoshoot> getPhotoshootList(List<PhotoshootRoot> photoshootRootList) {
+//        List<Photoshoot> photoshootList = new ArrayList<>();
+//        for (PhotoshootRoot photoshootRoot : photoshootRootList) {
+//            photoshootList.addAll(getPhotoshootList(photoshootRoot));
+//        }
+//
+//        return photoshootList;
+//    }
 }
 

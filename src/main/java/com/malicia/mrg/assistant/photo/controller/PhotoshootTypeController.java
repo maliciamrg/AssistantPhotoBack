@@ -35,7 +35,9 @@ public class PhotoshootTypeController {
     @GetMapping("/{photoshootTypeName}/photoshootlist")
     public List<Photoshoot> getPhotoshootByType(@PathVariable String photoshootTypeName) {
         PhotoshootType photoshootType = photoshootService.getPhotoshootType(photoshootTypeName);
-        return photoshootService.getPhotoshootList(photoshootType);
+        List<Photoshoot> photoshootList = photoshootService.getPhotoshootList(photoshootType);
+        photoshootList.sort(Photoshoot::compareToIgnoreCase);
+        return photoshootList;
     }
 
 
