@@ -112,7 +112,13 @@ public class FileSystemService {
         try {
             BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
             Instant creationTime = attrs.creationTime().toInstant();
-            ZonedDateTime zdt = ZonedDateTime.ofInstant(creationTime, ZoneId.systemDefault());
+            Instant lastModifiedTime = attrs.lastModifiedTime().toInstant();
+            ZonedDateTime zdt = null;
+            if (lastModifiedTime.isBefore(creationTime)) {
+                zdt = ZonedDateTime.ofInstant(lastModifiedTime, ZoneId.systemDefault());
+            } else {
+                zdt = ZonedDateTime.ofInstant(creationTime, ZoneId.systemDefault());
+            }
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             return zdt.format(formatter);

@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-size-mb-to-photo-file-system
+      author: cleme
+      changes:
+        - addColumn:
+            tableName: photo_filesystem
+            columns:
+              - column:
+                  name: size_mb
+                  type: double
+                  constraints:
+                    nullable: true

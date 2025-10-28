@@ -28,7 +28,7 @@ public class PhotoshootMetaDataAccumulator {
         int pick = photo.getPick();
         String label = photo.getLabel();
         List<String> tags = photo.getKeywords();
-        String exifDate = photo.getExifDate();
+        String takenDate = photo.getTakenDate();
         int rating = photo.getRating();
 
         switch (pick) {
@@ -58,14 +58,14 @@ public class PhotoshootMetaDataAccumulator {
             nbTag.merge(tag, 1, Integer::sum);
         }
 
-        updateDateBounds(exifDate);
+        updateDateBounds(takenDate);
     }
 
-    private void updateDateBounds(String exifDate) {
-        if(exifDate == null) return;
+    private void updateDateBounds(String takenDate) {
+        if(takenDate == null) return;
         try {
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date parsedDate = formatter.parse(exifDate);
+            Date parsedDate = formatter.parse(takenDate);
 
             if (lowerDate == null || parsedDate.before(lowerDate)) {
                 lowerDate = parsedDate;
@@ -74,7 +74,7 @@ public class PhotoshootMetaDataAccumulator {
                 upperDate = parsedDate;
             }
         } catch (ParseException e) {
-            System.err.println("Invalid exifDate: " + exifDate);
+            System.err.println("Invalid takenDate: " + takenDate);
         }
     }
 

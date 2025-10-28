@@ -48,8 +48,8 @@ public class XMPService {
         if (xmpPhoto.getLabel() != null)
             xmpMeta.setProperty(XMPConst.NS_XMP, "Label", xmpPhoto.getLabel());
 
-        if (xmpPhoto.getCreatedDate() != null)
-            xmpMeta.setProperty(XMPConst.NS_XMP, "CreateDate", xmpPhoto.getCreatedDate());
+        if (xmpPhoto.getTakenDate() != null)
+            xmpMeta.setProperty(XMPConst.NS_XMP, "TakenDate", xmpPhoto.getTakenDate());
 
 //        if (xmpPhoto.getMake() != null)
 //            xmpMeta.setProperty(XMPConst.NS_TIFF, "Make", xmpPhoto.getMake());
@@ -89,8 +89,8 @@ public class XMPService {
             XMPMeta xmpMeta = XMPMetaFactory.parse(inputStream);
 
             // XMP Core
-            if (xmpMeta.doesPropertyExist(XMPConst.NS_XMP, "CreateDate")) {
-                photoMetadata.setCreateDate(xmpMeta.getPropertyString(XMPConst.NS_XMP, "CreateDate"));
+            if (xmpMeta.doesPropertyExist(XMPConst.NS_XMP, "TakenDate")) {
+                photoMetadata.setTakenDate(xmpMeta.getPropertyString(XMPConst.NS_XMP, "TakenDate"));
             }
 
             if (xmpMeta.doesPropertyExist(XMPConst.NS_XMP, "Rating")) {

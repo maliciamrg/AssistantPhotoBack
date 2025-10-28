@@ -1,5 +1,6 @@
 package com.malicia.mrg.assistant.photo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -19,6 +20,9 @@ public class PhotoFileSystem {
     private String filename;
     private String extension;
     private String createdDate;
+    @Column(name = "size_mb")
+    private double sizeMB;
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "photo_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -92,6 +96,14 @@ public class PhotoFileSystem {
                 ", createdDate='" + createdDate + '\'' +
                 ", photoId=" + (photo != null ? photo.getId() : null) +
                 '}';
+    }
+
+    public void setSizeMB(double sizeMB) {
+        this.sizeMB = sizeMB;
+    }
+
+    public double getSizeMB() {
+        return sizeMB;
     }
 
     // Getters/setters

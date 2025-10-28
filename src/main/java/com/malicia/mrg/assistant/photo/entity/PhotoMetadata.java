@@ -1,5 +1,6 @@
 package com.malicia.mrg.assistant.photo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -17,12 +18,13 @@ public class PhotoMetadata {
 
     private int rating;
     private String label;
-    private String createDate;
+    private String takenDate;
     private int pick;
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "photo_keywords", joinColumns = @JoinColumn(name = "photo_id"))
     @Column(name = "keyword")
     private List<String> keywords;
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "photo_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -34,7 +36,7 @@ public class PhotoMetadata {
                 "id=" + id +
                 ", rating=" + rating +
                 ", label='" + label + '\'' +
-                ", createDate='" + createDate + '\'' +
+                ", takenDate='" + takenDate + '\'' +
                 ", pick=" + pick +
                 ", keywords=" + keywords +
                 ", photoId=" + (photo != null ? photo.getId() : null) +
@@ -65,12 +67,12 @@ public class PhotoMetadata {
         this.rating = rating;
     }
 
-    public String getCreateDate() {
-        return createDate;
+    public String getTakenDate() {
+        return takenDate;
     }
 
-    public void setCreateDate(String createDate) {
-        this.createDate = createDate;
+    public void setTakenDate(String takenDate) {
+        this.takenDate = takenDate;
     }
 
     public Photo getPhoto() {

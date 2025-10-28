@@ -34,7 +34,7 @@ public class RootRepertoire {
 
         String folderWor = "";
         if (addAutoSubFolder) {
-            String folderNameDatePart = photoGroupFrom.getPhotos().get(0).getExifDate().split(" ")[0].replace(":", "_");
+            String folderNameDatePart = photoGroupFrom.getPhotos().get(0).getTakenDate().split(" ")[0].replace(":", "_");
             String folderNameNumPart = String.format("%05d", photoGroupFrom.size());
             folderWor = folderNameDatePart + "_(" + folderNameNumPart + ")" + "\\";
         }

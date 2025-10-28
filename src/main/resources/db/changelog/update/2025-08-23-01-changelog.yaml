@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1755982238170-1
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addColumn:
+            columns:
+              - column:
+                  name: taken_date
+                  type: VARCHAR(255)
+            tableName: photo_metadata
+  - changeSet:
+      id: 1755982238170-2
+      author: cleme
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - dropColumn:
+            columnName: create_date
+            tableName: photo_metadata
+

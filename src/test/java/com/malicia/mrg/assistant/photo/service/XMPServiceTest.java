@@ -29,7 +29,7 @@ class XMPServiceTest {
         Assertions.assertEquals("Blue", result.getLabel());
         Assertions.assertEquals(4, result.getKeywords().size());
         Assertions.assertEquals("sea", result.getKeywords().get(2));
-        Assertions.assertEquals("2025-05-22T12:59:17", result.getCreateDate());
+        Assertions.assertEquals("2025-05-22T12:59:17", result.getTakenDate());
         Assertions.assertEquals(3, result.getRating());
     }
 
@@ -46,7 +46,7 @@ class XMPServiceTest {
         PhotoDTO dto = new PhotoDTO();
         dto.setRating(5); // Changer la note
         dto.setLabel("Green"); // Nouveau label
-        dto.setCreatedDate("2025-06-01T18:30:00"); // Date différente
+        dto.setTakenDate("2025-06-01T18:30:00"); // Date différente
         dto.setPick(1); // Nouveau flag
         dto.setKeywords(List.of("nature", "wildlife", "sunset")); // Remplace les mots-clés
 
@@ -58,7 +58,7 @@ class XMPServiceTest {
 
         Assertions.assertEquals(5, result.getRating());
         Assertions.assertEquals("Green", result.getLabel());
-        Assertions.assertEquals("2025-06-01T18:30:00", result.getCreateDate());
+        Assertions.assertEquals("2025-06-01T18:30:00", result.getTakenDate());
         Assertions.assertEquals(1, result.getPick());
         Assertions.assertEquals(List.of("nature", "wildlife", "sunset"), result.getKeywords());
 

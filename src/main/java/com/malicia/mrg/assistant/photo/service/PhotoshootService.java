@@ -292,6 +292,11 @@ public class PhotoshootService {
         for (int i = 1; i < nbStars.length - 1; i++) {
             int nbStarRep = nbStars[i];
 
+            int nbStarRepPlusSup = 0;
+            for (int j = i; j < nbStars.length - 1; j++) {
+                nbStarRepPlusSup += nbStars[j];
+            }
+
             int maxRatio = (int) Math.ceil(photoshootType.getRatioStarMax().get(i - 1) * nbRepPhoto / 100.0);
             if (nbStarRep > maxRatio) {
                 message.append("Star=").append(i).append(" : nbStarRep (").append(nbStarRep)
@@ -300,7 +305,7 @@ public class PhotoshootService {
             }
 
             int minRatio = (int) Math.ceil(photoshootType.getRatioStarMin().get(i - 1) * nbRepPhoto / 100.0);
-            if (nbStarRep < minRatio) {
+            if (nbStarRepPlusSup < minRatio) {
                 message.append("Star=").append(i).append(" : nbStarRep (").append(nbStarRep)
                         .append(") < nbMinStar (").append(minRatio).append(") \n");
                 valid = false;

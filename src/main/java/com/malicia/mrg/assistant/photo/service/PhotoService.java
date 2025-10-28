@@ -4,6 +4,8 @@ import com.adobe.internal.xmp.XMPException;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.drew.metadata.exif.makernotes.SonyType1MakernoteDirectory;
+import com.drew.metadata.exif.makernotes.SonyType6MakernoteDirectory;
 import com.malicia.mrg.assistant.photo.dto.PhotoDTO;
 import com.malicia.mrg.assistant.photo.dto.PhotoMetadataDTO;
 import com.malicia.mrg.assistant.photo.entity.*;
@@ -26,7 +28,10 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 @Service
 public class PhotoService {
@@ -35,6 +40,7 @@ public class PhotoService {
     private final PhotoRepository photoRepository;
     private final ThumbnailService thumbnailService;
 
+    private static final DateTimeFormatter EXIF_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public PhotoService(PhotoRepository photoRepository, ThumbnailService thumbnailService) {
         this.photoRepository = photoRepository;
@@ -127,7 +133,7 @@ public class PhotoService {
         // Create a new Photo object
         Photo photo = new Photo();
 
-        AddPhotoHashFromFile(path, photo);
+        photo.setHash(AddPhotoHashFromFile(path));
 
         try {
             Optional<Photo> existingPhoto = photoRepository.findByHash(photo.getHash());
@@ -154,8 +160,12 @@ public class PhotoService {
                 PhotoExifData exifDataOfPhoto = new PhotoExifData();
                 if (isVideo(path)) {
                     exifDataOfPhoto = getDataOfVideo(path);
-                }else{
-                    exifDataOfPhoto = getExifDataOfPhoto(path);
+                } else {
+                    if (isDng(path)) {
+                        exifDataOfPhoto = new PhotoExifData();
+                    } else {
+                        exifDataOfPhoto = getExifDataOfPhoto(path);
+                    }
                 }
                 exifDataOfPhoto.setPhoto(photo);
                 photo.setExif(exifDataOfPhoto);
@@ -171,11 +181,14 @@ public class PhotoService {
             if (photo.getThumbnail() == null) {
                 logger.debug("calculate getThumbnail");
                 PhotoThumbnail photoThumbnail = new PhotoThumbnail();
-                if (!isVideo(path)) {
-                    if (!isDng(path)) {
-                        photoThumbnail = thumbnailService.generateThumbnail(photo);
+                if (isVideo(path)) {
+                    photoThumbnail = new PhotoThumbnail();
+                } else {
+                    if (isDng(path)) {
+//                        photoThumbnail = thumbnailService.DngThumbnailExtractor(photo);
+                        photoThumbnail = new PhotoThumbnail();
                     } else {
-                        photoThumbnail = thumbnailService.DngThumbnailExtractor(photo);
+                        photoThumbnail = thumbnailService.generateThumbnail(photo);
                     }
                 }
                 photoThumbnail.setPhoto(photo);
@@ -207,29 +220,47 @@ public class PhotoService {
         photoFileSystemDTO.setExtension(extension);
         photoFileSystemDTO.setCreatedDate(FileSystemService.getFileCreatedDate(path));
 
+        try {
+            long sizeInBytes = Files.size(path);
+            double sizeInMB = sizeInBytes / (1024.0 * 1024.0);
+            photoFileSystemDTO.setSizeMB(Math.round(sizeInMB * 100.0) / 100.0);
+        } catch (IOException e) {
+            // Handle error (file may not exist or is inaccessible)
+            photoFileSystemDTO.setSizeMB(0.0); // or null if preferred
+            logger.warn("Could not get size for file: " + path, e);
+        }
+
         return photoFileSystemDTO;
 
     }
 
-    private void AddPhotoHashFromFile(Path path, Photo photo) {
+    private String AddPhotoHashFromFile(Path path) {
+        String hash = null;
         try {
-            photo.setHash(isVideo(path)?generateVideoHash(path):generateImageHash(path));
+            if (isVideo(path)) {
+                hash = generateFileNameSizeHash(path);
+            } else {
+                if (isDng(path)) {
+                    hash = generateFileNameSizeHash(path);
+                } else {
+                    hash = generateImageHash(path);
+                }
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        return hash;
     }
 
     private boolean isVideo(Path path) {
-        if (path.toString().toLowerCase().endsWith("mp4")) {return true;}
-        return false;
+        return path.toString().toLowerCase().endsWith("mp4");
     }
 
     private boolean isDng(Path path) {
-        if (path.toString().toLowerCase().endsWith("dng")) {return true;}
-        return false;
+        return path.toString().toLowerCase().endsWith("dng");
     }
 
-    private String generateVideoHash(Path path) throws IOException {
+    private String generateFileNameSizeHash(Path path) throws IOException {
         String salt = "YourSaltHere123";
         try {
             if (!Files.exists(path) || !Files.isRegularFile(path)) {
@@ -272,7 +303,7 @@ public class PhotoService {
     private PhotoMetadata getXmpSidecarDataOfPhoto(Path path) throws IOException {
         PhotoMetadata photoMetadata = new PhotoMetadata();
 
-        photoMetadata.setCreateDate("");
+        photoMetadata.setTakenDate("");
         photoMetadata.setRating(0);
         photoMetadata.setPick(0);
         photoMetadata.setLabel("");
@@ -314,10 +345,18 @@ public class PhotoService {
             ExifIFD0Directory ifd0 = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 
             if (subIFD != null) {
-                String dateTime = subIFD.getString(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+                String dateTime = subIFD.getString(ExifSubIFDDirectory.TAG_DATETIME);
+                String datetime_original = subIFD.getString(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+                String datetime_digitized = subIFD.getString(ExifSubIFDDirectory.TAG_DATETIME_DIGITIZED);
                 if (dateTime != null) {
                     dateTime = dateTime.replaceFirst("^(\\d{4}):(\\d{2}):(\\d{2})", "$1-$2-$3");
-                    dto.setDateTimeOriginal(dateTime);
+                    updateIfEarlier(dto, dateTime);
+                } else if (datetime_original != null) {
+                    datetime_original = datetime_original.replaceFirst("^(\\d{4}):(\\d{2}):(\\d{2})", "$1-$2-$3");
+                    updateIfEarlier(dto, datetime_original);
+                } else if (datetime_digitized != null) {
+                    datetime_digitized = datetime_digitized.replaceFirst("^(\\d{4}):(\\d{2}):(\\d{2})", "$1-$2-$3");
+                    updateIfEarlier(dto, datetime_digitized);
                 }
 
                 dto.setIso(subIFD.getString(ExifSubIFDDirectory.TAG_ISO_EQUIVALENT));
@@ -327,6 +366,12 @@ public class PhotoService {
             }
 
             if (ifd0 != null) {
+                String dateTime = ifd0.getString(ExifSubIFDDirectory.TAG_DATETIME);
+                if (dateTime != null) {
+                    dateTime = dateTime.replaceFirst("^(\\d{4}):(\\d{2}):(\\d{2})", "$1-$2-$3");
+                    updateIfEarlier(dto, dateTime);
+                }
+
                 dto.setMake(ifd0.getString(ExifIFD0Directory.TAG_MAKE));
                 dto.setModel(ifd0.getString(ExifIFD0Directory.TAG_MODEL));
                 dto.setOrientation(ifd0.getString(ExifIFD0Directory.TAG_ORIENTATION));
@@ -337,6 +382,27 @@ public class PhotoService {
         }
 
         return dto;
+    }
+
+    private void updateIfEarlier(PhotoExifData dto, String newDateTimeStr) {
+        try {
+            LocalDateTime newDate = LocalDateTime.parse(newDateTimeStr, EXIF_DATE_FORMAT);
+
+            String existingStr = dto.getDateTimeOriginal();
+            if (existingStr == null || existingStr.isEmpty()) {
+                dto.setDateTimeOriginal(newDateTimeStr);
+                return;
+            }
+
+            LocalDateTime existingDate = LocalDateTime.parse(existingStr, EXIF_DATE_FORMAT);
+
+            // Only update if new date is earlier
+            if (newDate.isBefore(existingDate)) {
+                dto.setDateTimeOriginal(newDateTimeStr);
+            }
+        } catch (DateTimeParseException e) {
+            System.err.println("Invalid EXIF date format: " + newDateTimeStr);
+        }
     }
 
     public void removeAllPhotoData(String photoshootName) {

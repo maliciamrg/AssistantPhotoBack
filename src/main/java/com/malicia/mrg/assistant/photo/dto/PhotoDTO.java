@@ -20,14 +20,12 @@ public class PhotoDTO implements Serializable {
     private String relativeToPath;
     private String filename;
     private String extension;
-    private String createdDate;
-    private String exifDate;
-    private String createDate;
+    private double sizeMB;
+    private String takenDate;
     private int rating;
     private String label;
     private int pick;
     private List<String> keywords;
-
     public PhotoDTO(Photo updatedPhoto) {
         this.id = updatedPhoto.getId();
         this.hash = updatedPhoto.getHash();
@@ -38,15 +36,21 @@ public class PhotoDTO implements Serializable {
             this.relativeToPath = fileSystem.getRelativeToPath();
             this.filename = fileSystem.getFilename();
             this.extension = fileSystem.getExtension();
-            this.createdDate = fileSystem.getCreatedDate();
+            this.takenDate = fileSystem.getCreatedDate();
+            this.sizeMB = fileSystem.getSizeMB();
         }
         PhotoExifData exif = updatedPhoto.getExif();
         if (exif != null) {
-            this.exifDate = exif.getDateTimeOriginal();
+            String dateTimeOriginal = exif.getDateTimeOriginal();
+            if (dateTimeOriginal != null && !dateTimeOriginal.startsWith("1904")) {
+                this.takenDate = dateTimeOriginal;
+            }
         }
         PhotoMetadata photoMetadata = updatedPhoto.getPhotoMetadata();
         if (photoMetadata != null) {
-            this.createDate = photoMetadata.getCreateDate();
+            if (photoMetadata.getTakenDate() != null) {
+                this.takenDate = photoMetadata.getTakenDate();
+            }
             this.rating = photoMetadata.getRating();
             this.label = photoMetadata.getLabel();
             this.pick = photoMetadata.getPick();
@@ -55,8 +59,16 @@ public class PhotoDTO implements Serializable {
                     : new ArrayList<>();
         }
     }
+    public PhotoDTO() {
+    }
 
-    public PhotoDTO() {}
+    public String getTakenDate() {
+        return takenDate;
+    }
+
+    public void setTakenDate(String takenDate) {
+        this.takenDate = takenDate;
+    }
 
     public UUID getId() {
         return id;
@@ -106,30 +118,6 @@ public class PhotoDTO implements Serializable {
         this.extension = extension;
     }
 
-    public String getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(String createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public String getExifDate() {
-        return exifDate;
-    }
-
-    public void setExifDate(String exifDate) {
-        this.exifDate = exifDate;
-    }
-
-    public String getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(String createDate) {
-        this.createDate = createDate;
-    }
-
     public int getRating() {
         return rating;
     }
@@ -168,5 +156,13 @@ public class PhotoDTO implements Serializable {
 
     public void setRootDir(String rootDir) {
         this.rootDir = rootDir;
+    }
+
+    public double getSizeMB() {
+        return sizeMB;
+    }
+
+    public void setSizeMB(double sizeMB) {
+        this.sizeMB = sizeMB;
     }
 }

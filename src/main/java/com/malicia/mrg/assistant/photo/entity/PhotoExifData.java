@@ -1,5 +1,6 @@
 package com.malicia.mrg.assistant.photo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -22,6 +23,7 @@ public class PhotoExifData {
     private String aperture;
     private String exposureTime;
     private String orientation;
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "photo_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
