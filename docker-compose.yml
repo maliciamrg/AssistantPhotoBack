@@ -1,7 +1,7 @@
 services:
   backend:
     container_name: assistant_photo_backend_service
-    image: maliciamrg/assistant_photo_backend:0.0.1-SNAPSHOT
+    image: maliciamrg/assistant_photo_backend:latest
     environment:
       - SPRING_DATA_REDIS_HOST=redis
       - ASSISTANT_ROOTPATH=/Photo/
