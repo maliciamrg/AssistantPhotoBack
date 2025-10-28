@@ -36,9 +36,9 @@ pipeline {
                         def password = env.HUB_REPO_PASS
                         sh "docker version"
                         sh "docker login -u $user -p $password"
-                        sh "docker build -t maliciamrg/${pom.getArtifactId().toLowerCase()}:${pom.getVersion()} -t maliciamrg/${pom.getArtifactId().name.toLowerCase()}:latest . "
+                        sh "docker build -t maliciamrg/${pom.getArtifactId().toLowerCase()}:${pom.getVersion()} -t maliciamrg/${pom.getArtifactId().toLowerCase()}:latest . "
                         sh "docker push maliciamrg/${pom.getArtifactId().toLowerCase()}:${pom.getVersion()}"
-                        sh "docker push maliciamrg/${pom.getArtifactId().name.toLowerCase()}:latest"
+                        sh "docker push maliciamrg/${pom.getArtifactId().toLowerCase()}:latest"
                         sleep 10 // Wait for 10 seconds
                     }
                 }
