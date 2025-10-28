@@ -1,3 +1,4 @@
+name: assistant-photo
 services:
   backend:
     container_name: assistant_photo_backend_service
@@ -9,7 +10,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=photos_user
       - SPRING_DATASOURCE_PASSWORD=photos_pass
     ports:
-      - "8999:8099"
+      - "8099:8099"
     volumes:
       - '/Photo/70_Catalog_Phototheque:/Lrcat'
       - '/Photo:/Photo'
